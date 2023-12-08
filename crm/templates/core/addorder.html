@@ -1,0 +1,17 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+{% if form %}
+    <div class="container" style="background-color:#adbbcc; padding:5%;border-radius:3%;">
+    <form action="{% url 'core:addorder' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-error">{{ form.non_field_errors }}</div>
+        {{ form|crispy }}
+        <button class="btn btn-light" type="submit">Сохранить</button>
+    </form>
+    </div>
+{% endif %}
+{% endblock %}

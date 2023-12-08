@@ -1,0 +1,79 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+{% block leftside %}
+<form action="" method="get">
+        {{ filter.form|crispy }}
+        <button class="btn btn-light" type="submit">Поиск</button>
+    </form>
+{% endblock %}
+
+{% block rightside %}
+<div>
+    {% if request.user.is_authenticated %}
+    <span style="color:white;">клиентов {{ clients }}</span><br>
+    <span style="color:white;">Количество моих клиентов {{ my_clients }}</span><br>
+    <span style="color:white;">Количество cогласных клиентов {{ success_client }}</span>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+    {% if object_list %}
+
+    <div class="row">
+          {% for client in object_list %}
+            {% if client.owner == request.user %}
+                    <div class="col-6 col-sm-3" style="padding: 2rem;">
+                        <a href="#">
+                            <div class="row hei" style="align: center; box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5); font-weight: 700; background-color:#ead1dc;">
+                                <div class="row" style="padding:0; margin:0;">
+                                    <div class="col-9 col-sm-9">{{client.name}} {{client.surname}}</div>
+                                    <div class="col-3 col-sm-3" style="background-color:white;"></div>
+                                </div>
+                                <div class="row" style="padding:0; margin:0;">
+                                    <div class="col-9 col-sm-9">{{client.phone}}</div>
+                                    <div class="col-3 col-sm-3" style="background-color:white;"></div>
+                                </div>
+                                <div class="row" style="padding:0; margin:0;">
+                                    <div class="col-9 col-sm-9">{{client.result}}</div>
+                                    <div class="col-3 col-sm-3" style="background-color:white;"></div>
+                                </div>
+                                <div class="row" style="padding:0; margin:0;">
+                                    <div class="col-9 col-sm-9">{{client.date_create}}</div>
+                                    <div class="col-3 col-sm-3" style="background-color:white;"></div>
+                                </div>
+
+                            </div>
+                        </a>
+                    </div>
+
+            {% else %}
+                    <div class="col-6 col-sm-3" style="padding: 2rem;">
+                        <a href="#">
+                            <div class="row hei" style="box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5); font-weight: 700; background-color:#bbddfd;">
+                                <div class="row" style="padding:0; margin:0;">
+                                    <div class="col-9 col-sm-9">{{client.name}} {{client.surname}}</div>
+                                    <div class="col-3 col-sm-3" style="background-color:white;"></div>
+                                </div>
+                                <div class="row" style="padding:0; margin:0;">
+                                    <div class="col-9 col-sm-9">{{client.phone}}</div>
+                                    <div class="col-3 col-sm-3" style="background-color:white;"></div>
+                                </div>
+                                <div class="row" style="padding:0; margin:0;">
+                                    <div class="col-9 col-sm-9">{{client.result}}</div>
+                                    <div class="col-3 col-sm-3" style="background-color:white;"></div>
+                                </div>
+                                <div class="row" style="padding:0; margin:0;">
+                                    <div class="col-9 col-sm-9">{{client.date_create}}</div>
+                                    <div class="col-3 col-sm-3" style="background-color:white;"></div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+            {% endif %}
+          {% endfor %}
+    </div>
+    {% else %}
+      <p style="color:white;">Нет такого клиента.</p>
+    {% endif %}
+{% endblock %}

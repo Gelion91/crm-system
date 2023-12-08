@@ -1,0 +1,21 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+{% load url_tag %}
+{% block leftside %}
+<form action="" method="get">
+        {{ filter.form|crispy }}
+        <button class="btn btn-light" type="submit">Поиск</button>
+    </form>
+{% endblock %}
+
+{% block rightside %}
+<div>
+    {% if request.user.is_authenticated %}
+    <span style="color:white;">Количество созданных заказов {{ my_orders }}</span><br>
+    <span style="color:white;">Количество завершенных заказов {{ success_orders }}</span>
+    {% endif %}
+</div>
+{% endblock %}
+{% block content %}
+{% include template_htmx %}
+{% endblock %}

@@ -1,0 +1,5 @@
+channels~=4.0.0
+Django~=4.2.7
+django-crispy-forms~=2.1
+django-filter~=23.3
+django-autoslug~=1.9.9
