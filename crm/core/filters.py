@@ -11,7 +11,17 @@ class DatInput(forms.DateInput):
 
 
 class OrderFilter(django_filters.FilterSet):
+    CHOICES = (
+        ('ascending', 'Cначала новые'),
+        ('descending', 'Сначала старые')
+    )
     date_create = DateFromToRangeFilter(widget=DateRangeWidget(attrs={'class': "form-control", 'type': 'date'}))
+
+    ordering = django_filters.ChoiceFilter(label='Сортировать', choices=CHOICES, method='filter_by_order')
+
+    def filter_by_order(self, queryset, name, value):
+        expression = '-date_create' if value == 'ascending' else 'date_create'
+        return queryset.order_by(expression)
 
     class Meta:
         model = Order

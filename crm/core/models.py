@@ -94,6 +94,7 @@ class Order(models.Model):
     date_update = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
     total_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Итоговая цена ¥', default=0)
     total_price_rub = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Итоговая цена ₽', default=0)
+    result = models.BooleanField(verbose_name='Выполнен', default=False)
 
     class Meta:
         verbose_name = 'Заказ'
@@ -109,6 +110,10 @@ class Order(models.Model):
         return "без имени"
 
     def save(self, *args, **kwargs):
+        if self.status == "Завершен":
+            self.result = True
+        else:
+            self.result = False
         try:
             total_price = sum(i.full_price for i in Order.objects.get(pk=self.pk).product.all())
             self.total_price = 0

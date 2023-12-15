@@ -7,7 +7,7 @@ from django.views.generic import CreateView, DeleteView
 from django_filters.views import FilterView
 
 from core.filters import OrderFilter
-from core.forms import AddOrderForm, AddClientForm, ProductForm, ProductFormSet, \
+from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
     ProductFormSetHelper, UpdateOrderForm
 from core.models import Order, Product
 
@@ -27,30 +27,52 @@ class CustomHtmxMixin:
 class OrderListView(FilterView):
     model = Order
     paginate_by = 16
-    template_name = 'core/order_list.html'
+    template_name = 'core/order_list2.html'
     filterset_class = OrderFilter
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = OrderFilter.form
         context['title'] = 'Список заказов'
-        print(self.request.user.get_all_permissions)
+        for obj in self.object_list:
+            print(obj.status)
         return context
 
 
-class AddClient(LoginRequiredMixin, CreateView):
-    form_class = AddClientForm
-    template_name = 'core/addclient.html'
-    success_url = reverse_lazy('clients:home')
-
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        return super().form_valid(form)
+class ActiveOrderListView(OrderListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Добавить клиента'
+        context['form'] = OrderFilter.form
+        context['title'] = 'Список активных заказов'
         return context
+
+    def get_queryset(self):
+        return Order.objects.filter(result=False)
+
+
+class WaitPayOrderListView(OrderListView):
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = OrderFilter.form
+        context['title'] = 'Заказы - ожидают оплаты'
+        return context
+
+    def get_queryset(self):
+        return Order.objects.filter(status='На оплату')
+
+
+class FinishOrderListView(OrderListView):
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = OrderFilter.form
+        context['title'] = 'Список завершенных заказов'
+        return context
+
+    def get_queryset(self):
+        return Order.objects.filter(result=True)
 
 
 class AddOrder(LoginRequiredMixin, PermissionRequiredMixin, CreateView):

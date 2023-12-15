@@ -30,7 +30,7 @@
     </style>
 </head>
 <body style="font-family: 'Oswald';">
-  <div class="container-fluid" style="background-color:#363b41;">
+  <div class="container-fluid" style="padding-left:0;">
     {% block sidebar %}
 
       <nav class="navbar navbar-dark bg-dark">
@@ -43,7 +43,12 @@
 
             <div class="dropdown me-auto">
                     {% for m in menu %}
+                        {% url m.url_name as url %}
+                        {% if url in request.path %}
+                        <a href="{% url m.url_name %}"><button class="btn btn-sm btn-light active" type="button">{{m.title}}</button></a>
+                        {% else %}
                         <a href="{% url m.url_name %}"><button class="btn btn-sm btn-light" type="button">{{m.title}}</button></a>
+                        {% endif %}
                 {% endfor %}
 
             </div>
@@ -60,13 +65,23 @@
                 </div>
             {% endif %}
         </div>
-
         </nav>
-    {% endblock %}
-      <div class="container-fluid">
-        <div class="row">
-        <div class="col-lg-3">{% block leftside %}{% endblock %}</div>
-        <div class="col-lg-6 secondcolor">
+      <div class="row">
+      <div class="col-2">
+          <ul class="list-group list-group-flush">
+        {% for m in menu %}
+              {% url m.url_name as url %}
+              {% if url in request.path %}
+              {% for sub in m.submenu %}
+                <li class="list-group-item"><a class="dropdown-item" href="{% url sub.url_name %}"><span>{{ sub.title }}</span></a></li>
+              {% endfor %}
+              {% endif %}
+          {% endfor %}
+
+          </ul>
+      </div>
+      {% endblock %}
+      <div class="col-10">
         {% block content %}
 
         {% endblock %}
@@ -98,8 +113,6 @@
         </ul>
     </nav>
 {% endif %}
-</div>
-<div class="col-sm-3">{% block rightside %}{% endblock %}</div>
 </div>
 </div>
 </div>

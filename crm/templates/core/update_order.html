@@ -1,8 +1,33 @@
 {% extends "base_generic.html" %}
 {% load crispy_forms_tags %}
-{% block rightside %}
+
+{% block content %}
+<div class="row" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
+    <h1 align="center">{{title}}</h1>
+    <hr>
+<div class="col-4" style="border-right: 1px solid;">
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-error">{{ form.non_field_errors }}</div>
+        {% crispy order_form %}
+        <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <button type="button" class="btn btn-warning"><a href="{% url 'core:delete' data.pk %}">Удалить</a></button>
+    </form>
+    </form>
+</div>
+<div class="col-4" style="border-right: 1px solid;">
+    <div class="row">
+        <form class="row" name="product" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-error">{{ product_form.non_field_errors }}</div>
+            {% crispy product_form helper %}
+        </form>
+    </div>
+    <br>
+</div>
 {% if data.product.all %}
-    <div class="row" style="background-color:#adbbcc; padding:5%;">
+    <div class="col-4">
             <h1 align="center">Продавцы</h1>
             {% for form in formset %}
             {% endfor %}
@@ -14,32 +39,5 @@
             </form>
     </div>
     {% endif %}
-{% endblock %}
-{% block content %}
-<div class="container" style="background-color:#adbbcc; padding:5%;">
-    <h1 align="center">{{title}}</h1>
-<div class="row">
-<div class="col-6">
-    <form action="" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="form-error">{{ form.non_field_errors }}</div>
-        {% crispy order_form %}
-        <form action="" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <button type="button"><a href="{% url 'core:delete' data.pk %}">Удалить</a></button>
-    </form>
-    </form>
-</div>
-<div class="col-6">
-    <div class="row">
-        <form class="row" name="product" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-error">{{ product_form.non_field_errors }}</div>
-            {% crispy product_form helper %}
-        </form>
-    </div>
-    <br>
-</div>
-</div>
 </div>
 {% endblock %}

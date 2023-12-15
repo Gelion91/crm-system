@@ -1,28 +1,10 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Field, Div, HTML
+from crispy_forms.layout import Submit, Layout, Field, Div, HTML, Button
 from django.contrib.auth.forms import AuthenticationForm
 from django.forms import ModelForm, CheckboxSelectMultiple, SelectMultiple, TextInput, MultipleHiddenInput, \
     PasswordInput, modelformset_factory, BaseFormSet, HiddenInput
 from core.models import Order, Clients, Product
 from django import forms
-
-
-class AddClientForm(ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_id = 'id-exampleForm'
-        self.helper.form_class = 'whiteForms'
-        self.helper.form_method = 'post'
-        self.helper.form_action = 'submit_survey'
-
-        self.helper.add_input(Submit('submit', 'Submit'))
-        self.fields["name"].widget.attrs.update({"class": "form__field"})
-
-    class Meta:
-        model = Clients
-        fields = '__all__'
-        exclude = ('owner',)
 
 
 class AddOrderForm(ModelForm):
@@ -33,12 +15,12 @@ class AddOrderForm(ModelForm):
         self.helper.form_class = 'whiteForms'
         self.helper.form_method = 'post'
         self.helper.form_action = 'submit_survey'
-        self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn btn-light'))
+        self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn-secondary'))
 
     class Meta:
         model = Order
         fields = '__all__'
-        exclude = ('product', 'owner', 'total_price', 'total_price_rub')
+        exclude = ('product', 'owner', 'total_price', 'total_price_rub', 'result')
 
 
 class UpdateOrderForm(AddOrderForm):
@@ -59,10 +41,9 @@ class ProductForm(ModelForm):
         super(ProductForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'id-exampleForm'
-        self.helper.form_class = 'whiteForms'
         self.helper.form_method = 'post'
         self.helper.form_action = 'submit_survey'
-        self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn btn-light'))
+        self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn-secondary'))
         self.layout = Layout(
             Div(Div('name', css_class='col-6'),
                 Div('price', css_class='col-6'), css_class='row'),
@@ -98,9 +79,10 @@ class ProductFormSetHelper(FormHelper):
             Div('arrive', css_class='col-8'),
             Div('paid', css_class='col-4'),
             'photo', Div('DELETE', css_class='input-small'),
+            HTML("""<hr>""")
         )
         self.render_required_fields = True
-        self.add_input(Submit("submit", 'Сохранить', css_class='btn btn-light'))
+        self.add_input(Submit("submit", 'Сохранить', css_class='btn-secondary'))
 
 
 # class BaseArticleFormSet(BaseFormSet):
