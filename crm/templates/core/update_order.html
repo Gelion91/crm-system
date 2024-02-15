@@ -29,8 +29,6 @@
 {% if data.product.all %}
     <div class="col-4">
             <h1 align="center">Продавцы</h1>
-            {% for form in formset %}
-            {% endfor %}
             {{ formset.management_form }}
             <form class="row" action="" method="post" enctype="multipart/form-data">
                 {% csrf_token %}

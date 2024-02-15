@@ -3,13 +3,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
-from django.views.generic import CreateView, DeleteView
+from django.views.generic import CreateView, DeleteView, UpdateView
 from django_filters.views import FilterView
 
 from core.filters import OrderFilter
 from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
-    ProductFormSetHelper, UpdateOrderForm
-from core.models import Order, Product
+    ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm
+from core.models import Order, Product, Logistics
 
 
 class CustomHtmxMixin:
@@ -34,8 +34,6 @@ class OrderListView(FilterView):
         context = super().get_context_data(**kwargs)
         context['form'] = OrderFilter.form
         context['title'] = 'Список заказов'
-        for obj in self.object_list:
-            print(obj.status)
         return context
 
 
@@ -87,7 +85,6 @@ class AddOrder(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
-        print(self.request.user)
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -106,7 +103,6 @@ class DeleteOrder(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
 def _get_form(request, formcls, prefix):
     data = request.POST if prefix in request.POST else None
-    print(data)
     return formcls(data, prefix=prefix)
 
 
@@ -120,11 +116,9 @@ def update(request, order_id):
     helper = ProductFormSetHelper()
 
     if request.method == 'POST':
-        print(request.POST)
         form = AddOrderForm(request.POST, instance=data)
         form2 = ProductForm(request.POST, request.FILES)
         formset = ProductFormSet(request.POST, request.FILES)
-        print(formset)
 
         # Проверяем валидность форм
         if form.is_valid():
@@ -146,7 +140,7 @@ def update(request, order_id):
         'order_form': form,
         'product_form': form2,
         'formset': formset,
-        'helper': helper
+        'helper': helper,
 
     }
     return render(request, 'core/update_order.html', context)
@@ -177,4 +171,42 @@ class AddProduct(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Оформить заказ'
+        return context
+
+
+class DeliveryListView(FilterView):
+    model = Logistics
+    paginate_by = 16
+    template_name = 'core/delivery_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Доставки'
+        return context
+
+
+class AddDelivery(LoginRequiredMixin, CreateView):
+    model = Logistics
+    form_class = DeliveryAddForm
+    template_name = 'core/add_delivery.html'
+    success_url = '/'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Оформить доставку'
+        return context
+
+
+class UpdateDelivery(UpdateView):
+    model = Logistics
+    form_class = DeliveryAddForm
+    pk_url_kwarg = 'logistic_id'
+    template_name = 'core/updatedelivery.html'
+
+    def get_success_url(self):
+        return reverse('core:update_delivery', kwargs={'logistic_id': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Доставка'
         return context

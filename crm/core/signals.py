@@ -1,19 +1,14 @@
 import os
-
+import django.dispatch
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete
 from django.dispatch import receiver
 
-from core.models import Order, Clients, Product
-from crm import settings
+from core.models import Order, Clients, Product, Logistics
 
 
-# @receiver(pre_delete, sender=Order)
-# @receiver(pre_delete, sender=Clients)
-# @receiver(pre_save, sender=Order)
-# @receiver(pre_save, sender=Clients)
-# def model_pre_change(sender, **kwargs):
-#     if os.path.isfile(settings.READ_ONLY_FILE):
-#         raise ReadOnlyException('Model in read only mode, cannot save')
+# @receiver(pre_save, sender=Logistics)
+# def create_logistic(sender, instance, created, **kwargs):
+#     instance.save()
 
 
 @receiver(post_save, sender=Product)

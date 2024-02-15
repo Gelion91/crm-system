@@ -29,7 +29,7 @@
           {% for client in object_list %}
 
           {% if client.result == True %}
-            <a href="{% url 'clients:upd' client.pk %}">
+            <a href="{% url 'clients:detail_client' client.pk %}">
                 <div class="row list-height" style="font-weight: 700; border-color:#ead1dc; margin-top:1%; margin-bottom:1%; background-color:#fff;">
                     <div class="col"><p>{{client}}</p></div>
                     <div class="col"><p>{{client.phone}}</p></div>
@@ -40,7 +40,7 @@
             </a>
 
           {% else %}
-            <a href="#">
+            <a href="{% url 'clients:detail_client' client.pk %}">
                 <div class="row list-height" style="font-weight: 700; border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
                     <div class="col"><p>{{client}}</p></div>
                     <div class="col"><p>{{client.phone}}</p></div>
@@ -51,7 +51,7 @@
           {% endif %}
             {% endfor %}
         {% else %}
-    <h3>Нет заказов.</h3>
+    <h3>Нет клиентов.</h3>
     </div>
     </div>
     {% endif %}

@@ -24,5 +24,6 @@ urlpatterns = [
     path('', include('login.urls', namespace='login')),
     path('manager/', include('core.urls', namespace='core')),
     path('call/', include('clients.urls', namespace='clients')),
+    path('dashboard/', include('dashboard.urls', namespace='dashboard')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

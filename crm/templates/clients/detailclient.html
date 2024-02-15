@@ -1,0 +1,47 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="col secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
+  <div class="row">
+      <div class="col"><p style="font-size: calc(16px + 8 * (100vw / 1280)); font-weight: 700;">{{ object.name }} {{ object.surname }}</p></div>
+      <div class="col"><p style="font-size: calc(16px + 8 * (100vw / 1280)); font-weight: 700;">Остаток на счете: {{ object.deposit }}</p></div>
+  </div>
+  <p><strong>Телефон: </strong>{{ object.phone }}</p>
+  <a href="{% url 'clients:upd' object.pk %}">Изменить</a>
+    {% if comments %}
+          {% for comment in comments %}
+            <div class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
+                <div class="row hei" style="margin:0;">
+                    <div class="col-3" style="background-color:#f2feff; margin-left: auto; margin-right: auto;">
+                        <div class="row" style="margin-left: auto; margin-right: auto;">
+                            <p style="font-size: calc(16px + 8 * (100vw / 1280)); font-weight: 700;">{{ comment.owner.username }}</p>
+                        </div>
+                        <div class="row" style="margin-left: auto; margin-right: auto;">
+                            <p style="font-size: calc(12px + 8 * (100vw / 1280));">{{ comment.date_create }}</p>
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <p style="font-size:1rem;">{{ comment.comment }}</p>
+                    </div>
+
+                    <div class="col-1">
+                        {% if comment.owner == request.user %}
+                        <a href="{% url 'clients:del' comment.pk %}">удалить</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+          {% endfor %}
+    {% else %}
+        <p style="font-size: calc(16px + 8 * (100vw / 1280)); font-weight: 700;">Комментариев пока не оставляли.</p>
+    {% endif %}
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-error">{{ form.non_field_errors }}</div>
+        {{ form|crispy }}
+        <button class="btn btn-secondary" type="submit">Сохранить</button>
+    </form>
+    </div>
+
+{% endblock %}

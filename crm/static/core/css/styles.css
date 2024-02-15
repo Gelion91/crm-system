@@ -436,6 +436,16 @@ footer {
 .hei {
     min-height: 200px;
     min-weight: 200px;
+    max-height: 100%;
+    background-size: cover;
+    text-align: center;
+    color: black;
+    }
+
+.total_sum {
+    min-height: 100px;
+    min-weight: 200px;
+    max-height: 100%;
     background-size: cover;
     text-align: center;
     color: black;

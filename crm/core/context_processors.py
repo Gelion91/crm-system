@@ -8,20 +8,19 @@ def menu_manager(request):
                                                                          {'title': 'Активные клиенты', 'url_name': 'clients:active'},
                                                                          {'title': 'Мои клиенты', 'url_name': 'clients:my_clients'},
                                                                          {'title': 'Надо позвонить', 'url_name': 'clients:home'}]},
+
             {'title': 'Заказы', 'url_name': 'core:home', 'submenu': [{'title': 'Оформить заказ', 'url_name': 'core:addorder'},
                                                                      {'title': 'Активные заказы', 'url_name': 'core:active'},
                                                                      {'title': 'Ожидают оплаты', 'url_name': 'core:on_pay'},
                                                                      {'title': 'Завершенные заказы', 'url_name': 'core:finish'}]},
+
+            {'title': 'Доставка', 'url_name': 'core:logistic', 'submenu': [{'title': 'Оформить доставку', 'url_name': 'core:add_delivery'},
+                                                                           ]},
+
+            {'title': 'Панель управления', 'url_name': 'dashboard:home', 'submenu': [{'title': 'Общее', 'url_name': 'dashboard:home'},
+                                                                     ]}
             ]
-    # if request.user.groups.filter(id=1):
-    #     menu = [{'title': 'Список клиентов', 'url_name': 'clients:home'},
-    #             {'title': 'Добавить клиента', 'url_name': 'core:addclient'},
-    #             ]
-    #
-    # elif request.user.groups.filter(id=2):
-    #     menu = [{'title': 'Список заказов', 'url_name': 'core:home'},
-    #             {'title': 'Оформить заказ', 'url_name': 'core:addorder'}
-    #             ]
+
     return {'menu': menu}
 
 

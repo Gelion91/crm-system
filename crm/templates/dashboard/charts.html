@@ -1,0 +1,140 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="col-lg-12 secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
+<div class="col">
+  <br>
+    <button class="btn btn-outline-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Фильтры</button>
+
+    <div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
+    <div class="offcanvas-header">
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+    </div>
+    <div class="offcanvas-body">
+    <form method="get">
+        {{ filter.form|crispy }}
+        <input type="submit" />
+    </form>
+    </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col hei" style="margin: 2rem; padding: 2rem; box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5); background: linear-gradient(90deg, rgba(207,242,191,1) 0%, rgba(207,242,191,1) 42%, rgba(0,255,158,1) 100%);">
+        <a href="{% url 'core:finish' %}">
+            <h3>Завершенные: {{ complete }}</h3>
+        </a>
+    </div>
+    <div class="col hei" style="margin: 2rem; padding: 2rem; box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5); background: linear-gradient(90deg, rgba(238,151,189,1) 0%, rgba(234,209,220,1) 50%, rgba(238,151,189,1) 100%);">
+        <a href="{% url 'core:active' %}">
+            <h3>Оформляются: {{ inwork }}</h3>
+        </a>
+    </div>
+    <div class="col hei" style="margin: 2rem; padding: 2rem; box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5); background: linear-gradient(90deg, rgba(57,159,255,1) 0%, rgba(187,221,253,1) 50%, rgba(187,221,253,1) 100%);">
+        <a href="{% url 'core:on_pay' %}">
+            <h3>Ждут оплаты: {{ onpay }}</h3>
+        </a>
+    </div>
+</div>
+    <div class="row">
+    <div class="col total_sum" style="margin: 2rem; padding: 2rem; box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5); background: linear-gradient(90deg, rgba(207,242,191,1) 0%, rgba(207,242,191,1) 42%, rgba(0,255,158,1) 100%);">
+        <h3>Общая сумма заказов: {{ total_sum.total_price_rub__sum }}</h3>
+    </div>
+</div>
+<div class="row">
+<div class="col-6 hei secondcolor">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<canvas id="chart" width="400" height="400"></canvas>
+<script>
+  window.onload = function () {
+  // We render via Django template
+  var data = [
+    {% for item in data %}
+      parseFloat({{ item.summa }}),
+    {% endfor %}
+  ]
+
+  // We render via Django template
+  var labels = [
+    {% for item in data %}
+      "{{ item.date }}",
+    {% endfor %}
+  ]
+
+  console.log(data);
+  console.log(labels);
+let ctx = document.getElementById("chart").getContext("2d");
+
+let chart = new Chart(ctx, {
+  type: "bar",
+  data: {
+     labels: [{% for obj in dataset_all %}"{{obj.day}}",{% endfor %}],
+     datasets: [
+        {
+          label: 'Все заказы',
+          data: [{% for obj in dataset_all %}parseFloat({{obj.total_price_rub__sum}}),{% endfor %}],
+          backgroundColor: [
+                "#FF6384",
+            ],
+          borderColor: "#417690",
+        },
+        {
+          label: 'Завершенные заказы',
+          data: [{% for obj in dataset_complete %}parseFloat({{obj.total_price_rub__sum}}),{% endfor %}],
+          backgroundColor: [
+                "#399fff",
+            ],
+          borderColor: "#417690",
+        }
+     ]
+  },
+  options: {
+        scales: {
+            y: {
+              beginAtZero: true
+            }},
+        animation: true,
+        plugins: {
+          legend: {
+            display: true
+          },
+          tooltip: {
+            enabled: true
+          },
+
+        }
+      }
+});
+}
+</script>
+</div>
+<div class="col-6">
+    <canvas id="oilChart" width="400" height="400"></canvas>
+    <script>
+        var oilCanvas = document.getElementById("oilChart");
+
+var oilData = {
+    labels: [{% for user in users %}"{{user.username}}",{% endfor %}],
+    datasets: [
+        {
+            data: [{% for user in users %}parseFloat({{user.summa}}),{% endfor %}],
+            backgroundColor: [
+                "#FF6384",
+                "#399fff",
+                "#84FF63",
+                "#8463FF",
+                "#6384FF"
+            ]
+        }]
+};
+
+var pieChart = new Chart(oilCanvas, {
+  type: 'pie',
+  data: oilData
+});
+    </script>
+</div>
+</div>
+</div>
+{% endblock %}

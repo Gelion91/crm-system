@@ -1,4 +1,5 @@
 import datetime
+from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -15,10 +16,11 @@ class Product(models.Model):
     arrive = models.BooleanField(verbose_name='Прибыл на склад')
     paid = models.BooleanField(verbose_name='Оплачен')
     photo = models.ImageField(upload_to='core/image', verbose_name='Изображение', blank=True, null=True)
-    price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Цена', default=0)
-    fraht = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость доставки по Китаю', default=0)
-    quantity = models.IntegerField(verbose_name='Количество мест', default=0)
-    full_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Общая цена', default=0)
+    price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Цена ¥', default=0)
+    fraht = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость доставки по Китаю ¥',
+                                default=0)
+    quantity = models.IntegerField(verbose_name='Количество мест', default=1)
+    full_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Общая цена ¥', default=0)
 
     class Meta:
         verbose_name = 'Товар'
@@ -41,11 +43,21 @@ class Product(models.Model):
         return reverse('client', kwargs={'product_id': self.pk})
 
 
-class Clients(models.Model):
+class ImagesProduct(models.Model):
+    product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='images/')
 
+    class Meta:
+        verbose_name = 'Изображение'
+        verbose_name_plural = 'Изображения'
+        ordering = ['-id']
+
+
+class Clients(models.Model):
     name = models.CharField(max_length=100, verbose_name='Имя')
     surname = models.CharField(max_length=100, null=True, verbose_name='Фамилия')
     phone = PhoneNumberField(null=True, verbose_name='Номер телефона')
+    deposit = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Счет', default=0)
     slug = AutoSlugField(populate_from='name', db_index=True)
     comment = models.TextField(verbose_name='Комментарий', blank=True)
     result = models.BooleanField(verbose_name='Согласен')
@@ -84,11 +96,11 @@ class Order(models.Model):
     marker = models.CharField(max_length=100, verbose_name='Маркировка')
     product = models.ManyToManyField(Product, verbose_name='Товары')
     slug = AutoSlugField(populate_from='marker', db_index=True)
-    weight = models.FloatField(verbose_name='Вес кг.')
-    exchange_for_client = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Курс ¥ для клиента', default=0)
-    exchange_for_company = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Курс ¥ для компании', default=0)
-    arrive_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Цена доставки $', default=0)
-    status = models.CharField(max_length=100, choices=ORDER_CHOICES, default='re', null=False, verbose_name='Статус')
+    exchange_for_client = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Курс ¥ для клиента',
+                                              default=0)
+    exchange_for_company = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Курс ¥ для компании',
+                                               default=0)
+    status = models.CharField(max_length=100, choices=ORDER_CHOICES, default='Оформление', null=False, verbose_name='Статус')
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Создал')
     date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     date_update = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
@@ -110,6 +122,8 @@ class Order(models.Model):
         return "без имени"
 
     def save(self, *args, **kwargs):
+        if self.exchange_for_client:
+            self.exchange_for_company = self.exchange_for_client - Decimal(0.3)
         if self.status == "Завершен":
             self.result = True
         else:
@@ -125,3 +139,72 @@ class Order(models.Model):
 
     def get_absolute_url(self):
         return reverse('order', kwargs={'order_id': self.pk})
+
+
+class Logistics(models.Model):
+    SIMPLY = "Простая"
+    SHEATHING = "Обрешетка"
+    BOX = "Ящик"
+
+    PACKAGE_CHOICES = [
+        (SIMPLY, "Простая"),
+        (SHEATHING, "Обрешетка"),
+        (BOX, "Ящик"),
+    ]
+
+    UNDELIVERED = "undelivered"
+    IN_STOCK = "in_stock"
+    IN_MOSCOW = "in_moscow"
+    DELIVERED = "delivered"
+
+    DELIVERY_CHOICES = [
+        (UNDELIVERED, "Не доставлено"),
+        (IN_STOCK, "На складе Китай"),
+        (IN_MOSCOW, "В Москве"),
+        (DELIVERED, "Доставлено"),
+    ]
+
+    order = models.ManyToManyField(Order, related_name='delivery', verbose_name='Заказ')
+    height = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Высота, см.', default=0)
+    width = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Ширина, см.', default=0)
+    lenght = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Длина, см.', default=0)
+    weight = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Вес, кг.', default=0)
+    volume = models.DecimalField(decimal_places=3, max_digits=100, verbose_name='Объем', default=0)
+    density = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Плотность', default=0)
+    tariff = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Тариф', default=0)
+    order_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость товаров в заказах ¥', default=0)
+    insurance = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Страховка', default=0)
+    package = models.CharField(max_length=100, choices=PACKAGE_CHOICES, default='simply', null=False,
+                               verbose_name='Упаковка')
+    package_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость упаковки', default=0)
+    full_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Общая стоимость', default=0)
+    delivery = models.CharField(max_length=100, choices=DELIVERY_CHOICES, default='undelivered', null=False,
+                                verbose_name='Статус отправления')
+    date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    date_update = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
+
+    class Meta:
+        verbose_name = 'Доставка'
+        verbose_name_plural = 'Доставки'
+        ordering = ['-id']
+
+    def __str__(self):
+        """
+        String for representing the Model object.
+        """
+        if self.order:
+            orders = [order.marker for order in self.order.all()]
+            return str(orders)
+        return "без имени"
+
+    def save(self, *args, **kwargs):
+        if self.width and self.lenght and self.height:
+            self.volume = (self.width * self.height * self.lenght)/1000000
+            if self.weight:
+                self.density = self.weight/self.volume
+        if self.order:
+            self.order_price = sum(order.total_price for order in self.order.all())
+        super(Logistics, self).save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('logistic', kwargs={'logistic_id': self.pk})

@@ -39,10 +39,13 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'clients.apps.ClientsConfig',
     'login.apps.LoginConfig',
+    'dashboard.apps.DashboardConfig',
     'phonenumber_field',
     'crispy_forms',
     'crispy_bootstrap5',
     'django_filters',
+    'django_extensions',
+    'django.forms',
 
     # 'channels
 ]
@@ -62,7 +65,7 @@ ROOT_URLCONF = 'crm.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'core')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -132,8 +135,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATICFILES_DIRS = []
+#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = [
+os.path.join(BASE_DIR, "static"),
+]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
@@ -145,6 +150,8 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 LOGIN_URL = 'login:login'
 LOGOUT_URL = 'logout'
