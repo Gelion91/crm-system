@@ -1,18 +1,13 @@
-from django.forms.widgets import ClearableFileInput
+import posixpath
+
+from django import forms
+from django.conf import settings
+from django.utils.html import conditional_escape
+from django.utils.safestring import mark_safe
 
 
-class CustomClearableFileInput(ClearableFileInput):
-    initial_text = 'Текущее изображение'
+def thumbnail(image_path, width, height):
+    absolute_url = posixpath.join(settings.MEDIA_URL, image_path)
+    return f'<img src="{absolute_url}" alt="{image_path}" class="django-widget-img" ' \
+           f'width={width} height={height} loading=lazy />', absolute_url
 
-    input_text = 'Изменить'
-
-    clear_checkbox_label = 'Очистить'
-
-    template_with_initial = (
-        '<span>%(initial_text)s</span>:'
-        '<a href="%(initial_url)s">%(initial)s</a>'
-        '%(clear_template)s<br/><span>%(input_text)s</span>: %(input)s'
-    )
-
-    template_with_clear = '%(clear)s'
-    '<label for="%(clear_checkbox_id)s">%(clear_checkbox_label)s</label>'

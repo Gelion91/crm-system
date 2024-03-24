@@ -1,0 +1,17 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+<script src="{% static 'core/js/main.js' %}" defer></script>
+{% if form %}
+    <div class="col secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
+    <form id="delivery-form" action="{% url 'core:update_delivery' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-error">{{ form.non_field_errors }}</div>
+        {% crispy form %}
+    </form>
+    </div>
+{% endif %}
+{% endblock %}

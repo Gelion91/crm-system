@@ -41,11 +41,12 @@ INSTALLED_APPS = [
     'login.apps.LoginConfig',
     'dashboard.apps.DashboardConfig',
     'phonenumber_field',
+    'django.forms',
     'crispy_forms',
     'crispy_bootstrap5',
     'django_filters',
     'django_extensions',
-    'django.forms',
+    'sorl.thumbnail',
 
     # 'channels
 ]
@@ -65,7 +66,7 @@ ROOT_URLCONF = 'crm.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 'core')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'),],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,7 +76,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.menu_manager',
                 'core.context_processors.get_complete_orders',
-                'core.context_processors.get_clients_info'
+                'core.context_processors.get_clients_info',
             ],
         },
     },
@@ -139,6 +140,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
 os.path.join(BASE_DIR, "static"),
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
@@ -150,8 +152,6 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 LOGIN_URL = 'login:login'
 LOGOUT_URL = 'logout'

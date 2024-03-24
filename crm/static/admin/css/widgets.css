@@ -1,19 +1,19 @@
 /* SELECTOR (FILTER INTERFACE) */
 
 .selector {
-    width: 800px;
+    width: 100%;
     float: left;
     display: flex;
 }
 
 .selector select {
-    width: 380px;
+    width: 100%;
     height: 17.2em;
     flex: 1 0 auto;
 }
 
 .selector-available, .selector-chosen {
-    width: 380px;
+    width: 100%;
     text-align: center;
     margin-bottom: 5px;
     display: flex;
@@ -73,7 +73,7 @@
 
 .selector .selector-available input,
 .selector .selector-chosen input {
-    width: 320px;
+    width: 100%;
     margin-left: 8px;
 }
 

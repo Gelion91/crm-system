@@ -1,0 +1,47 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+{% if form %}
+    <div class="col secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-error">{{ form.non_field_errors }}</div>
+        {% crispy form %}
+    </form>
+
+    {% if photos %}
+        {% for img in photos %}
+        {% load thumbnail %}
+            {% thumbnail img.image "100x100" as im %}
+        <!-- Modal -->
+        <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img{{forloop.counter}}">
+              <img src="{{ im.url }}" class="image-detail">
+        </a>
+                    <div class="modal fade" id="img{{forloop.counter}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">{{img.product}}</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <img src="{{ img.image.url }}">
+                          </div>
+                          <div class="modal-footer">
+                            <form method="POST" action="{% url 'core:delete_image' img.pk %}">
+                                {% csrf_token %}<input type="submit" value="Удалить">
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+        {% endthumbnail %}
+        {% endfor %}
+        {% endif %}
+
+    </div>
+{% endif %}
+{% endblock %}

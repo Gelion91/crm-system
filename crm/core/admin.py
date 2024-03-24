@@ -11,7 +11,7 @@ class ClientsAdmin(admin.ModelAdmin):
 
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'url', 'arrive', 'paid', 'photo')
+    list_display = ('name', 'url', 'arrive', 'paid')
 
 
 class OrderAdmin(admin.ModelAdmin):

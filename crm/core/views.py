@@ -2,14 +2,18 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
-from django.http import JsonResponse
+from django.views import View
 from django.views.generic import CreateView, DeleteView, UpdateView
+from django.views.generic.base import ContextMixin
 from django_filters.views import FilterView
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
+
+from time import time
 
 from core.filters import OrderFilter
 from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
-    ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm
-from core.models import Order, Product, Logistics
+    ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm, ProductImageInlineFormset, DeliveryForm
+from core.models import Order, Product, Logistics, ImagesProduct
 
 
 class CustomHtmxMixin:
@@ -141,37 +145,95 @@ def update(request, order_id):
         'product_form': form2,
         'formset': formset,
         'helper': helper,
+        'products': []
 
     }
+    for prod in data.product.all():
+        context['products'].append({'product': prod, 'images': prod.imagesproduct_set.all()})
+    print(context['products'])
+    for i in context['products']:
+        print(i['product'], i['images'])
     return render(request, 'core/update_order.html', context)
-
-
-# def delete_product(request, order, product_id):
-#     order.product.remove(product_id.name)
-#     Product.objects.get(pk=id).delete()
-#     return redirect('upd', order_id=order.pk)
 
 
 class AddProduct(LoginRequiredMixin, CreateView):
     form_class = ProductForm
-    template_name = 'core/addorder.html'
+    template_name = 'core/add_product.html'
     success_url = '/'
-
-    def post(self, request, *args, **kwargs):
-        product_form = self.form_class(request.POST)
-        if product_form.is_valid():
-            return self.render_to_response(
-                self.get_context_data(success=True)
-            )
-        else:
-            return self.render_to_response(
-                self.get_context_data(product_form=product_form)
-            )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Оформить заказ'
+        context['ord'] = kwargs.get('pk')
         return context
+
+
+class UpdateProduct(UpdateView):
+    model = Product
+    form_class = ProductForm
+    pk_url_kwarg = 'product_id'
+    template_name = 'core/edit_product.html'
+
+    def get_success_url(self):
+        return reverse('core:upd_product', kwargs={'product_id': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Продавец'
+        context['photos'] = ImagesProduct.objects.filter(product=self.object)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = ProductForm(request.POST)
+        files = request.FILES.getlist('image')
+        print(files)
+        if form.is_valid():
+            if files:
+                for f in files:
+                    img = ImagesProduct(product=self.object, image=f)
+                    img.save()
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        form.instance.id = self.object.pk
+        self.object = form.save()
+        return super().form_valid(form)
+
+
+class DeleteProduct(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Product
+    permission_required = 'core.delete_product'
+    context_object_name = 'product'
+    pk_url_kwarg = "product_id"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print(context)
+        return context
+
+    def get_success_url(self):
+        order = Order.objects.get(product=self.object.pk)
+        return reverse('core:upd', kwargs={'order_id': order.pk})
+
+
+class DeleteImage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = ImagesProduct
+    permission_required = 'core.delete_imagesproduct'
+    context_object_name = 'image'
+    pk_url_kwarg = "image_id"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print(context)
+        return context
+
+    def get_success_url(self):
+
+        return reverse('core:upd_product', kwargs={'product_id': self.object.product.pk})
 
 
 class DeliveryListView(FilterView):
@@ -210,3 +272,22 @@ class UpdateDelivery(UpdateView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Доставка'
         return context
+
+def is_ajax(request):
+    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+
+
+class AjaxHandlerView(View):
+    def get(self, request):
+        text = request.GET.get('number')
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            print(text)
+            return JsonResponse({'seconds': text}, status=200)
+        return render(request, 'core/updatedelivery.html')
+
+    def post(self, request):
+        text = request.GET.get('number')
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            print(text)
+            return JsonResponse({'seconds': text}, status=200)
+        return render(request, 'core/updatedelivery.html')

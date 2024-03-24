@@ -16,7 +16,7 @@ a:hover {
 	text-decoration: underline;
 }
 
-img {max-width: 600px; height: auto;}
+img {max-width: 100%; height: auto;}
 
 img.img-article-left {
 	max-width: 300px;
@@ -783,4 +783,22 @@ tr {
     z-index: 1;
 }
 
+.btn_edit {
+    display: grid; /* Строчно-блочный элемент */
+    text-align: center;
+    background: #8C959D; /* Серый цвет фона */
+    color: #fff; /* Белый цвет текста */
+    padding: 1rem 1.5rem; /* Поля вокруг текста */
+    text-decoration: none; /* Убираем подчёркивание */
+    border-radius: 3px; /* Скругляем уголки */
+   }
+
+.btn_delete {
+    display: inline-block; /* Строчно-блочный элемент */
+    background: #CD5C5C; /* Серый цвет фона */
+    color: #fff; /* Белый цвет текста */
+    padding: 1rem 1.5rem; /* Поля вокруг текста */
+    text-decoration: none; /* Убираем подчёркивание */
+    border-radius: 3px; /* Скругляем уголки */
+   }
 

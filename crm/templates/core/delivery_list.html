@@ -30,7 +30,7 @@
           {% if order.status == 'Оформление' %}
             <a href="{% url 'core:update_delivery' obj.pk %}">
                 <div class="row list-height" style="font-weight: 700; border-color:#ead1dc; margin-top:1%; margin-bottom:1%; background-color:#fff;">
-                    <div class="col"><p>{% for mark in obj.order.all %}{{ mark }}<br>{% endfor %}</p></div>
+                    <div class="col"><p>{{obj.marker}}</p></div>
                     <div class="col"><p>{{obj.package}}</p></div>
                     <div class="col"><p>{{obj.date_create}}</p></div>
                 </div>
@@ -40,7 +40,7 @@
           {% elif order.status == 'Завершен' %}
             <a href="{% url 'core:update_delivery' obj.pk %}">
                 <div class="row list-height" style="font-weight: 700; border-color:#cff2bf; margin-top:1%; margin-bottom:1%; background-color:#fff;">
-                    <div class="col"><p>{% for mark in obj.order.all %}{{ mark }}<br>{% endfor %}</p></div>
+                    <div class="col"><p>{{obj.marker}}</p></div>
                     <div class="col"><p>{{obj.package}}</p></div>
                     <div class="col"><p>{{obj.date_create}}</p></div>
                 </div>
@@ -48,7 +48,7 @@
           {% else %}
             <a href="{% url 'core:update_delivery' obj.pk %}">
                 <div class="row list-height" style="font-weight: 700; border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
-                    <div class="col"><p>{% for mark in obj.order.all %}{{ mark }}<br>{% endfor %}</p></div>
+                    <div class="col"><p>{{obj.marker}}</p></div>
                     <div class="col"><p>{{obj.package}}</p></div>
                     <div class="col"><p>{{obj.date_create}}</p></div>
                 </div>

@@ -6,9 +6,9 @@ from django.dispatch import receiver
 from core.models import Order, Clients, Product, Logistics
 
 
-# @receiver(pre_save, sender=Logistics)
-# def create_logistic(sender, instance, created, **kwargs):
-#     instance.save()
+@receiver(post_save, sender=Logistics)
+def create_logistic(sender, instance, created, **kwargs):
+    print(instance)
 
 
 @receiver(post_save, sender=Product)
