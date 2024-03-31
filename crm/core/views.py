@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
@@ -150,9 +152,6 @@ def update(request, order_id):
     }
     for prod in data.product.all():
         context['products'].append({'product': prod, 'images': prod.imagesproduct_set.all()})
-    print(context['products'])
-    for i in context['products']:
-        print(i['product'], i['images'])
     return render(request, 'core/update_order.html', context)
 
 
@@ -187,7 +186,6 @@ class UpdateProduct(UpdateView):
         self.object = self.get_object()
         form = ProductForm(request.POST)
         files = request.FILES.getlist('image')
-        print(files)
         if form.is_valid():
             if files:
                 for f in files:
@@ -212,7 +210,6 @@ class DeleteProduct(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        print(context)
         return context
 
     def get_success_url(self):
@@ -228,7 +225,6 @@ class DeleteImage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        print(context)
         return context
 
     def get_success_url(self):
@@ -271,23 +267,30 @@ class UpdateDelivery(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Доставка'
+        # data = list(Product.objects.filter(paid=True, arrive=True).values('id', 'full_price'))
+        # json_data = json.dumps(data, ensure_ascii=True, default=float)
+        # context['json_products'] = json_data
+        # print(context['json_products'])
+        context['data'] = [{'id': i.id, 'full_price': i.full_price} for i in context['form'].fields['product'].queryset]
+        # print([{'id': i.id, 'full_price': i.full_price} for i in context['form'].fields['product'].queryset])
         return context
+
 
 def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
 
-class AjaxHandlerView(View):
-    def get(self, request):
-        text = request.GET.get('number')
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            print(text)
-            return JsonResponse({'seconds': text}, status=200)
-        return render(request, 'core/updatedelivery.html')
-
-    def post(self, request):
-        text = request.GET.get('number')
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            print(text)
-            return JsonResponse({'seconds': text}, status=200)
-        return render(request, 'core/updatedelivery.html')
+# class AjaxHandlerView(View):
+#     def get(self, request):
+#         text = request.GET.get('number')
+#         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+#             print(text)
+#             return JsonResponse({'seconds': text}, status=200)
+#         return render(request, 'core/updatedelivery.html')
+#
+#     def post(self, request):
+#         text = request.GET.get('number')
+#         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+#             print(text)
+#             return JsonResponse({'seconds': text}, status=200)
+#         return render(request, 'core/updatedelivery.html')

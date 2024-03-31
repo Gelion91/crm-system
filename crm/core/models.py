@@ -11,15 +11,17 @@ from core.validators import custom_validator
 class Product(models.Model):
     product_marker = models.CharField(max_length=100, verbose_name='маркировка товара', null=True)
     name = models.CharField(max_length=100, verbose_name='Товар')
-    url = models.CharField(max_length=500, verbose_name='Ссылка на продавца')
+    number_order = models.CharField(max_length=100, verbose_name='Номер заказа', blank=True)
+    url = models.CharField(max_length=500, verbose_name='Ссылка на продавца', blank=True)
     arrive = models.BooleanField(verbose_name='Прибыл на склад')
     paid = models.BooleanField(verbose_name='Оплачен')
     price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Цена ¥', default=0)
-    margin = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Наценка ¥', default=0)
+    margin_product = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Наценка ¥', default=0)
     fraht = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость доставки по Китаю ¥',
                                 default=0)
     quantity = models.IntegerField(verbose_name='Количество мест', default=1)
     full_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Общая цена ¥', default=0)
+
     # logistics = models.ForeignKey('Logistics', related_name='delivers', verbose_name='Доставка', on_delete=models.SET_NULL,
     #                              null=True)
 
@@ -98,13 +100,14 @@ class Order(models.Model):
     ]
     client = models.ForeignKey(Clients, on_delete=models.SET_NULL, null=True, verbose_name='Клиент')
     marker = models.CharField(max_length=100, verbose_name='Маркировка заказа')
-    product = models.ManyToManyField(Product, verbose_name='Товары')
+    product = models.ManyToManyField(Product, verbose_name='Товары', null=True)
     slug = AutoSlugField(populate_from='marker', db_index=True)
     exchange_for_client = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Курс ¥ для клиента',
                                               default=0)
     exchange_for_company = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Курс ¥ для компании',
                                                default=0)
-    status = models.CharField(max_length=100, choices=ORDER_CHOICES, default='Оформление', null=False, verbose_name='Статус')
+    status = models.CharField(max_length=100, choices=ORDER_CHOICES, default='Оформление', null=False,
+                              verbose_name='Статус')
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Создал')
     date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     date_update = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
@@ -139,6 +142,9 @@ class Order(models.Model):
             self.total_price = 0
             self.total_price = total_price + self.margin
             self.total_price_rub = self.total_price * self.exchange_for_client
+            price_for_company = self.total_price_rub - (self.total_price * self.exchange_for_company)
+
+            self.profit = (self.margin * self.exchange_for_company) + price_for_company
         except:
             pass
         super(Order, self).save(*args, **kwargs)
@@ -179,7 +185,8 @@ class Logistics(models.Model):
     volume = models.DecimalField(decimal_places=3, max_digits=100, verbose_name='Объем', default=0)
     density = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Плотность', default=0)
     tariff = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Тариф', default=0)
-    order_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость товаров в заказах ¥', default=0)
+    order_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость товаров в заказах ¥',
+                                      default=0)
     insurance = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Страховка', default=0)
     package = models.CharField(max_length=100, choices=PACKAGE_CHOICES, default='simply', null=False,
                                verbose_name='Упаковка')
@@ -203,11 +210,11 @@ class Logistics(models.Model):
             return self.marker
         return "без имени"
 
-    def save(self, *args, **kwargs):
-        if self.product.all():
-            print(self.product)
-            self.order_price = sum(product.full_price for product in self.product.all())
-        super(Logistics, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     if self.product.all():
+    #         print(self.product)
+    #         self.order_price = sum(product.full_price for product in self.product.all())
+    #     super(Logistics, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('logistic', kwargs={'logistic_id': self.pk})

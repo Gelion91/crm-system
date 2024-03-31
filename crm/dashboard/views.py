@@ -1,8 +1,7 @@
 from django.contrib.auth.models import User
 from django.db.models import Count, Sum
-from django.db.models.functions import ExtractDay, TruncDay
+from django.db.models.functions import TruncDay
 from django.shortcuts import render
-from django_filters.views import FilterView
 
 from core.models import Order
 from dashboard.filters import OrderChartFilter

@@ -11,7 +11,7 @@
   <!-- Добавление дополнительного статического CSS файла -->
     <link rel="stylesheet" href="{% static 'core/css/styles.css' %}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="{% static 'core/js/main.js' %}" defer></script>
+<!--    <script src="{% static 'core/js/main.js' %}" defer></script>-->
     <style>
       .bd-placeholder-img {
         font-size: 1.125rem;
@@ -53,14 +53,14 @@
             </div>
             {% if request.user.is_authenticated %}
                 <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id={{user.username}} data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false" data-display="static" aria-expanded="false">
+                    <button class="btn btn-secondary" type="button" id={{user.username}} data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false" data-display="static" aria-expanded="false">
                         {{user.username}}
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="{{m.title}}">
-                        {% for m in menu %}
-                            <li><a class="dropdown-item" href="{% url m.url_name %}">{{ m.title }}</a></li>
-                        {% endfor %}
-                    </ul>
+<!--                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="{{m.title}}">-->
+<!--                        {% for m in menu %}-->
+<!--                            <li><a class="dropdown-item" href="{% url m.url_name %}">{{ m.title }}</a></li>-->
+<!--                        {% endfor %}-->
+<!--                    </ul>-->
                 </div>
             {% endif %}
         </div>

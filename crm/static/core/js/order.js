@@ -20,10 +20,23 @@ exchange_for_client.addEventListener('input', ()=>{
 id_margin.addEventListener('change', ()=>{
                     console.log(price)
                     exchange_for_company.value = parseFloat(exchange_for_client.value - parseFloat(0.3)).toFixed(2)
-                    if (id_margin.value < old_margin) {
+                    console.log(Boolean(Number(id_margin.value) < Number(old_margin)));
+                    console.log(id_margin.value)
+                    console.log(old_margin)
+                    console.log(Math.abs(old_margin - id_margin.value))
+
+                    if (Number(id_margin.value) < Number(old_margin)) {
                       id_total_price.value = parseFloat(parseFloat(price) - parseFloat(Math.abs(old_margin - id_margin.value))).toFixed(2)
+                      console.log('Новая наценка ниже старой')
+                      console.log(old_margin)
+                      console.log(id_margin.value)
+
                     } else {
                       id_total_price.value = parseFloat(parseFloat(price) + parseFloat(Math.abs(old_margin - id_margin.value))).toFixed(2)
+                      console.log('Новая наценка выше старой')
+                      console.log(old_margin)
+                      console.log(id_margin.value)
+                      console.log(id_total_price.value)
                     }
                     id_total_price_rub.value =  parseFloat(exchange_for_client.value*id_total_price.value).toFixed(2)
 })

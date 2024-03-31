@@ -73,7 +73,7 @@ class ProductForm(ModelForm):
     class Meta:
         model = Product
         fields = '__all__'
-        exclude = ('full_price', 'DELETE', 'logistics')
+        exclude = ('full_price', 'DELETE', 'logistics', 'margin_product')
 
     def clean_image(self):
         data = self.cleaned_data['image']
@@ -111,6 +111,7 @@ class ProductFormSetHelper(FormHelper):
                 Div('name', css_class='col-6'), css_class='row'),
             Div(Div('price', css_class='col-6'),
                 Div('url', css_class='col-6'), css_class='row'),
+            Div(Div('number_order', css_class='col-12'), css_class='row'),
             Div(Div('fraht', css_class='col-6'),
                 Div('quantity', css_class='col-6'), css_class='row'),
             Div(Div('arrive', css_class='col-6'),
@@ -156,13 +157,11 @@ class DeliveryAddForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(DeliveryAddForm, self).__init__(*args, **kwargs)
         qs1 = Product.objects.filter(paid=True, arrive=True, logistics=None)
-        print(self.instance)
         if self.initial:
             qs2 = Product.objects.filter(logistics=self.instance.pk)
         else:
             qs2 = Product.objects.none()
         queryset = (qs1 | qs2).distinct()
-        print(queryset)
         if self.initial:
             qs1 = Product.objects.prefetch_related('logistics').filter(paid=True, arrive=True).filter(
                 logistics__product__isnull=True)
@@ -176,6 +175,7 @@ class DeliveryAddForm(ModelForm):
         self.fields['product'].widget = FilteredSelectMultiple("Товары", is_stacked=False)
         self.fields['product'].queryset = queryset
         self.fields['product'].label = ''
+        self.fields['product'].required = False
         self.helper = FormHelper()
         self.helper.form_id = 'id-exampleForm'
         self.helper.form_class = 'whiteForms'
@@ -208,7 +208,7 @@ class DeliveryAddForm(ModelForm):
         css = {
             'all': ('/static/admin/css/widgets.css',),
         }
-        js = ('core/js/main.js', '/admin/jsi18n', 'defer')
+        js = ('/admin/jsi18n', 'defer', 'core/js/main.js')
 
 
 def render_js(cls):

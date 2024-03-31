@@ -2,6 +2,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+
 {% if form %}
     <div class="col secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
     <form id="delivery-form" action="" method="post" enctype="multipart/form-data">
@@ -11,4 +12,34 @@
     </form>
     </div>
 {% endif %}
+<script defer>
+window.onload = function () {
+    const Delivery_form = document.getElementById('delivery-form')
+    const volume = document.getElementById('id_volume')
+    const weight = document.getElementById('id_weight')
+    const density = document.getElementById('id_density')
+    const csrf = document.getElementsByName('csrfmiddlewaretoken')
+
+    const e = document.getElementById("div_id_product");
+    console.log(e)
+    const a = document.getElementsByClassName('selector');
+    console.log(a)
+    console.log(Delivery_form)
+    console.log(volume)
+    {{ e.options }}
+
+    volume.addEventListener('input', ()=>{
+                    const volume_data = volume.value
+                    console.log(volume_data)
+                    density.value = parseFloat((weight.value / volume.value).toFixed(2))
+    })
+    weight.addEventListener('input', ()=>{
+                    const volume_data = volume.value
+                    console.log(volume_data)
+                    density.value = parseFloat((weight.value / volume.value).toFixed(2))
+    })
+
+};
+
+</script>
 {% endblock %}

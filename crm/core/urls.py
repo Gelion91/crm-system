@@ -19,5 +19,4 @@ urlpatterns = [
     path('logistic/', views.DeliveryListView.as_view(), name='logistic'),
     path('logistic/add_delivery', views.AddDelivery.as_view(), name='add_delivery'),
     path('logistic/update_delivery/<int:logistic_id>/', views.UpdateDelivery.as_view(), name='update_delivery'),
-    path('logistic/ajax', views.AjaxHandlerView.as_view(), name='ajax'),
 ]
