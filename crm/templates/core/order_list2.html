@@ -5,7 +5,7 @@
 {% block content %}
     <div class="row">
 
-        <div class="col-lg-12 secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
+        <div class="col-lg-12 secondcolor pad_list" style="background-color:#f5f5f5;">
                 <br>
                 <button class="btn btn-outline-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Фильтры</button>
 
@@ -20,12 +20,13 @@
             </form>
                 </div>
                 </div>
+            <hr>
         {% if object_list %}
-        <div class="row" style="font-weight: 700; margin-top:1%; margin-bottom:1%;">
-            <div class="col"><p class="font-size: calc(12px + 8 * (100vw / 1280));">Клиент</p></div>
-            <div class="col"><p class="font-size: calc(12px + 8 * (100vw / 1280));">Маркировка</p></div>
-            <div class="col"><p class="font-size: calc(12px + 8 * (100vw / 1280));">Статус</p></div>
-            <div class="col"><p class="font-size: calc(12px + 8 * (100vw / 1280));">Дата оформления</p></div>
+        <div class="row" style="margin-top:1%; margin-bottom:1%;">
+            <div class="col"><p class="p-size">Клиент</p></div>
+            <div class="col"><p class="p-size">Маркировка</p></div>
+            <div class="col"><p class="p-size">Статус</p></div>
+            <div class="col"><p class="p-size">Дата оформления</p></div>
         </div>
           {% for order in object_list %}
 

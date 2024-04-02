@@ -802,3 +802,19 @@ tr {
     border-radius: 3px; /* Скругляем уголки */
    }
 
+.btn_cab {
+    color: #fff;
+}
+
+.pad_list {
+    padding-left: 7%;
+    padding-right: 7%;
+   }
+
+.p-size {
+    font-size: calc(12px + 8 * (100vw / 1280));
+}
+
+.gut {
+	--bs-gutter-x: 0px;
+}

@@ -1,5 +1,6 @@
+from django.contrib.auth import logout
 from django.contrib.auth.views import LoginView
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 
 from core.forms import CustomAuthForm
@@ -24,3 +25,8 @@ class LoginUser(LoginView):
             return reverse_lazy('core:home')
         else:
             return reverse_lazy('core:home')
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('login:login')

@@ -19,6 +19,7 @@
     </div>
     </div>
 </div>
+    <hr>
 <div class="row">
     <div class="col hei" style="margin: 2rem; padding: 2rem; box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5); background: linear-gradient(90deg, rgba(207,242,191,1) 0%, rgba(207,242,191,1) 42%, rgba(0,255,158,1) 100%);">
         <a href="{% url 'core:finish' %}">
@@ -42,7 +43,7 @@
     </div>
 </div>
 <div class="row">
-<div class="col-6 hei secondcolor">
+<div class="col-xs-12 col-sm-6 hei">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
 <canvas id="chart" width="400" height="400"></canvas>
@@ -109,7 +110,7 @@ let chart = new Chart(ctx, {
 }
 </script>
 </div>
-<div class="col-6">
+<div class="col-xs-12 col-sm-6">
     <canvas id="oilChart" width="400" height="400"></canvas>
     <script>
         var oilCanvas = document.getElementById("oilChart");

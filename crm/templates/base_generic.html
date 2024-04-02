@@ -29,7 +29,7 @@
     </style>
 </head>
 <body style="font-family: 'Oswald';">
-  <div class="container-fluid" style="padding-left:0;">
+  <div class="container-fluid gut" style="padding-left:0;">
     {% block sidebar %}
 
       <nav class="navbar navbar-dark bg-dark">
@@ -40,7 +40,7 @@
             <a class="navbar-brand" href="{% url 'clients:home' %}">CRM</a>
             {% endif %}
 
-            <div class="dropdown me-auto">
+            <div class="dropdown me-auto order-3 order-sm-last">
                     {% for m in menu %}
                         {% url m.url_name as url %}
                         {% if url in request.path %}
@@ -52,15 +52,13 @@
 
             </div>
             {% if request.user.is_authenticated %}
-                <div class="dropdown">
-                    <button class="btn btn-secondary" type="button" id={{user.username}} data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false" data-display="static" aria-expanded="false">
+                <div class="dropdown order-2 order-md-last">
+                    <button class="btn btn_cab" type="button" id={{user.username}} data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false" data-display="static" aria-expanded="false">
                         {{user.username}}
                     </button>
-<!--                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="{{m.title}}">-->
-<!--                        {% for m in menu %}-->
-<!--                            <li><a class="dropdown-item" href="{% url m.url_name %}">{{ m.title }}</a></li>-->
-<!--                        {% endfor %}-->
-<!--                    </ul>-->
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="{{m.title}}">
+                            <li><a class="dropdown-item" href="{% url 'login:logout' %}">Выйти</a></li>
+                    </ul>
                 </div>
             {% endif %}
         </div>
