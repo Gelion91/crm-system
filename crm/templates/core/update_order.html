@@ -36,7 +36,7 @@
             <div class="accordion-item">
             <h2 class="accordion-header">
               <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc{{forloop.counter}}" aria-expanded="false" aria-controls="flush-collapseOne">
-                <div class="row"><a href="{% url 'core:upd_product' prod.product.pk %}">{{prod.product.product_marker}} | {{prod.product.name}}</a></div>
+                <div class="row"><a href="{% url 'core:upd_product' prod.product.pk %}">{{prod.product.product_marker}} | {{prod.product.name}} | Оплачен: {% if prod.product.paid %}&#9989;{% else %}&#10060;{% endif %} | На складе {% if prod.product.arrive %}&#9989;{% else %}&#10060;{% endif %}</a></div>
               </button>
             </h2>
             <div id="acc{{forloop.counter}}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">

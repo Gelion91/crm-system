@@ -17,6 +17,9 @@ urlpatterns = [
     path('orders/update/delete/<int:product_id>/', views.DeleteProduct.as_view(), name='delete_product'),
     # path('orders/update/<int:order_id>/', views.UpdateOrder.as_view(), name='upd'),
     path('logistic/', views.DeliveryListView.as_view(), name='logistic'),
+    path('logistic/sp', views.ProductStatus.as_view(), name='status_product'),
+    path('change_status_paid', views.change_status_paid, name='change_status_paid'),
+    path('change_status_arrive', views.change_status_arrive, name='change_status_arrive'),
     path('logistic/add_delivery', views.AddDelivery.as_view(), name='add_delivery'),
     path('logistic/update_delivery/<int:logistic_id>/', views.UpdateDelivery.as_view(), name='update_delivery'),
 ]

@@ -5,25 +5,25 @@ from django.db import models
 from autoslug.fields import AutoSlugField
 from django.urls import reverse
 from phonenumber_field.modelfields import PhoneNumberField
-from core.validators import custom_validator
 
 
 class Product(models.Model):
     product_marker = models.CharField(max_length=100, verbose_name='маркировка товара', null=True)
-    name = models.CharField(max_length=100, verbose_name='Товар')
+    name = models.CharField(max_length=100, verbose_name='Наименование')
     number_order = models.CharField(max_length=100, verbose_name='Номер заказа', blank=True)
     url = models.CharField(max_length=500, verbose_name='Ссылка на продавца', blank=True)
     arrive = models.BooleanField(verbose_name='Прибыл на склад')
     paid = models.BooleanField(verbose_name='Оплачен')
-    price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Цена ¥', default=0)
+    price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Цена для клиента ¥', default=0)
+    price_company = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Цена для компании ¥', default=0)
     margin_product = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Наценка ¥', default=0)
-    fraht = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость доставки по Китаю ¥',
+    fraht = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Доставка по Китаю для клиента ¥',
                                 default=0)
-    quantity = models.IntegerField(verbose_name='Количество мест', default=1)
-    full_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Общая цена ¥', default=0)
-
-    # logistics = models.ForeignKey('Logistics', related_name='delivers', verbose_name='Доставка', on_delete=models.SET_NULL,
-    #                              null=True)
+    fraht_company = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Доставка по Китаю для '
+                                                                                       'компании ¥', default=0)
+    quantity = models.IntegerField(verbose_name='Количество', default=1)
+    full_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Общая цена для клиента ¥', default=0)
+    full_price_company = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Общая цена для компании ¥', default=0)
 
     class Meta:
         verbose_name = 'Товар'
@@ -40,6 +40,7 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         self.full_price = self.price + self.fraht
+        self.full_price_company = self.price_company + self.fraht_company
         super(Product, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -61,12 +62,13 @@ class ImagesProduct(models.Model):
 
 class Clients(models.Model):
     name = models.CharField(max_length=100, verbose_name='Имя')
-    surname = models.CharField(max_length=100, null=True, verbose_name='Фамилия')
-    phone = PhoneNumberField(null=True, verbose_name='Номер телефона', unique=True)
+    surname = models.CharField(max_length=100, null=True, verbose_name='Фамилия', blank=True)
+    phone = PhoneNumberField(null=True, verbose_name='Номер телефона', unique=True, blank=True)
+    messanger = models.TextField(max_length=500, null=True, verbose_name='Примечание', blank=True)
     deposit = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Счет', default=0)
     slug = AutoSlugField(populate_from='name', db_index=True)
     comment = models.TextField(verbose_name='Комментарий', blank=True)
-    result = models.BooleanField(verbose_name='Согласен')
+    result = models.BooleanField(verbose_name='Согласен', default=True)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Создал')
     date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     date_update = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
@@ -80,8 +82,10 @@ class Clients(models.Model):
         """
         String for representing the Model object.
         """
-        if self.name:
+        if self.surname:
             return f"{self.name} {self.surname}"
+        elif not self.surname:
+            return f"{self.name}"
         return "без имени"
 
     def get_absolute_url(self):
@@ -93,14 +97,31 @@ class Order(models.Model):
     PAYMENT = "На оплату"
     COMPLETE = "Завершен"
 
+    ALFA_BANK = "Альфа-банк"
+    SBER = "Сбер"
+    TINKOFF = "Тинькофф"
+    TIMOFEEV = "Тимофеев"
+    CASH = "Наличные"
+    IP = "Расчетный счет"
+
     ORDER_CHOICES = [
         (REGISTRATION, "Оформление"),
         (PAYMENT, "Оплата"),
         (COMPLETE, "Выполнен"),
     ]
+
+    PAID_METHOD = [
+        (ALFA_BANK, "Альфа-банк"),
+        (SBER, "Сбер"),
+        (TINKOFF, "Тинькофф"),
+        (TIMOFEEV, "Тимофеев"),
+        (CASH, "Наличные"),
+        (IP, "Расчетный счет"),
+    ]
+
     client = models.ForeignKey(Clients, on_delete=models.SET_NULL, null=True, verbose_name='Клиент')
     marker = models.CharField(max_length=100, verbose_name='Маркировка заказа')
-    product = models.ManyToManyField(Product, verbose_name='Товары', null=True)
+    product = models.ManyToManyField(Product, verbose_name='Товары')
     slug = AutoSlugField(populate_from='marker', db_index=True)
     exchange_for_client = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Курс ¥ для клиента',
                                               default=0)
@@ -112,9 +133,13 @@ class Order(models.Model):
     date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     date_update = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
     margin = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Наценка ¥', default=0)
-    total_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Итоговая цена ¥', default=0)
-    total_price_rub = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Итоговая цена ₽', default=0)
+    total_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Итоговая цена для клиента ¥', default=0)
+    total_price_rub = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Итоговая цена для клиента ₽', default=0)
+    total_price_company = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Итоговая цена для компании ¥', default=0)
+    total_price_rub_company = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Итоговая цена для компании ₽', default=0)
     profit = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Прибыль', default=0)
+    paid_method = models.CharField(max_length=100, choices=PAID_METHOD, default='Наличные', null=False,
+                                   verbose_name='Способ оплаты')
     result = models.BooleanField(verbose_name='Выполнен', default=False)
 
     class Meta:
@@ -139,12 +164,15 @@ class Order(models.Model):
             self.result = False
         try:
             total_price = sum(i.full_price for i in Order.objects.get(pk=self.pk).product.all())
+            total_price_company = sum(i.full_price_company for i in Order.objects.get(pk=self.pk).product.all())
             self.total_price = 0
-            self.total_price = total_price + self.margin
+            self.total_price = total_price
             self.total_price_rub = self.total_price * self.exchange_for_client
-            price_for_company = self.total_price_rub - (self.total_price * self.exchange_for_company)
+            self.total_price_company = 0
+            self.total_price_company = total_price_company
+            self.total_price_rub_company = self.total_price_company * self.exchange_for_company
 
-            self.profit = (self.margin * self.exchange_for_company) + price_for_company
+            self.profit = self.total_price_rub - self.total_price_rub_company
         except:
             pass
         super(Order, self).save(*args, **kwargs)

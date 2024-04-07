@@ -24,20 +24,28 @@ class AddOrderForm(ModelForm):
 
     class Meta:
         model = Order
-        fields = '__all__'
-        exclude = ('product', 'owner', 'total_price', 'total_price_rub', 'result')
+        fields = ['client', 'marker']
 
 
-class UpdateOrderForm(AddOrderForm):
+class UpdateOrderForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'whiteForms'
+        self.helper.form_method = 'post'
+        self.helper.form_action = 'submit_survey'
+        self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn-secondary'))
         self.fields["total_price"].disabled = True
         self.fields["total_price_rub"].disabled = True
+        self.fields["total_price_company"].disabled = True
+        self.fields["total_price_rub_company"].disabled = True
+
 
     class Meta:
         model = Order
         fields = '__all__'
-        exclude = ('product', 'owner')
+        exclude = ('product', 'owner', 'margin')
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -109,11 +117,13 @@ class ProductFormSetHelper(FormHelper):
         self.layout = Layout(
             Div(Div('product_marker', css_class='col-6'),
                 Div('name', css_class='col-6'), css_class='row'),
-            Div(Div('price', css_class='col-6'),
-                Div('url', css_class='col-6'), css_class='row'),
+            Div(Div('url', css_class='col-12'), css_class='row'),
             Div(Div('number_order', css_class='col-12'), css_class='row'),
-            Div(Div('fraht', css_class='col-6'),
-                Div('quantity', css_class='col-6'), css_class='row'),
+            Div(Div('price', css_class='col-6'),
+                Div('price_company', css_class='col-6'), css_class='row'),
+            Div(Div('quantity', css_class='col-12'), css_class='row'),
+            Div(Div('fraht', css_class='col-12'), css_class='row'),
+            Div(Div('fraht_company', css_class='col-12'), css_class='row'),
             Div(Div('arrive', css_class='col-6'),
                 Div('paid', css_class='col-6'), css_class='row'),
             Div('DELETE', css_class='input-small'),

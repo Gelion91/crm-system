@@ -18,11 +18,15 @@ class AddClientForm(ModelForm):
 
         self.helper.add_input(Submit('submit', 'Submit'))
         self.fields["name"].widget.attrs.update({"class": "form__field"})
+        self.fields["phone"].widget.attrs.update(
+            {'placeholder': 'Номер телефона в формате +7...'})
+        self.fields["messanger"].widget.attrs.update(
+            {'placeholder': 'Поле для заметок. Например номер wechat или whatsapp...'})
 
     class Meta:
         model = Clients
         fields = '__all__'
-        exclude = ('owner', 'comment')
+        exclude = ('owner', 'comment', 'deposit')
 
 
 class FilterName(forms.Form):

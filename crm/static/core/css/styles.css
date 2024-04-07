@@ -818,3 +818,7 @@ tr {
 .gut {
 	--bs-gutter-x: 0px;
 }
+
+.checkbox_margin {
+    margin: 7%;
+}

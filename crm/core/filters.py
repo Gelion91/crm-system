@@ -3,7 +3,7 @@ from django import forms
 from django_filters import DateFromToRangeFilter, MultipleChoiceFilter, AllValuesMultipleFilter
 from django_filters.widgets import RangeWidget, DateRangeWidget
 
-from core.models import Order
+from core.models import Order, Product
 
 
 class DatInput(forms.DateInput):
@@ -26,3 +26,15 @@ class OrderFilter(django_filters.FilterSet):
     class Meta:
         model = Order
         fields = ['client', 'status', 'date_create']
+
+
+class ProductFilter(django_filters.FilterSet):
+
+    marker = django_filters.CharFilter(label='Поиск по маркировке', method='filter_by_marker')
+
+    def filter_by_marker(self, queryset, name, value):
+        return queryset.filter(product_marker__icontains=value)
+
+    class Meta:
+        model = Product
+        fields = ['paid', 'arrive']

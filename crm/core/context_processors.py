@@ -18,6 +18,7 @@ def menu_manager(request):
 
             {'title': 'Доставка', 'url_name': 'core:logistic',
              'submenu': [{'title': 'Оформить доставку', 'url_name': 'core:add_delivery'},
+                         {'title': 'Статус товаров', 'url_name': 'core:status_product'},
                          ]},
 
             {'title': 'Панель управления', 'url_name': 'dashboard:home',

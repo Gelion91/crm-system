@@ -5,14 +5,14 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views import View
-from django.views.generic import CreateView, DeleteView, UpdateView
+from django.views.generic import CreateView, DeleteView, UpdateView, ListView
 from django.views.generic.base import ContextMixin
 from django_filters.views import FilterView
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 
 from time import time
 
-from core.filters import OrderFilter
+from core.filters import OrderFilter, ProductFilter
 from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
     ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm, ProductImageInlineFormset, DeliveryForm
 from core.models import Order, Product, Logistics, ImagesProduct
@@ -118,26 +118,23 @@ def update(request, order_id):
     data = get_object_or_404(Order, pk=order_id)
     form = UpdateOrderForm(instance=data)
     form2 = ProductForm()
-    formset = ProductFormSet(queryset=data.product.all())
     helper = ProductFormSetHelper()
 
     if request.method == 'POST':
-        form = AddOrderForm(request.POST, instance=data)
+        form = UpdateOrderForm(request.POST, instance=data)
         form2 = ProductForm(request.POST, request.FILES)
-        formset = ProductFormSet(request.POST, request.FILES)
 
         # Проверяем валидность форм
         if form.is_valid():
+            print('форма1 валидна')
             form.save()
 
         if form2.is_valid():
+            print('форма2 валидна')
             form2.save()
             product = Product.objects.get(id=form2.instance.id)
             data.product.add(product)
             data.save()
-
-        if formset.is_valid():
-            formset.save()
         return redirect('core:upd', order_id=order_id)
 
     context = {
@@ -145,7 +142,6 @@ def update(request, order_id):
         'title': data.marker,
         'order_form': form,
         'product_form': form2,
-        'formset': formset,
         'helper': helper,
         'products': []
 
@@ -267,12 +263,7 @@ class UpdateDelivery(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Доставка'
-        # data = list(Product.objects.filter(paid=True, arrive=True).values('id', 'full_price'))
-        # json_data = json.dumps(data, ensure_ascii=True, default=float)
-        # context['json_products'] = json_data
-        # print(context['json_products'])
         context['data'] = [{'id': i.id, 'full_price': i.full_price} for i in context['form'].fields['product'].queryset]
-        # print([{'id': i.id, 'full_price': i.full_price} for i in context['form'].fields['product'].queryset])
         return context
 
 
@@ -280,17 +271,52 @@ def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
 
-# class AjaxHandlerView(View):
-#     def get(self, request):
-#         text = request.GET.get('number')
-#         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-#             print(text)
-#             return JsonResponse({'seconds': text}, status=200)
-#         return render(request, 'core/updatedelivery.html')
-#
-#     def post(self, request):
-#         text = request.GET.get('number')
-#         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-#             print(text)
-#             return JsonResponse({'seconds': text}, status=200)
-#         return render(request, 'core/updatedelivery.html')
+class ProductStatus(FilterView):
+    model = Product
+    paginate_by = 16
+    template_name = 'core/productstatus.html'
+    filterset_class = ProductFilter
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = ProductFilter.form
+        context['title'] = 'Статус товаров'
+        return context
+
+
+def change_status_paid(request):
+    """Проверка доступности логина"""
+    print('Отработал paid')
+    product_id = request.POST.get("id")
+    product = Product.objects.get(pk=product_id)
+    checked = request.POST.get("checked")
+    if checked =='true':
+        product.paid = True
+    else:
+        product.paid = False
+    product.save()
+
+
+    response = {
+        'OK': 200
+    }
+    return JsonResponse(response)
+
+
+def change_status_arrive(request):
+    """Проверка доступности логина"""
+    print('Отработал arrive')
+    product_id = request.POST.get("id")
+    product = Product.objects.get(pk=product_id)
+    checked = request.POST.get("checked")
+    if checked =='true':
+        product.arrive = True
+    else:
+        product.arrive = False
+    product.save()
+
+
+    response = {
+        'OK': 200
+    }
+    return JsonResponse(response)

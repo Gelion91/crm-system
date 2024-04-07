@@ -12,5 +12,26 @@
     </form>
     </div>
 {% endif %}
-<script src="{% static 'core/js/main.js' %}" defer></script>
+<script defer>
+window.onload = function () {
+    const Delivery_form = document.getElementById('delivery-form')
+    const volume = document.getElementById('id_volume')
+    const weight = document.getElementById('id_weight')
+    const density = document.getElementById('id_density')
+    const csrf = document.getElementsByName('csrfmiddlewaretoken')
+
+    volume.addEventListener('input', ()=>{
+                    const volume_data = volume.value
+                    console.log(volume_data)
+                    density.value = parseFloat((weight.value / volume.value).toFixed(2))
+    })
+    weight.addEventListener('input', ()=>{
+                    const volume_data = volume.value
+                    console.log(volume_data)
+                    density.value = parseFloat((weight.value / volume.value).toFixed(2))
+    })
+
+};
+
+</script>
 {% endblock %}
