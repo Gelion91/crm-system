@@ -1,7 +1,7 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-<div class="row" style="background-color:#adbbcc; padding:5%;">
+<div class="row secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
 <form method="post">{% csrf_token %}
     <p>Вы уверены, что хотите удалить заказ"{{ object }}"?</p>
     {{ form }}

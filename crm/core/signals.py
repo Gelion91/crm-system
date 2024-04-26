@@ -35,12 +35,25 @@ def model_post_save(sender, instance, **kwargs):
 @receiver(pre_delete, sender=Product)
 def model_pre_delete(sender, instance, **kwargs):
     product = Product.objects.get(pk=instance.pk)
-    order = Order.objects.get(product=product)
-    order.product.remove(product)
-    total_price = sum([i.full_price for i in order.product.all()])
-    order.total_price = total_price
-    order.total_price_rub = order.total_price * order.exchange_for_client
-    order.save()
+    if Order.objects.filter(product=product).count() == 0:
+        pass
+    else:
+        order = Order.objects.get(product=product)
+        order.product.remove(product)
+        total_price = sum([i.full_price for i in order.product.all()])
+        order.total_price = total_price
+        order.total_price_rub = order.total_price * order.exchange_for_client
+        order.save()
+
+
+@receiver(pre_delete, sender=Order)
+def model_pre_delete(sender, instance, **kwargs):
+    order = Order.objects.get(pk=instance.pk)
+    if not order.product:
+        pass
+    else:
+        for product in order.product.all():
+            product.delete()
 
 
 class ReadOnlyException(Exception):
