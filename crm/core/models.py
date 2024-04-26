@@ -48,7 +48,7 @@ class Product(models.Model):
 
 
 class ImagesProduct(models.Model):
-    product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='images/', validators=[validate_image_file_extension])
 
     class Meta:
@@ -58,6 +58,19 @@ class ImagesProduct(models.Model):
 
     def get_absolute_url(self):
         return reverse('core', kwargs={'image_id': self.pk})
+
+
+class PackedImagesProduct(models.Model):
+    product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE, related_name='packed_images')
+    image = models.ImageField(upload_to='packed_images/', validators=[validate_image_file_extension])
+
+    class Meta:
+        verbose_name = 'Изображение упакованного продукта'
+        verbose_name_plural = 'Изображения упакованного продукта'
+        ordering = ['-id']
+
+    def get_absolute_url(self):
+        return reverse('core', kwargs={'packed_image_id': self.pk})
 
 
 class Clients(models.Model):
@@ -94,7 +107,7 @@ class Clients(models.Model):
 
 class Order(models.Model):
     REGISTRATION = "Оформление"
-    PAYMENT = "На оплату"
+    PAYMENT = "Ожидает отправки"
     COMPLETE = "Завершен"
 
     ALFA_BANK = "Альфа-банк"
@@ -106,7 +119,7 @@ class Order(models.Model):
 
     ORDER_CHOICES = [
         (REGISTRATION, "Оформление"),
-        (PAYMENT, "Оплата"),
+        (PAYMENT, "Ожидает отправки"),
         (COMPLETE, "Выполнен"),
     ]
 
@@ -185,23 +198,25 @@ class Logistics(models.Model):
     SIMPLY = "Простая"
     SHEATHING = "Обрешетка"
     BOX = "Ящик"
+    BAG = "Скотч-мешок-скотч"
 
     PACKAGE_CHOICES = [
         (SIMPLY, "Простая"),
+        (BAG, "Скотч-мешок-скотч"),
         (SHEATHING, "Обрешетка"),
         (BOX, "Ящик"),
     ]
 
-    UNDELIVERED = "undelivered"
-    ARRIVED = "arrived"
-    IN_MOSCOW = "in_moscow"
-    DELIVERED = "delivered"
+    AUTO = "Авто"
+    AUTO_EXPRESS = "Авто-экспресс"
+    RAIL = "Жд"
+    AVIA = "Авиа"
 
     DELIVERY_CHOICES = [
-        (UNDELIVERED, "Не отправлено"),
-        (ARRIVED, "Отправлено"),
-        (IN_MOSCOW, "В Москве"),
-        (DELIVERED, "Доставлено клиенту"),
+        (AUTO, "Авто"),
+        (AUTO_EXPRESS, "Авто-экспресс"),
+        (RAIL, "Жд"),
+        (AVIA, "Авиа"),
     ]
 
     marker = models.CharField(max_length=100, verbose_name='Маркировка груза')
@@ -212,18 +227,23 @@ class Logistics(models.Model):
     weight = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Вес, кг.', default=0)
     volume = models.DecimalField(decimal_places=3, max_digits=100, verbose_name='Объем', default=0)
     density = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Плотность', default=0)
-    tariff = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Тариф', default=0)
+    tariff = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость доставки $', default=0)
     order_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость товаров в заказах ¥',
                                       default=0)
-    insurance = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Страховка', default=0)
+    insurance = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость страховки $', default=0)
     package = models.CharField(max_length=100, choices=PACKAGE_CHOICES, default='simply', null=False,
                                verbose_name='Упаковка')
-    package_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость упаковки', default=0)
+    extra_package = models.TextField(max_length=500, null=True, verbose_name='Примечание по упаковке', blank=True)
+    package_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость упаковки $', default=0)
     full_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Общая стоимость', default=0)
-    delivery = models.CharField(max_length=100, choices=DELIVERY_CHOICES, default='undelivered', null=False,
-                                verbose_name='Статус отправления')
+    delivery = models.CharField(max_length=100, choices=DELIVERY_CHOICES, default='Авто', null=False,
+                                verbose_name='Тип отправления')
+    places = models.IntegerField(verbose_name='Количество мест', default=1)
     date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     date_update = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
+    first_step = models.BooleanField(verbose_name='Отправлен', default=False)
+    second_step = models.BooleanField(verbose_name='В Москве', default=False)
+    third_step = models.BooleanField(verbose_name='Получен клиентом', default=False)
 
     class Meta:
         verbose_name = 'Доставка'
@@ -246,3 +266,16 @@ class Logistics(models.Model):
 
     def get_absolute_url(self):
         return reverse('logistic', kwargs={'logistic_id': self.pk})
+
+
+class ImagesLogistics(models.Model):
+    logistic = models.ForeignKey(Logistics, default=None, on_delete=models.CASCADE, related_name='logistic_images')
+    image = models.ImageField(upload_to='logistic_images/', validators=[validate_image_file_extension])
+
+    class Meta:
+        verbose_name = 'Изображение упакованного груза'
+        verbose_name_plural = 'Изображения упакованного груза'
+        ordering = ['-id']
+
+    def get_absolute_url(self):
+        return reverse('core', kwargs={'logistic_image_id': self.pk})

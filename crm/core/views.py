@@ -7,6 +7,7 @@ from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.generic import CreateView, DeleteView, UpdateView, ListView
 from django.views.generic.base import ContextMixin
+from django.views.generic.edit import FormMixin
 from django_filters.views import FilterView
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 
@@ -14,8 +15,9 @@ from time import time
 
 from core.filters import OrderFilter, ProductFilter
 from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
-    ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm, ProductImageInlineFormset, DeliveryForm
-from core.models import Order, Product, Logistics, ImagesProduct
+    ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm, ProductImageInlineFormset, PackedImageForm, \
+    LogisticImageForm
+from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics
 
 
 class CustomHtmxMixin:
@@ -147,7 +149,7 @@ def update(request, order_id):
 
     }
     for prod in data.product.all():
-        context['products'].append({'product': prod, 'images': prod.imagesproduct_set.all()})
+        context['products'].append({'product': prod, 'images': prod.images.all()})
     return render(request, 'core/update_order.html', context)
 
 
@@ -170,7 +172,7 @@ class UpdateProduct(UpdateView):
     template_name = 'core/edit_product.html'
 
     def get_success_url(self):
-        return reverse('core:upd_product', kwargs={'product_id': self.object.pk})
+        return reverse('core:upd', kwargs={'order_id': Order.objects.get(product=self.object).pk})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -209,8 +211,7 @@ class DeleteProduct(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         return context
 
     def get_success_url(self):
-        order = Order.objects.get(product=self.object.pk)
-        return reverse('core:upd', kwargs={'order_id': order.pk})
+        return self.request.META.get('HTTP_REFERER')
 
 
 class DeleteImage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
@@ -224,7 +225,6 @@ class DeleteImage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         return context
 
     def get_success_url(self):
-
         return reverse('core:upd_product', kwargs={'product_id': self.object.product.pk})
 
 
@@ -267,35 +267,53 @@ class UpdateDelivery(UpdateView):
         return context
 
 
-def is_ajax(request):
-    return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
-
-
-class ProductStatus(FilterView):
+class ProductStatus(FormMixin, FilterView):
     model = Product
     paginate_by = 16
     template_name = 'core/productstatus.html'
     filterset_class = ProductFilter
+    form_class = PackedImageForm
+
+    def get_queryset(self):
+        return Product.objects.filter(logistics=None)
+
+    def get_success_url(self):
+        return reverse('core:status_product')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = ProductFilter.form
+        context['image_form'] = PackedImageForm
         context['title'] = 'Статус товаров'
         return context
+
+    def post(self, request, *args, **kwargs):
+        image_form = PackedImageForm(request.POST or None, request.FILES or None)
+        prod_id = request.POST.get('id')
+        if image_form.is_valid():
+            return self.form_valid(image_form, prod_id)
+        else:
+            return self.form_invalid(image_form)
+
+    def form_valid(self, form, prod_id):
+        """If the form is valid, save the associated model."""
+        files = form.cleaned_data["image"]
+        for img in files:
+            img = PackedImagesProduct(product=Product.objects.get(pk=prod_id), image=img)
+            img.save()
+        return super().form_valid(form)
 
 
 def change_status_paid(request):
     """Проверка доступности логина"""
-    print('Отработал paid')
     product_id = request.POST.get("id")
     product = Product.objects.get(pk=product_id)
     checked = request.POST.get("checked")
-    if checked =='true':
+    if checked == 'true':
         product.paid = True
     else:
         product.paid = False
     product.save()
-
 
     response = {
         'OK': 200
@@ -305,18 +323,122 @@ def change_status_paid(request):
 
 def change_status_arrive(request):
     """Проверка доступности логина"""
-    print('Отработал arrive')
     product_id = request.POST.get("id")
     product = Product.objects.get(pk=product_id)
     checked = request.POST.get("checked")
-    if checked =='true':
+    if checked == 'true':
         product.arrive = True
     else:
         product.arrive = False
     product.save()
 
+    response = {
+        'OK': 200
+    }
+    return JsonResponse(response)
+
+
+def get_price(request):
+    product_id = request.POST.get("id")
+    product = Product.objects.get(pk=product_id)
+    response = {
+        'price': product.full_price
+    }
+
+    return JsonResponse(response)
+
+
+# Временно не работает, отключил в productstatus.html
+
+def save_image(request):
+    print('Работает')
+    image = request.FILES.get('image')
+
+    print(image)
+    product_id = request.POST.get("id")
+    print(product_id)
+    product = Product.objects.get(pk=product_id)
+    img = PackedImagesProduct(product=product, image=image)
+    img.save()
+
+    response = {
+        'image': img.image.url,
+        'product': product_id
+    }
+
+    return HttpResponse(json.dumps(response), content_type='application/json')
+
+
+class DeliveryStatus(FormMixin, FilterView):
+    model = Logistics
+    paginate_by = 16
+    template_name = 'core/status_delivery.html'
+    filterset_class = ProductFilter
+    form_class = LogisticImageForm
+
+    def get_queryset(self):
+        return Logistics.objects.all()
+
+    def get_success_url(self):
+        return reverse('core:status_delivery')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = ProductFilter.form
+        context['image_form'] = LogisticImageForm
+        context['title'] = 'Статус грузов'
+        return context
+
+    def post(self, request, *args, **kwargs):
+        image_form = LogisticImageForm(request.POST or None, request.FILES or None)
+        logistic_id = request.POST.get('id')
+        if image_form.is_valid():
+            return self.form_valid(image_form, logistic_id)
+        else:
+            return self.form_invalid(image_form)
+
+    def form_valid(self, form, logistic_id):
+        """If the form is valid, save the associated model."""
+        files = form.cleaned_data["image"]
+        for img in files:
+            img = ImagesLogistics(logistic=Logistics.objects.get(pk=logistic_id), image=img)
+            img.save()
+        return super().form_valid(form)
+
+
+def change_logistic_status(request):
+    """Проверка доступности логина"""
+    logistic_id = request.POST.get("id")
+    logistic = Logistics.objects.get(pk=logistic_id)
+    checked = request.POST.get("checked")
+    attribut = request.POST.get("attribut").split('-')[0]
+    if checked == 'true':
+        result = True
+    else:
+        result = False
+    if attribut == 'first_step':
+        logistic.first_step = result
+    elif attribut == 'second_step':
+        logistic.second_step = result
+    else:
+        logistic.third_step = result
+    logistic.save()
 
     response = {
         'OK': 200
     }
     return JsonResponse(response)
+
+
+class DeleteDelivery(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Logistics
+    permission_required = 'core.delete_logistics'
+    context_object_name = 'logistic'
+    pk_url_kwarg = "logistic_id"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+    def get_success_url(self):
+        return self.request.META.get('HTTP_REFERER')

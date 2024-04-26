@@ -7,8 +7,9 @@
       <div class="col"><p style="font-size: calc(16px + 8 * (100vw / 1280)); font-weight: 700;">{{ object.name }} {{ object.surname }}</p></div>
       <div class="col"><p style="font-size: calc(16px + 8 * (100vw / 1280)); font-weight: 700;">Остаток на счете: {{ object.deposit }}</p></div>
   </div>
-  <p><strong>Телефон: </strong>{{ object.phone }}</p>
-  <a href="{% url 'clients:upd' object.pk %}">Изменить</a>
+  <div class="col"><p><strong>Телефон: </strong>{{ object.phone }}</p></div>
+        <div class="col messanger"><p>{{object.messanger}}</p></div>
+  <div class="col-3" style="margin-top:5%;"><a href="{% url 'clients:upd' object.pk %}" class="btn_edit">Изменить</a></div>
     {% if comments %}
           {% for comment in comments %}
             <div class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">

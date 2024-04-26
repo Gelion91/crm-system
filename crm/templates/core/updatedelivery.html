@@ -19,6 +19,7 @@ window.onload = function () {
     const weight = document.getElementById('id_weight')
     const density = document.getElementById('id_density')
     const csrf = document.getElementsByName('csrfmiddlewaretoken')
+    const order_price = document.getElementById('id_order_price')
 
     volume.addEventListener('input', ()=>{
                     const volume_data = volume.value
@@ -32,6 +33,34 @@ window.onload = function () {
     })
 
 };
+
+
+    $('[name="product"]').click(function() {
+    var checked_paid = $(this).is(':checked');
+    const order_price = document.getElementById('id_order_price')
+    $.ajax({
+
+        type: "POST",
+        url: "{% url 'core:get_price' %}",
+        data: { checked: checked_paid,
+                id: $(this).attr('value'),
+                csrfmiddlewaretoken: '{{ csrf_token }}'},
+
+        success: function(response) {
+               if (checked_paid) {
+                      order_price.value = parseFloat(parseFloat(order_price.value) + parseFloat(response.price)).toFixed(2)
+                    } else {
+                      order_price.value = parseFloat(parseFloat(order_price.value) - parseFloat(response.price)).toFixed(2)
+                    }
+        },
+
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+
+
 
 </script>
 {% endblock %}

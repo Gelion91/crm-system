@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 {% load url_tag %}
-  {% block title %}<title>CRM - {{ title }}</title>{% endblock %}
+  {% block title %}<title>{{ title }}</title>{% endblock %}
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -27,6 +27,9 @@
         }
       }
     </style>
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'core/image/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'core/image/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'core/image/favicon-16x16.png' %}">
 </head>
 <body style="font-family: 'Oswald';">
   <div class="container-fluid gut" style="padding-left:0;">
@@ -70,7 +73,11 @@
               {% url m.url_name as url %}
               {% if url in request.path %}
               {% for sub in m.submenu %}
-                <li class="list-group-item"><a class="dropdown-item" href="{% url sub.url_name %}"><span>{{ sub.title }}</span></a></li>
+              {% if sub.path in request.path %}
+                <li class="list-group-item active"><a class="dropdown-item" href="{% url sub.url_name %}"><span>{{ sub.title }}</span></a></li>
+              {% else %}
+              <li class="list-group-item"><a class="dropdown-item" href="{% url sub.url_name %}"><span>{{ sub.title }}</span></a></li>
+              {% endif %}
               {% endfor %}
               {% endif %}
           {% endfor %}

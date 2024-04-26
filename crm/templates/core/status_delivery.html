@@ -1,0 +1,246 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+
+
+
+{% block content %}
+
+
+    <div class="row" >
+
+        <div class="col-lg-12 secondcolor pad_list" style="background-color:#f5f5f5;">
+            <br>
+                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Фильтры</button>
+                <div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
+
+                    <div class="offcanvas-header">
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+                    </div>
+
+                    <div class="offcanvas-body">
+                         <form action="" method="get">
+                            {{ filter.form|crispy }}
+                         <button class="btn btn-outline-secondary" type="submit">Поиск</button>
+                         </form>
+                    </div>
+
+                </div>
+            <hr>
+        {% if object_list %}
+        <div class="row" style="margin-top:1%; margin-bottom:1%;">
+            <div class="col center"><p class="p-size">Маркировка</p></div>
+            <div class="col center"><p class="p-size">Отправлен</p></div>
+            <div class="col center"><p class="p-size">В Москве</p></div>
+            <div class="col center"><p class="p-size">Прибыл клиенту</p></div>
+            <div class="col center"><p class="p-size"></p></div>
+        </div>
+
+            <div class="col accordion accordion-flush" id="accordionFlushExample">
+          {% for obj in object_list %}
+            <div class="row list-height" style="font-weight: 700; border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
+                <div class="col center"><p>{{obj.marker}}</p></div>
+
+                <div class="col checkbox-wr"><input id="first_step-{{obj.pk}}" name="{{obj.pk}}" class="first_step checkbox_margin" type="checkbox" {% if obj.first_step %} checked="true" {% endif %}>
+                    <label for="first_step-{{obj.pk}}">
+                        <div class="tick_mark"></div>
+                    </label>
+                </div>
+
+                <div class="col checkbox-wr"><input id="second_step-{{obj.pk}}" name="{{obj.pk}}" class="second_step checkbox_margin" type="checkbox" {% if obj.second_step %} checked="true" {% endif %}>
+                    <label for="second_step-{{obj.pk}}">
+                        <div class="tick_mark"></div>
+                    </label>
+                </div>
+
+                <div class="col checkbox-wr"><input id="third_step-{{obj.pk}}" name="{{obj.pk}}" class="third_step checkbox_margin checkbox-wrapper-26" type="checkbox" {% if obj.third_step %} checked="true" {% endif %}>
+                    <label for="third_step-{{obj.pk}}">
+                        <div class="tick_mark"></div>
+                    </label>
+                </div>
+
+                <div class="col">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" style="background-color:white;" type="button" data-bs-toggle="collapse" data-bs-target="#acc{{forloop.counter}}" aria-expanded="false" aria-controls="flush-collapseOne"></button>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+
+        <div id="acc{{forloop.counter}}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+              <div class="accordion-body">
+                  <p>Фотографии товара у продавца</p>
+                  {% for img in obj.logistic_images.all %}
+                  <img src="{{ img.url }}" class="image-detail">
+                    {% load thumbnail %}
+                        {% thumbnail img.image "100x100" as im %}
+                    <!-- Modal -->
+                            <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img{{forloop.counter}}_{{obj.pk}}">
+                                  <img src="{{ im.url }}" class="image-detail">
+                            </a>
+                                        <div class="modal fade" id="img{{forloop.counter}}_{{obj.pk}}" tabindex="-1" aria-labelledby="img{{forloop.counter}}" aria-hidden="true">
+                                          <div class="modal-dialog modal-xl">
+                                            <div class="modal-content">
+                                              <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="exampleModalLabel">{{img.product}}</h1>
+                                              </div>
+                                              <div class="modal-body">
+                                                <img src="{{ img.image.url }}">
+                                              </div>
+                                              <div class="modal-footer">
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                        {% endthumbnail %}
+                  {% endfor %}
+                  <hr>
+
+                    <form id="image_form_{{obj.pk}}" class="row" name="{{obj.pk}}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type='hidden' value='{{obj.pk}}' name='id'>
+                        {{ image_form | crispy}}
+                        <button class="btn btn-outline-secondary" type="submit">Сохранить</button>
+                     </form>
+<!--                  <form id="{{obj.pk}}" class="row packed_image" name="packed_image" enctype="multipart/form-data">-->
+<!--                      <label for="packed_images">Добавить изображение со склада:</label>-->
+<!--                        <input type="file" id="packed_images" name="pack_img" accept="image/png, image/jpeg">-->
+<!--                      <button id="button_image" type="submit" class="btn btn-success">Сохранить</button>-->
+<!--                  </form>-->
+                  <hr>
+                  <div class="row">
+                    <div class="col">
+                        <a href="{% url 'core:update_delivery' obj.pk %}" class="btn_edit">Редактировать</a>
+                    </div>
+                    <div class="col">
+                        <form method="POST" action="{% url 'core:delete_logistic' obj.pk %}" class="form">
+                            {% csrf_token %}<input type="submit" class="btn_delete" value="Удалить">
+                        </form>
+                    </div>
+                  </div>
+              </div>
+            </div>
+            {% endfor %}
+                </div>
+        {% else %}
+    <h3>Нет товаров.</h3>
+    </div>
+    </div>
+    {% endif %}
+
+
+<script>
+
+$('.first_step').click(function() {
+var checked_first_step = $(this).is(':checked');
+console.log(checked_first_step);
+console.log($(this).attr('id'))
+console.log($(this).attr('name'))
+
+    $.ajax({
+
+        type: "POST",
+        url: "{% url 'core:change_logistic_status' %}",
+        data: { checked: checked_first_step,
+                id: $(this).attr('name'),
+                attribut: $(this).attr('id'),
+                csrfmiddlewaretoken: '{{ csrf_token }}'},
+        success: function(response) {
+        console.log(response)
+        console.log('it work');
+        },
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+
+$('.second_step').click(function() {
+var checked_first_step = $(this).is(':checked');
+console.log(checked_first_step);
+console.log($(this).attr('id'))
+console.log($(this).attr('name'))
+
+    $.ajax({
+
+        type: "POST",
+        url: "{% url 'core:change_logistic_status' %}",
+        data: { checked: checked_first_step,
+                id: $(this).attr('name'),
+                attribut: $(this).attr('id'),
+                csrfmiddlewaretoken: '{{ csrf_token }}'},
+        success: function(response) {
+        console.log(response)
+        console.log('it work');
+        },
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+
+$('.third_step').click(function() {
+var checked_first_step = $(this).is(':checked');
+console.log(checked_first_step);
+console.log($(this).attr('id'))
+console.log($(this).attr('name'))
+
+    $.ajax({
+
+        type: "POST",
+        url: "{% url 'core:change_logistic_status' %}",
+        data: { checked: checked_first_step,
+                id: $(this).attr('name'),
+                attribut: $(this).attr('id'),
+                csrfmiddlewaretoken: '{{ csrf_token }}'},
+        success: function(response) {
+        console.log(response)
+        console.log('it work');
+        },
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+
+<!--$('.packed_image').on('submit', function(e)-->
+<!--    {-->
+<!--        e.preventDefault();-->
+<!--        var $form = $(this);-->
+<!--        var data = {-->
+<!--            image: $form.find("[name='pack_img']").prop('files')[0],-->
+<!--            id: $form.attr('id'),-->
+<!--        }-->
+<!--        console.log(data)-->
+<!--        var fileData = $form.find("[name='pack_img']").prop('files')[0];-->
+<!--        var prod_id = $form.attr('id')-->
+
+<!--        var formData = new FormData();-->
+<!--        formData.append('image', fileData);-->
+<!--        formData.append('id', prod_id);-->
+
+<!--        var token = '{{ csrf_token }}';-->
+<!--        $.ajax({-->
+<!--            cache: false,-->
+<!--            contentType: false,-->
+<!--            processData: false,-->
+<!--            type        : 'POST',-->
+<!--            url         : "{% url 'core:save_image' %}",-->
+<!--            data: formData,-->
+<!--            headers: {'X-CSRFToken': token},-->
+
+<!--            success:function(response){-->
+<!--            $($form)[0].reset();-->
+<!--                console.log([response])-->
+<!--            var images = [-->
+<!--            {% for item in response %}-->
+<!--                item,-->
+<!--            {% endfor %}-->
+<!--  ]-->
+<!--            console.log(response.image)-->
+<!--            $('.accordion-body').append('<img class="IMG show" src="' + response.image + '"/>');-->
+<!--          },-->
+<!--    });-->
+<!--});-->
+  </script>
+{% endblock %}

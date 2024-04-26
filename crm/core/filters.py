@@ -29,11 +29,28 @@ class OrderFilter(django_filters.FilterSet):
 
 
 class ProductFilter(django_filters.FilterSet):
+    CHOICES = (
+        ('all', 'Все'),
+        ('arrived', 'Отправленные'),
+        ('waited', 'Ожидают отправки')
+    )
 
     marker = django_filters.CharFilter(label='Поиск по маркировке', method='filter_by_marker')
+    logist = django_filters.ChoiceFilter(label='Показать', choices=CHOICES, method='filter_by_status')
 
     def filter_by_marker(self, queryset, name, value):
         return queryset.filter(product_marker__icontains=value)
+
+    def filter_by_status(self, queryset, name, value):
+        if value == 'all':
+            queryset = Product.objects.all()
+            return queryset
+        elif value == 'arrived':
+            queryset = Product.objects.filter(logistics__isnull=False)
+            return queryset
+        else:
+            queryset = Product.objects.filter(logistics=None)
+            return queryset
 
     class Meta:
         model = Product

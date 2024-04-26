@@ -5,20 +5,20 @@ from core.models import Order, Clients
 
 def menu_manager(request):
     menu = [{'title': 'клиенты', 'url_name': 'clients:home',
-             'submenu': [{'title': 'Добавить клиента', 'url_name': 'clients:addclient'},
-                         {'title': 'Активные клиенты', 'url_name': 'clients:active'},
-                         {'title': 'Мои клиенты', 'url_name': 'clients:my_clients'},
-                         {'title': 'Надо позвонить', 'url_name': 'clients:home'}]},
+             'submenu': [{'title': 'Добавить клиента', 'url_name': 'clients:addclient', 'path': 'clients/addclient/'},
+                         {'title': 'Активные клиенты', 'url_name': 'clients:active', 'path': 'clients/active_clients'},
+                         {'title': 'Мои клиенты', 'url_name': 'clients:my_clients', 'path': 'clients/my_clients'}]},
 
             {'title': 'Заказы', 'url_name': 'core:home',
-             'submenu': [{'title': 'Оформить заказ', 'url_name': 'core:addorder'},
-                         {'title': 'Активные заказы', 'url_name': 'core:active'},
-                         {'title': 'Ожидают оплаты', 'url_name': 'core:on_pay'},
-                         {'title': 'Завершенные заказы', 'url_name': 'core:finish'}]},
+             'submenu': [{'title': 'Оформить заказ', 'url_name': 'core:addorder', 'path': 'orders/addorder/'},
+                         {'title': 'Активные заказы', 'url_name': 'core:active', 'path': 'orders/active/'},
+                         {'title': 'Ожидают отправки', 'url_name': 'core:on_pay', 'path': 'orders/on_pay/'},
+                         {'title': 'Завершенные заказы', 'url_name': 'core:finish', 'path': 'orders/finish/'}]},
 
             {'title': 'Доставка', 'url_name': 'core:logistic',
-             'submenu': [{'title': 'Оформить доставку', 'url_name': 'core:add_delivery'},
-                         {'title': 'Статус товаров', 'url_name': 'core:status_product'},
+             'submenu': [{'title': 'Оформить доставку', 'url_name': 'core:add_delivery', 'path': 'logistic/add_delivery'},
+                         {'title': 'Статус товаров', 'url_name': 'core:status_product', 'path': 'logistic/sp'},
+                         {'title': 'Статус грузов', 'url_name': 'core:status_delivery', 'path': 'logistic/status_delivery'},
                          ]},
 
             {'title': 'Панель управления', 'url_name': 'dashboard:home',
