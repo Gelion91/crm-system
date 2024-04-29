@@ -63,7 +63,7 @@ class AddClient(LoginRequiredMixin, CreateView):
         return context
 
 
-class UpdateClient(UpdateView):
+class UpdateClient(LoginRequiredMixin, UpdateView):
     model = Clients
     form_class = AddClientForm
     pk_url_kwarg = 'client_id'
@@ -73,7 +73,7 @@ class UpdateClient(UpdateView):
         return reverse('clients:home')
 
 
-class ClientDetail(FormMixin, DetailView):
+class ClientDetail(LoginRequiredMixin, FormMixin, DetailView):
     template_name = 'clients/detailclient.html'
     model = Clients
     pk_url_kwarg = 'client_id'

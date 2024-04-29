@@ -1,13 +1,15 @@
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncDay
 from django.shortcuts import render
-
 from core.models import Order
+from crm.settings import LOGIN_URL
 from dashboard.filters import OrderChartFilter
 """.values(day=TruncDay('date_create')).annotate(Count('id'), Sum('total_price_rub'))"""
 
 
+@login_required(login_url=LOGIN_URL)
 def chart(request):
     filter = OrderChartFilter(request.GET, queryset=Order.objects.all())
     context = {'users': [

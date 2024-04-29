@@ -18,6 +18,7 @@ from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
     ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm, ProductImageInlineFormset, PackedImageForm, \
     LogisticImageForm
 from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics
+from crm.settings import LOGIN_URL
 
 
 class CustomHtmxMixin:
@@ -32,7 +33,7 @@ class CustomHtmxMixin:
         return super().get_context_data(**kwargs)
 
 
-class OrderListView(FilterView):
+class OrderListView(LoginRequiredMixin, FilterView):
     model = Order
     paginate_by = 16
     template_name = 'core/order_list2.html'
@@ -114,7 +115,7 @@ def _get_form(request, formcls, prefix):
     return formcls(data, prefix=prefix)
 
 
-@login_required(login_url='login.LoginUser')
+@login_required(login_url=LOGIN_URL)
 @permission_required('core.update_order')
 def update(request, order_id):
     data = get_object_or_404(Order, pk=order_id)
@@ -165,7 +166,7 @@ class AddProduct(LoginRequiredMixin, CreateView):
         return context
 
 
-class UpdateProduct(UpdateView):
+class UpdateProduct(LoginRequiredMixin, UpdateView):
     model = Product
     form_class = ProductForm
     pk_url_kwarg = 'product_id'
@@ -228,7 +229,7 @@ class DeleteImage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         return reverse('core:upd_product', kwargs={'product_id': self.object.product.pk})
 
 
-class DeliveryListView(FilterView):
+class DeliveryListView(LoginRequiredMixin, FilterView):
     model = Logistics
     paginate_by = 16
     template_name = 'core/delivery_list.html'
@@ -251,7 +252,7 @@ class AddDelivery(LoginRequiredMixin, CreateView):
         return context
 
 
-class UpdateDelivery(UpdateView):
+class UpdateDelivery(LoginRequiredMixin, UpdateView):
     model = Logistics
     form_class = DeliveryAddForm
     pk_url_kwarg = 'logistic_id'
@@ -267,7 +268,7 @@ class UpdateDelivery(UpdateView):
         return context
 
 
-class ProductStatus(FormMixin, FilterView):
+class ProductStatus(LoginRequiredMixin, FormMixin, FilterView):
     model = Product
     paginate_by = 16
     template_name = 'core/productstatus.html'
@@ -369,7 +370,7 @@ def save_image(request):
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 
-class DeliveryStatus(FormMixin, FilterView):
+class DeliveryStatus(LoginRequiredMixin, FormMixin, FilterView):
     model = Logistics
     paginate_by = 16
     template_name = 'core/status_delivery.html'
