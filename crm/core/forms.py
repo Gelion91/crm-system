@@ -10,23 +10,25 @@ from django.forms import ModelForm, CheckboxSelectMultiple, SelectMultiple, Text
     ChoiceField, RadioSelect
 from django.utils.html import format_html
 
-from core.models import Order, Clients, Product, ImagesProduct, Logistics, PackedImagesProduct
+from core.models import Order, Clients, Product, ImagesProduct, Logistics, PackedImagesProduct, Account
 from django import forms
 
 
 class AddOrderForm(ModelForm):
     def __init__(self, *args, **kwargs):
+        self.current_user = kwargs.pop('current_user', None)
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'id-exampleForm'
         self.helper.form_class = 'whiteForms'
         self.helper.form_method = 'post'
         self.helper.form_action = 'submit_survey'
+        self.fields["account"].queryset = Account.objects.filter(user=self.current_user)
         self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn-secondary'))
 
     class Meta:
         model = Order
-        fields = ['client', 'marker']
+        fields = ['client', 'marker', 'account']
 
 
 class UpdateOrderForm(ModelForm):
@@ -37,6 +39,7 @@ class UpdateOrderForm(ModelForm):
         self.helper.form_class = 'whiteForms'
         self.helper.form_method = 'post'
         self.helper.form_action = 'submit_survey'
+        self.fields["account"].queryset = Account.objects.filter(user=self.instance.owner)
         self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn-secondary'))
         self.fields["total_price"].disabled = True
         self.fields["total_price_rub"].disabled = True
@@ -83,7 +86,7 @@ class ProductForm(ModelForm):
     class Meta:
         model = Product
         fields = '__all__'
-        exclude = ('full_price', 'full_price_company', 'DELETE', 'logistics', 'margin_product')
+        exclude = ('full_price', 'full_price_company', 'DELETE', 'logistics', 'margin_product', 'owner')
 
     def clean_image(self):
         data = self.cleaned_data['image']
@@ -198,6 +201,7 @@ class DeliveryAddForm(ModelForm):
             (RAIL, "Жд"),
             (AVIA, "Авиа"),
         ]
+        self.current_user = kwargs.pop('current_user', None)
         super(DeliveryAddForm, self).__init__(*args, **kwargs)
         qs1 = Product.objects.filter(paid=True, arrive=True, logistics=None)
         if self.initial:
@@ -217,7 +221,10 @@ class DeliveryAddForm(ModelForm):
         self.fields['product'].widget = CheckboxSelectMultiple(choices=self.fields["product"].queryset)
         # self.fields['product'].widget = FilteredSelectMultiple("Товары", is_stacked=False)
         self.fields['delivery'].widget = RadioSelect(choices=DELIVERY_CHOICES)
-        self.fields['product'].queryset = queryset
+        if self.current_user.is_superuser or self.current_user.groups.filter(name='logist'):
+            self.fields['product'].queryset = queryset
+        else:
+            self.fields['product'].queryset = queryset.filter(owner=self.current_user)
         self.fields['product'].label = ''
         self.fields['product'].required = False
         self.fields["product"].widget.attrs.update({"class": "form-check-inline"})
@@ -247,7 +254,7 @@ class DeliveryAddForm(ModelForm):
     class Meta:
         model = Logistics
         fields = '__all__'
-        exclude = ('height', 'width', 'lenght', 'full_price', 'first_step', 'second_step', 'third_step')
+        exclude = ('height', 'width', 'lenght', 'full_price', 'first_step', 'second_step', 'third_step', 'owner')
 
 
 
@@ -273,3 +280,17 @@ def render_js(cls):
 class LogisticImageForm(forms.Form):
     image = MultipleFileField(label='Добавить фото груза')
 
+
+class AddAccountForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'whiteForms'
+        self.helper.form_method = 'post'
+        self.helper.form_action = 'submit_survey'
+        self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn-secondary'))
+
+    class Meta:
+        model = Account
+        fields = '__all__'

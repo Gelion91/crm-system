@@ -41,7 +41,7 @@
                         <div class="tick_mark"></div>
                     </label>
                 </div>
-                <div class="col checkbox-wr"><input id="arrive_{{obj.pk}}" name="{{obj.pk}}" class="toggle_arrive checkbox_margin" type="checkbox" {% if obj.arrive %} checked="true" {% endif %}>
+                <div class="col checkbox-wr"><input id="arrive_{{obj.pk}}" name="{{obj.pk}}" class="toggle_arrive checkbox_margin" type="checkbox" {% if obj.arrive %} checked="true" {% endif %}{% if request.user.is_superuser or groups %}{% else %}disabled{% endif %}>
                     <label for="arrive_{{obj.pk}}">
                         <div class="tick_mark"></div>
                     </label>

@@ -5,12 +5,11 @@ app_name = 'core'
 
 urlpatterns = [
     path('orders/', views.OrderListView.as_view(), name='home'),
-    path('orders/active/', views.ActiveOrderListView.as_view(), name='active'),
+    path('orders/all/', views.AllOrderListView.as_view(), name='all'),
     path('orders/on_pay/', views.WaitPayOrderListView.as_view(), name='on_pay'),
     path('orders/finish/', views.FinishOrderListView.as_view(), name='finish'),
     path('orders/addorder/', views.AddOrder.as_view(), name='addorder'),
     path('orders/delete/<int:order_id>/', views.DeleteOrder.as_view(), name='delete'),
-    path('orders/addproduct/<int:order_id>/', views.AddProduct.as_view(), name='addproduct'),
     path('orders/updateproduct/<int:product_id>/', views.UpdateProduct.as_view(), name='upd_product'),
     path('orders/updateproduct/delete/<int:image_id>/', views.DeleteImage.as_view(), name='delete_image'),
     path('orders/update/<int:order_id>/', views.update, name='upd'),
@@ -26,4 +25,5 @@ urlpatterns = [
     path('save_image', views.save_image, name='save_image'),
     path('logistic/add_delivery', views.AddDelivery.as_view(), name='add_delivery'),
     path('logistic/update_delivery/<int:logistic_id>/', views.UpdateDelivery.as_view(), name='update_delivery'),
+    path('account/add_acc/', views.AddAccount.as_view(), name='add_account'),
 ]

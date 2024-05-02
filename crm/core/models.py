@@ -10,6 +10,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 class Product(models.Model):
     product_marker = models.CharField(max_length=100, verbose_name='маркировка товара', null=True)
     name = models.CharField(max_length=100, verbose_name='Наименование')
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Создал')
     number_order = models.CharField(max_length=100, verbose_name='Номер заказа', blank=True)
     url = models.CharField(max_length=500, verbose_name='Ссылка на продавца', blank=True)
     arrive = models.BooleanField(verbose_name='Прибыл на склад')
@@ -105,6 +106,27 @@ class Clients(models.Model):
         return reverse('client', kwargs={'client_id': self.pk})
 
 
+class Account(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Аккаунт')
+    accounts = models.CharField(max_length=100, verbose_name='Аккаунт')
+
+    class Meta:
+        verbose_name = 'Аккаунт'
+        verbose_name_plural = 'Аккаунты'
+        ordering = ['-id']
+
+    def __str__(self):
+        """
+        String for representing the Model object.
+        """
+        if self.accounts:
+            return self.accounts
+        return "без аккаунта"
+
+    def get_absolute_url(self):
+        return reverse('account', kwargs={'account_id': self.pk})
+
+
 class Order(models.Model):
     REGISTRATION = "Оформление"
     PAYMENT = "Ожидает отправки"
@@ -143,6 +165,7 @@ class Order(models.Model):
     status = models.CharField(max_length=100, choices=ORDER_CHOICES, default='Оформление', null=False,
                               verbose_name='Статус')
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Создал')
+    account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, verbose_name='Аккаунт')
     date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     date_update = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
     margin = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Наценка ¥', default=0)
@@ -220,6 +243,7 @@ class Logistics(models.Model):
     ]
 
     marker = models.CharField(max_length=100, verbose_name='Маркировка груза')
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Создал')
     product = models.ManyToManyField(Product, verbose_name='Товары', related_name='logistics')
     height = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Высота, см.', default=0)
     width = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Ширина, см.', default=0)

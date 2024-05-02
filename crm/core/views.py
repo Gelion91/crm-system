@@ -1,7 +1,9 @@
 import json
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views import View
@@ -11,13 +13,11 @@ from django.views.generic.edit import FormMixin
 from django_filters.views import FilterView
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 
-from time import time
-
 from core.filters import OrderFilter, ProductFilter
 from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
     ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm, ProductImageInlineFormset, PackedImageForm, \
-    LogisticImageForm
-from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics
+    LogisticImageForm, AddAccountForm
+from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics, Account
 from crm.settings import LOGIN_URL
 
 
@@ -33,11 +33,12 @@ class CustomHtmxMixin:
         return super().get_context_data(**kwargs)
 
 
-class OrderListView(LoginRequiredMixin, FilterView):
+class OrderListView(LoginRequiredMixin, PermissionRequiredMixin, FilterView):
     model = Order
     paginate_by = 16
     template_name = 'core/order_list2.html'
     filterset_class = OrderFilter
+    permission_required = 'core.view_order'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -45,8 +46,14 @@ class OrderListView(LoginRequiredMixin, FilterView):
         context['title'] = 'Список заказов'
         return context
 
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Order.objects.filter(result=False)
+        elif self.request.user.has_perm('core.view_order'):
+            return Order.objects.filter(result=False).filter(owner=self.request.user)
 
-class ActiveOrderListView(OrderListView):
+
+class AllOrderListView(OrderListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -55,7 +62,10 @@ class ActiveOrderListView(OrderListView):
         return context
 
     def get_queryset(self):
-        return Order.objects.filter(result=False)
+        if self.request.user.is_superuser:
+            return Order.objects.all()
+        elif self.request.user.has_perm('core.view_order'):
+            return Order.objects.filter(owner=self.request.user)
 
 
 class WaitPayOrderListView(OrderListView):
@@ -67,7 +77,10 @@ class WaitPayOrderListView(OrderListView):
         return context
 
     def get_queryset(self):
-        return Order.objects.filter(status='На оплату')
+        if self.request.user.is_superuser:
+            return Order.objects.filter(status='Ожидает отправки')
+        elif self.request.user.has_perm('core.view_order'):
+            return Order.objects.filter(status='Ожидает отправки').filter(owner=self.request.user)
 
 
 class FinishOrderListView(OrderListView):
@@ -79,7 +92,10 @@ class FinishOrderListView(OrderListView):
         return context
 
     def get_queryset(self):
-        return Order.objects.filter(result=True)
+        if self.request.user.is_superuser:
+            return Order.objects.filter(result=True)
+        elif self.request.user.has_perm('core.view_order'):
+            return Order.objects.filter(result=True).filter(owner=self.request.user)
 
 
 class AddOrder(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
@@ -96,10 +112,20 @@ class AddOrder(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         form.instance.owner = self.request.user
         return super().form_valid(form)
 
+    def get_form_kwargs(self):
+        kwargs = super(AddOrder, self).get_form_kwargs()
+        kwargs['current_user'] = self.request.user
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Оформить заказ'
         return context
+
+    def handle_no_permission(self):
+        # add custom message
+        messages.error(self.request, 'You have no permission')
+        return super(AddOrder, self).handle_no_permission()
 
 
 class DeleteOrder(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
@@ -116,7 +142,7 @@ def _get_form(request, formcls, prefix):
 
 
 @login_required(login_url=LOGIN_URL)
-@permission_required('core.update_order')
+@permission_required('core.change_order')
 def update(request, order_id):
     data = get_object_or_404(Order, pk=order_id)
     form = UpdateOrderForm(instance=data)
@@ -134,6 +160,7 @@ def update(request, order_id):
 
         if form2.is_valid():
             print('форма2 валидна')
+            form2.instance.owner = request.user
             form2.save()
             product = Product.objects.get(id=form2.instance.id)
             data.product.add(product)
@@ -154,23 +181,12 @@ def update(request, order_id):
     return render(request, 'core/update_order.html', context)
 
 
-class AddProduct(LoginRequiredMixin, CreateView):
-    form_class = ProductForm
-    template_name = 'core/add_product.html'
-    success_url = '/'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = 'Оформить заказ'
-        context['ord'] = kwargs.get('pk')
-        return context
-
-
-class UpdateProduct(LoginRequiredMixin, UpdateView):
+class UpdateProduct(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Product
     form_class = ProductForm
     pk_url_kwarg = 'product_id'
     template_name = 'core/edit_product.html'
+    permission_required = 'core.change_product'
 
     def get_success_url(self):
         return reverse('core:upd', kwargs={'order_id': Order.objects.get(product=self.object).pk})
@@ -211,6 +227,11 @@ class DeleteProduct(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         context = super().get_context_data(**kwargs)
         return context
 
+    def handle_no_permission(self):
+        # add custom message
+        messages.error(self.request, 'You have no permission')
+        return super(DeleteProduct, self).handle_no_permission()
+
     def get_success_url(self):
         return self.request.META.get('HTTP_REFERER')
 
@@ -224,6 +245,11 @@ class DeleteImage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+
+    def handle_no_permission(self):
+        # add custom message
+        messages.error(self.request, 'You have no permission')
+        return super(DeleteImage, self).handle_no_permission()
 
     def get_success_url(self):
         return reverse('core:upd_product', kwargs={'product_id': self.object.product.pk})
@@ -239,6 +265,12 @@ class DeliveryListView(LoginRequiredMixin, FilterView):
         context['title'] = 'Доставки'
         return context
 
+    def get_queryset(self):
+        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
+            return Logistics.objects.all()
+        else:
+            return Logistics.objects.filter(owner=self.request.user)
+
 
 class AddDelivery(LoginRequiredMixin, CreateView):
     model = Logistics
@@ -251,6 +283,15 @@ class AddDelivery(LoginRequiredMixin, CreateView):
         context['title'] = 'Оформить доставку'
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super(AddDelivery, self).get_form_kwargs()
+        kwargs['current_user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
 
 class UpdateDelivery(LoginRequiredMixin, UpdateView):
     model = Logistics
@@ -260,6 +301,11 @@ class UpdateDelivery(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('core:update_delivery', kwargs={'logistic_id': self.object.pk})
+
+    def get_form_kwargs(self):
+        kwargs = super(UpdateDelivery, self).get_form_kwargs()
+        kwargs['current_user'] = self.request.user
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -276,7 +322,10 @@ class ProductStatus(LoginRequiredMixin, FormMixin, FilterView):
     form_class = PackedImageForm
 
     def get_queryset(self):
-        return Product.objects.filter(logistics=None)
+        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
+            return Product.objects.filter(logistics=None)
+        else:
+            return Product.objects.filter(logistics=None).filter(owner=self.request.user)
 
     def get_success_url(self):
         return reverse('core:status_product')
@@ -286,6 +335,7 @@ class ProductStatus(LoginRequiredMixin, FormMixin, FilterView):
         context['form'] = ProductFilter.form
         context['image_form'] = PackedImageForm
         context['title'] = 'Статус товаров'
+        context['groups'] = self.request.user.groups.filter(name='logist').exists()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -307,6 +357,7 @@ class ProductStatus(LoginRequiredMixin, FormMixin, FilterView):
 
 def change_status_paid(request):
     """Проверка доступности логина"""
+    print(request.user)
     product_id = request.POST.get("id")
     product = Product.objects.get(pk=product_id)
     checked = request.POST.get("checked")
@@ -352,12 +403,8 @@ def get_price(request):
 # Временно не работает, отключил в productstatus.html
 
 def save_image(request):
-    print('Работает')
     image = request.FILES.get('image')
-
-    print(image)
     product_id = request.POST.get("id")
-    print(product_id)
     product = Product.objects.get(pk=product_id)
     img = PackedImagesProduct(product=product, image=image)
     img.save()
@@ -378,7 +425,11 @@ class DeliveryStatus(LoginRequiredMixin, FormMixin, FilterView):
     form_class = LogisticImageForm
 
     def get_queryset(self):
-        return Logistics.objects.all()
+        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
+            return Logistics.objects.all()
+        else:
+            return Logistics.objects.all().filter(owner=self.request.user)
+
 
     def get_success_url(self):
         return reverse('core:status_delivery')
@@ -388,6 +439,7 @@ class DeliveryStatus(LoginRequiredMixin, FormMixin, FilterView):
         context['form'] = ProductFilter.form
         context['image_form'] = LogisticImageForm
         context['title'] = 'Статус грузов'
+        context['groups'] = self.request.user.groups.filter(name='logist').exists()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -443,3 +495,19 @@ class DeleteDelivery(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return self.request.META.get('HTTP_REFERER')
+
+
+class AddAccount(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = Account
+    permission_required = 'core.add_account'
+    form_class = AddAccountForm
+    template_name = 'core/add_account.html'
+
+    # On successful form submission
+    def get_success_url(self):
+        return reverse('core:add_account')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Добавить аккаунт'
+        return context
