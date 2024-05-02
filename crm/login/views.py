@@ -18,11 +18,11 @@ class LoginUser(LoginView):
         return context
 
     def get_success_url(self):
-        if self.request.user.groups.filter(id=1):
+        if self.request.user.groups.filter(name='managers'):
             print('True')
-            return reverse_lazy('clients:home')
-        elif self.request.user.groups.filter(id=2):
             return reverse_lazy('core:home')
+        elif self.request.user.groups.filter(name='logist'):
+            return reverse_lazy('core:status_product')
         else:
             return reverse_lazy('core:home')
 

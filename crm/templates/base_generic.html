@@ -39,8 +39,8 @@
         <div class="container-fluid">
             {% if perms.core.add_order %}
             <a class="navbar-brand" href="{% url 'core:home' %}">CRM</a>
-            {% elif perms.core.add_clients %}
-            <a class="navbar-brand" href="{% url 'clients:home' %}">CRM</a>
+            {% elif perms.core.add_logistics %}
+            <a class="navbar-brand" href="{% url 'core:status_product' %}">CRM</a>
             {% endif %}
 
             <div class="dropdown me-auto order-3 order-sm-last">
