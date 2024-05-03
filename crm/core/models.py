@@ -139,6 +139,16 @@ class Order(models.Model):
     CASH = "Наличные"
     IP = "Расчетный счет"
 
+    IGOR = "Игорь Смирнов"
+    SERGEY = "Сергей Тимофеев"
+    MARIA = "Мария"
+
+    WHO_TAKE_MONEY = [
+        (IGOR, "Игорь Смирнов"),
+        (SERGEY, "Сергей Тимофеев"),
+        (MARIA, "Мария"),
+    ]
+
     ORDER_CHOICES = [
         (REGISTRATION, "Оформление"),
         (PAYMENT, "Ожидает отправки"),
@@ -176,6 +186,7 @@ class Order(models.Model):
     profit = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Прибыль', default=0)
     paid_method = models.CharField(max_length=100, choices=PAID_METHOD, default='Наличные', null=False,
                                    verbose_name='Способ оплаты')
+    takemoney = models.CharField(max_length=100, choices=WHO_TAKE_MONEY, verbose_name='Кто принял оплату', blank=True)
     result = models.BooleanField(verbose_name='Выполнен', default=False)
 
     class Meta:
