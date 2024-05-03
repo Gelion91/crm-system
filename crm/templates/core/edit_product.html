@@ -2,6 +2,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+
 {% if form %}
     <div class="col secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
     <form action="" method="post" enctype="multipart/form-data">
@@ -43,4 +44,11 @@
 
     </div>
 {% endif %}
+
+<script defer>
+$("input").focus(function(){
+  $(this).select();
+});
+
+</script>
 {% endblock %}
