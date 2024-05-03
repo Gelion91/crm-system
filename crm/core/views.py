@@ -122,11 +122,6 @@ class AddOrder(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         context['title'] = 'Оформить заказ'
         return context
 
-    def handle_no_permission(self):
-        # add custom message
-        messages.error(self.request, 'You have no permission')
-        return super(AddOrder, self).handle_no_permission()
-
 
 class DeleteOrder(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Order
@@ -152,7 +147,6 @@ def update(request, order_id):
     if request.method == 'POST':
         form = UpdateOrderForm(request.POST, instance=data)
         form2 = ProductForm(request.POST, request.FILES)
-
         # Проверяем валидность форм
         if form.is_valid():
             print('форма1 валидна')
@@ -213,6 +207,7 @@ class UpdateProduct(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     def form_valid(self, form):
         """If the form is valid, save the associated model."""
         form.instance.id = self.object.pk
+        form.instance.owner = self.request.user
         self.object = form.save()
         return super().form_valid(form)
 

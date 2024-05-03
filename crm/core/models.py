@@ -107,7 +107,7 @@ class Clients(models.Model):
 
 
 class Account(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Аккаунт')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Пользователь')
     accounts = models.CharField(max_length=100, verbose_name='Аккаунт')
 
     class Meta:
@@ -146,12 +146,12 @@ class Order(models.Model):
     ]
 
     PAID_METHOD = [
-        (ALFA_BANK, "Альфа-банк"),
-        (SBER, "Сбер"),
-        (TINKOFF, "Тинькофф"),
+        (ALFA_BANK, "Альфа-банк Игорь"),
+        (SBER, "Сбер Мария"),
+        (TINKOFF, "Тинькофф Игорь"),
         (TIMOFEEV, "Тимофеев"),
         (CASH, "Наличные"),
-        (IP, "Расчетный счет"),
+        (IP, "Расчетный счет(ИП)"),
     ]
 
     client = models.ForeignKey(Clients, on_delete=models.SET_NULL, null=True, verbose_name='Клиент')

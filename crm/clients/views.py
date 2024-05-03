@@ -23,6 +23,12 @@ class ClientsListView(LoginRequiredMixin, FilterView):
         context['title'] = 'Список клиентов'
         return context
 
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Clients.objects.filter(result=True)
+        else:
+            return Clients.objects.filter(result=True).filter(owner=self.request.user)
+
 
 class ActiveClientsListView(ClientsListView):
 
@@ -33,7 +39,10 @@ class ActiveClientsListView(ClientsListView):
         return context
 
     def get_queryset(self):
-        return Clients.objects.filter(result=True)
+        if self.request.user.is_superuser:
+            return Clients.objects.filter(result=True)
+        else:
+            return Clients.objects.filter(result=True).filter(owner=self.request.user)
 
 
 class MyClientsListView(ClientsListView):

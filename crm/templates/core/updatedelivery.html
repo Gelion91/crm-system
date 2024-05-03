@@ -60,7 +60,9 @@ window.onload = function () {
     });
 });
 
-
+$("input").focus(function(){
+  $(this).select();
+});
 
 </script>
 {% endblock %}

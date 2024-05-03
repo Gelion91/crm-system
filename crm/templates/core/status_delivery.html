@@ -202,45 +202,5 @@ console.log($(this).attr('name'))
         },
     });
 });
-
-<!--$('.packed_image').on('submit', function(e)-->
-<!--    {-->
-<!--        e.preventDefault();-->
-<!--        var $form = $(this);-->
-<!--        var data = {-->
-<!--            image: $form.find("[name='pack_img']").prop('files')[0],-->
-<!--            id: $form.attr('id'),-->
-<!--        }-->
-<!--        console.log(data)-->
-<!--        var fileData = $form.find("[name='pack_img']").prop('files')[0];-->
-<!--        var prod_id = $form.attr('id')-->
-
-<!--        var formData = new FormData();-->
-<!--        formData.append('image', fileData);-->
-<!--        formData.append('id', prod_id);-->
-
-<!--        var token = '{{ csrf_token }}';-->
-<!--        $.ajax({-->
-<!--            cache: false,-->
-<!--            contentType: false,-->
-<!--            processData: false,-->
-<!--            type        : 'POST',-->
-<!--            url         : "{% url 'core:save_image' %}",-->
-<!--            data: formData,-->
-<!--            headers: {'X-CSRFToken': token},-->
-
-<!--            success:function(response){-->
-<!--            $($form)[0].reset();-->
-<!--                console.log([response])-->
-<!--            var images = [-->
-<!--            {% for item in response %}-->
-<!--                item,-->
-<!--            {% endfor %}-->
-<!--  ]-->
-<!--            console.log(response.image)-->
-<!--            $('.accordion-body').append('<img class="IMG show" src="' + response.image + '"/>');-->
-<!--          },-->
-<!--    });-->
-<!--});-->
   </script>
 {% endblock %}
