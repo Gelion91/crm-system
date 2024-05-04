@@ -107,7 +107,7 @@ class Clients(models.Model):
 
 
 class Account(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Пользователь')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Пользователь', related_name='accounts')
     accounts = models.CharField(max_length=100, verbose_name='Аккаунт')
 
     class Meta:

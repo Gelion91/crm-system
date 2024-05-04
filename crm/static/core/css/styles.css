@@ -802,6 +802,16 @@ tr {
     border-radius: 3px; /* Скругляем уголки */
    }
 
+.btn_delete_acc {
+    display: grid; /* Строчно-блочный элемент */
+    background: #CD5C5C; /* Серый цвет фона */
+    color: #fff; /* Белый цвет текста */
+    text-decoration: none; /* Убираем подчёркивание */
+    border-radius: 3px; /* Скругляем уголки */
+    width: 90px;
+    height: 30px;
+   }
+
 .btn_cab {
     color: #fff;
 }

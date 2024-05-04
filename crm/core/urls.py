@@ -26,4 +26,5 @@ urlpatterns = [
     path('logistic/add_delivery', views.AddDelivery.as_view(), name='add_delivery'),
     path('logistic/update_delivery/<int:logistic_id>/', views.UpdateDelivery.as_view(), name='update_delivery'),
     path('account/add_acc/', views.AddAccount.as_view(), name='add_account'),
+    path('account/delete/<int:account_id>/', views.DeleteAccount.as_view(), name='delete_account'),
 ]

@@ -3,6 +3,7 @@ import json
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
@@ -425,7 +426,6 @@ class DeliveryStatus(LoginRequiredMixin, FormMixin, FilterView):
         else:
             return Logistics.objects.all().filter(owner=self.request.user)
 
-
     def get_success_url(self):
         return reverse('core:status_delivery')
 
@@ -505,4 +505,24 @@ class AddAccount(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Добавить аккаунт'
+        context['accounts'] = [{
+            'user': i.username,
+            'accounts': [acc for acc in i.accounts.all()]
+        }
+            for i in User.objects.all()]
+        print(context['accounts'])
         return context
+
+
+class DeleteAccount(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Account
+    permission_required = 'core.delete_account'
+    context_object_name = 'account'
+    pk_url_kwarg = "account_id"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+    def get_success_url(self):
+        return self.request.META.get('HTTP_REFERER')
