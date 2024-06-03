@@ -314,3 +314,51 @@ class ImagesLogistics(models.Model):
 
     def get_absolute_url(self):
         return reverse('core', kwargs={'logistic_image_id': self.pk})
+
+
+class NotesProduct(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Менеджер')
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, verbose_name='Товар', related_name='product_notes')
+    comment = models.TextField(verbose_name='Комментарий', blank=True)
+    date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        ordering = ['id']
+
+    def __str__(self):
+        """
+        String for representing the Model object.
+        """
+        if self.owner:
+            return self.owner.username
+        else:
+            return 'без имени'
+
+    def get_absolute_url(self):
+        return reverse('note', kwargs={'note_id': self.pk})
+
+
+class NotesDelivery(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Менеджер')
+    delivery = models.ForeignKey(Logistics, on_delete=models.SET_NULL, null=True, verbose_name='Доставка', related_name='delivery_notes')
+    comment = models.TextField(verbose_name='Комментарий', blank=True)
+    date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        ordering = ['id']
+
+    def __str__(self):
+        """
+        String for representing the Model object.
+        """
+        if self.owner:
+            return self.owner.username
+        else:
+            return 'без имени'
+
+    def get_absolute_url(self):
+        return reverse('note', kwargs={'note_id': self.pk})

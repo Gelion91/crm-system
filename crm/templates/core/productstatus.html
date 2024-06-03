@@ -76,6 +76,9 @@
                                                 <img src="{{ img.image.url }}">
                                               </div>
                                               <div class="modal-footer">
+                                                <form method="POST" action="{% url 'core:delete_image' img.pk %}">
+                                                    {% csrf_token %}<input type="submit" value="Удалить">
+                                                </form>
                                               </div>
                                             </div>
                                           </div>
@@ -102,6 +105,9 @@
                                                 <img src="{{ img.image.url }}">
                                               </div>
                                               <div class="modal-footer">
+                                                <form method="POST" action="{% url 'core:delete_packedimage' img.pk %}">
+                                                    {% csrf_token %}<input type="submit" value="Удалить">
+                                                </form>
                                               </div>
                                             </div>
                                           </div>
@@ -109,12 +115,47 @@
                         {% endthumbnail %}
                   {% endfor %}
                   <hr>
+
                     <form id="image_form_{{obj.pk}}" class="row" name="{{obj.pk}}" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <input type='hidden' value='{{obj.pk}}' name='id'>
                         {{ image_form | crispy}}
                         <button class="btn btn-outline-secondary" type="submit">Сохранить</button>
                      </form>
+
+                  <div id="comments_{{obj.pk}}">
+                  {% if obj.product_notes.all %}
+                      {% for comment in obj.product_notes.all %}
+                        <div class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
+                            <div class="row comment" style="margin:0;">
+                                <div class="col-3" style="background-color:#f2feff; margin-left: auto; margin-right: auto;">
+                                    <div class="row" style="margin-left: auto; margin-right: auto;">
+                                        <p class="p-size">{{ comment.owner.username }}</p>
+                                    </div>
+                                    <div class="row" style="margin-left: auto; margin-right: auto;">
+                                        <p class="p-size">{{ comment.date_create }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-8">
+                                    <p class="p-size">{{ comment.comment }}</p>
+                                </div>
+
+                                <div class="col-1">
+                                    {% if comment.owner == request.user %}
+                                    <a href="{% url 'core:delete_notes_product' comment.pk %}">удалить</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                      {% endfor %}
+                {% endif %}
+              </div>
+                <form id="{{obj.pk}}" name="notes" method="post" class="notes" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-error">{{ form.non_field_errors }}</div>
+                    {{ notes_form|crispy }}
+                    <button class="btn btn-secondary" type="submit">Сохранить</button>
+                </form>
 <!--                  <form id="{{obj.pk}}" class="row packed_image" name="packed_image" enctype="multipart/form-data">-->
 <!--                      <label for="packed_images">Добавить изображение со склада:</label>-->
 <!--                        <input type="file" id="packed_images" name="pack_img" accept="image/png, image/jpeg">-->
@@ -190,44 +231,51 @@ $('.toggle_arrive').click(function() {
 });
 
 
-<!--$('.packed_image').on('submit', function(e)-->
-<!--    {-->
-<!--        e.preventDefault();-->
-<!--        var $form = $(this);-->
-<!--        var data = {-->
-<!--            image: $form.find("[name='pack_img']").prop('files')[0],-->
-<!--            id: $form.attr('id'),-->
-<!--        }-->
-<!--        console.log(data)-->
-<!--        var fileData = $form.find("[name='pack_img']").prop('files')[0];-->
-<!--        var prod_id = $form.attr('id')-->
+$('.notes').on('submit', function(e)
+    {
+    e.preventDefault();
+    var $form = $(this);
+    console.log($form)
+    var data = {
+            note: $form.find("[name='comment']").val(),
+            id: $form.attr('id'),
+        };
 
-<!--        var formData = new FormData();-->
-<!--        formData.append('image', fileData);-->
-<!--        formData.append('id', prod_id);-->
 
-<!--        var token = '{{ csrf_token }}';-->
-<!--        $.ajax({-->
-<!--            cache: false,-->
-<!--            contentType: false,-->
-<!--            processData: false,-->
-<!--            type        : 'POST',-->
-<!--            url         : "{% url 'core:save_image' %}",-->
-<!--            data: formData,-->
-<!--            headers: {'X-CSRFToken': token},-->
+    var token = '{{ csrf_token }}';
+    console.log(data)
 
-<!--            success:function(response){-->
-<!--            $($form)[0].reset();-->
-<!--                console.log([response])-->
-<!--            var images = [-->
-<!--            {% for item in response %}-->
-<!--                item,-->
-<!--            {% endfor %}-->
-<!--  ]-->
-<!--            console.log(response.image)-->
-<!--            $('.accordion-body').append('<img class="IMG show" src="' + response.image + '"/>');-->
-<!--          },-->
-<!--    });-->
-<!--});-->
+    $.ajax({
+            type        : 'POST',
+            url         : "{% url 'core:save_notes_product' %}",
+            data: data,
+            headers: {'X-CSRFToken': token},
+
+            success:function(response){
+            $($form)[0].reset();
+                var card = '<div class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">' +
+                           '<div class="row comment" style="margin:0;">' +
+                           '<div class="col-3" style="background-color:#f2feff; margin-left: auto; margin-right: auto;">' +
+                           '<div class="row" style="margin-left: auto; margin-right: auto;">' +
+                           '<p class="p-size">' + response.user + '</p>' +
+                           '</div>' +
+                           '<div class="row" style="margin-left: auto; margin-right: auto;">' +
+                           '<p class="p-size">' + response.date + '</p>' +
+                           '</div>' +
+                           '</div>' +
+                           '<div class="col-8">' +
+                           '<p class="p-size">' + response.note + '</p>' +
+                           '</div>' +
+                           '<div class="col-1">' +
+                           '<a href="#">' + 'удалить' +'</a>' +
+                           '</div>' +
+                           '</div>' +
+                           '</div>';
+                var comm = 'comments' + '_' + response.product
+                $('#' + comm).append(card);
+
+          },
+    });
+});
   </script>
 {% endblock %}

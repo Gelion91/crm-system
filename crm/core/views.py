@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from django.contrib import messages
@@ -7,6 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
+from django.utils import dateformat
 from django.views import View
 from django.views.generic import CreateView, DeleteView, UpdateView, ListView
 from django.views.generic.base import ContextMixin
@@ -14,11 +16,13 @@ from django.views.generic.edit import FormMixin
 from django_filters.views import FilterView
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 
-from core.filters import OrderFilter, ProductFilter
+from core.filters import OrderFilter, ProductFilter, DeliveryFilter
 from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
     ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm, ProductImageInlineFormset, PackedImageForm, \
-    LogisticImageForm, AddAccountForm
-from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics, Account
+    LogisticImageForm, AddAccountForm, ProductNotesForm, DeliveryNotesForm
+from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics, Account, \
+    NotesProduct, NotesDelivery
+from crm import settings
 from crm.settings import LOGIN_URL
 
 
@@ -248,7 +252,7 @@ class DeleteImage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
         return super(DeleteImage, self).handle_no_permission()
 
     def get_success_url(self):
-        return reverse('core:upd_product', kwargs={'product_id': self.object.product.pk})
+        return self.request.META.get('HTTP_REFERER')
 
 
 class DeliveryListView(LoginRequiredMixin, FilterView):
@@ -330,6 +334,7 @@ class ProductStatus(LoginRequiredMixin, FormMixin, FilterView):
         context = super().get_context_data(**kwargs)
         context['form'] = ProductFilter.form
         context['image_form'] = PackedImageForm
+        context['notes_form'] = ProductNotesForm
         context['title'] = 'Статус товаров'
         context['groups'] = self.request.user.groups.filter(name='logist').exists()
         return context
@@ -413,18 +418,59 @@ def save_image(request):
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 
+def save_notes_product(request):
+    note = request.POST.get("note")
+    product_id = request.POST.get("id")
+    print(note)
+    print(product_id)
+    comment = NotesProduct(product=Product.objects.get(pk=product_id), comment=note, owner=request.user)
+    comment.save()
+    print(comment.date_create)
+    response = {
+        'note': note,
+        'product': product_id,
+        'user': request.user.username,
+        'date': dateformat.format(comment.date_create, settings.DATE_FORMAT).lstrip('0')
+    }
+    print(response)
+
+    return HttpResponse(json.dumps(response), content_type='application/json')
+
+
+def delete_notes_product(request, pk):
+    comment = NotesProduct.objects.get(pk=pk)
+    comment.delete()
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+class DeletePackedImage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = PackedImagesProduct
+    permission_required = 'core.delete_packedimagesproduct'
+    context_object_name = 'packed_image'
+    pk_url_kwarg = "packed_image_id"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+    def handle_no_permission(self):
+        # add custom message
+        messages.error(self.request, 'You have no permission')
+        return super(DeletePackedImage, self).handle_no_permission()
+
+    def get_success_url(self):
+        return self.request.META.get('HTTP_REFERER')
+
+
 class DeliveryStatus(LoginRequiredMixin, FormMixin, FilterView):
     model = Logistics
     paginate_by = 16
     template_name = 'core/status_delivery.html'
-    filterset_class = ProductFilter
+    filterset_class = DeliveryFilter
     form_class = LogisticImageForm
 
     def get_queryset(self):
-        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
-            return Logistics.objects.all()
-        else:
-            return Logistics.objects.all().filter(owner=self.request.user)
+        return Logistics.objects.filter(third_step=False)
 
     def get_success_url(self):
         return reverse('core:status_delivery')
@@ -433,6 +479,7 @@ class DeliveryStatus(LoginRequiredMixin, FormMixin, FilterView):
         context = super().get_context_data(**kwargs)
         context['form'] = ProductFilter.form
         context['image_form'] = LogisticImageForm
+        context['notes_form'] = DeliveryNotesForm
         context['title'] = 'Статус грузов'
         context['groups'] = self.request.user.groups.filter(name='logist').exists()
         return context
@@ -476,6 +523,50 @@ def change_logistic_status(request):
         'OK': 200
     }
     return JsonResponse(response)
+
+
+def save_notes_delivery(request):
+    note = request.POST.get("note")
+    delivery_id = request.POST.get("id")
+    print(note)
+    print(delivery_id)
+    comment = NotesDelivery(delivery=Logistics.objects.get(pk=delivery_id), comment=note, owner=request.user)
+    comment.save()
+    print(comment.date_create)
+    response = {
+        'note': note,
+        'delivery': delivery_id,
+        'user': request.user.username,
+        'date': dateformat.format(comment.date_create, settings.DATE_FORMAT).lstrip('0')
+    }
+    print(response)
+
+    return HttpResponse(json.dumps(response), content_type='application/json')
+
+
+def delete_notes_delivery(request, pk):
+    comment = NotesDelivery.objects.get(pk=pk)
+    comment.delete()
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+class DeleteLogisticImage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = ImagesLogistics
+    permission_required = 'core.delete_imageslogistics'
+    context_object_name = 'image'
+    pk_url_kwarg = "logistic_image_id"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+    def handle_no_permission(self):
+        # add custom message
+        messages.error(self.request, 'You have no permission')
+        return super(DeleteLogisticImage, self).handle_no_permission()
+
+    def get_success_url(self):
+        return self.request.META.get('HTTP_REFERER')
 
 
 class DeleteDelivery(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):

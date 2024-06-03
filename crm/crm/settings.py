@@ -156,3 +156,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'login:login'
 LOGOUT_URL = 'logout'
+
+DATE_FORMAT = 'd E Y г. H:i'

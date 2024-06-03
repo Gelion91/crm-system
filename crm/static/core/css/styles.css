@@ -353,6 +353,10 @@ ul.lang-list li a:hover {color: #fdc073;}
 	font-style: italic;
 }
 
+.footer {
+  flex: 0 0 auto;
+}
+
 footer {
   text-align: center;
   padding: 3px;
@@ -821,9 +825,19 @@ tr {
     padding-right: 7%;
    }
 
-.p-size {
-    font-size: calc(12px + 8 * (100vw / 1280));
+
+@media (max-width: 767px){
+ .p-size {
+  font-size: calc(10px + (8 + 8 * 0.7) * ((100vw - 320px) / 1280));
+ }
 }
+
+@media (min-width: 767px){
+ .p-size {
+  font-size: calc(10px + 4 * (100vw / 1280));
+ }
+}
+
 
 .gut {
 	--bs-gutter-x: 0px;
@@ -987,4 +1001,13 @@ align-self: center;
     border-color: silver;
     border-radius: .375rem;
     padding: .375rem .75rem;
+    }
+
+.comment {
+    min-height: 50px;
+    min-weight: 200px;
+    max-height: 100%;
+    background-size: cover;
+    text-align: center;
+    color: black;
     }

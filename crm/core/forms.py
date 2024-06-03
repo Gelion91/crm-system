@@ -10,7 +10,8 @@ from django.forms import ModelForm, CheckboxSelectMultiple, SelectMultiple, Text
     ChoiceField, RadioSelect
 from django.utils.html import format_html
 
-from core.models import Order, Clients, Product, ImagesProduct, Logistics, PackedImagesProduct, Account
+from core.models import Order, Clients, Product, ImagesProduct, Logistics, PackedImagesProduct, Account, NotesProduct, \
+    NotesDelivery
 from django import forms
 
 
@@ -294,3 +295,37 @@ class AddAccountForm(ModelForm):
     class Meta:
         model = Account
         fields = '__all__'
+
+
+class ProductNotesForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'whiteForms'
+        self.helper.form_method = 'post'
+        self.helper.form_action = 'submit_survey'
+
+        self.helper.add_input(Submit('submit', 'Submit'))
+
+    class Meta:
+        model = NotesProduct
+        fields = '__all__'
+        exclude = ('owner', 'product')
+
+
+class DeliveryNotesForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'whiteForms'
+        self.helper.form_method = 'post'
+        self.helper.form_action = 'submit_survey'
+
+        self.helper.add_input(Submit('submit', 'Submit'))
+
+    class Meta:
+        model = NotesDelivery
+        fields = '__all__'
+        exclude = ('owner', 'delivery')

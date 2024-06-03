@@ -69,7 +69,41 @@
 
         <div id="acc{{forloop.counter}}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
               <div class="accordion-body">
-                  <p>Фотографии товара у продавца</p>
+
+<!--                  <p>Фотографии упакованных товаров</p>-->
+<!--                  {% for product in obj.product.all %}-->
+<!--                  -->
+<!--                    {% for img in product.packed_images.all %}-->
+<!--                  <img src="{{ img.url }}" class="image-detail">-->
+<!--                    {% load thumbnail %}-->
+<!--                        {% thumbnail img.image "100x100" as im %}-->
+<!--                    &lt;!&ndash; Modal &ndash;&gt;-->
+<!--                            <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img{{forloop.counter}}_{{obj.pk}}">-->
+<!--                                  <img src="{{ im.url }}" class="image-detail">-->
+<!--                            </a>-->
+<!--                                        <div class="modal fade" id="img{{forloop.counter}}_{{obj.pk}}" tabindex="-1" aria-labelledby="img{{forloop.counter}}" aria-hidden="true">-->
+<!--                                          <div class="modal-dialog modal-xl">-->
+<!--                                            <div class="modal-content">-->
+<!--                                              <div class="modal-header">-->
+<!--                                                <h1 class="modal-title fs-5" id="exampleModalLabel">{{img.product}}</h1>-->
+<!--                                              </div>-->
+<!--                                              <div class="modal-body">-->
+<!--                                                <img src="{{ img.image.url }}">-->
+<!--                                              </div>-->
+<!--                                              <div class="modal-footer">-->
+<!--                                                <form method="POST" action="{% url 'core:delete_logistic_image' img.pk %}">-->
+<!--                                                    {% csrf_token %}<input type="submit" value="Удалить">-->
+<!--                                                </form>-->
+<!--                                              </div>-->
+<!--                                            </div>-->
+<!--                                          </div>-->
+<!--                                        </div>-->
+<!--                        {% endthumbnail %}-->
+<!--                  {% endfor %}-->
+<!--                  {% endfor %}-->
+<!--                  <hr>-->
+
+                  <p>Фотографии груза</p>
                   {% for img in obj.logistic_images.all %}
                   <img src="{{ img.url }}" class="image-detail">
                     {% load thumbnail %}
@@ -88,6 +122,9 @@
                                                 <img src="{{ img.image.url }}">
                                               </div>
                                               <div class="modal-footer">
+                                                <form method="POST" action="{% url 'core:delete_logistic_image' img.pk %}">
+                                                    {% csrf_token %}<input type="submit" value="Удалить">
+                                                </form>
                                               </div>
                                             </div>
                                           </div>
@@ -101,12 +138,47 @@
                         <input type='hidden' value='{{obj.pk}}' name='id'>
                         {{ image_form | crispy}}
                         <button class="btn btn-outline-secondary" type="submit">Сохранить</button>
+
                      </form>
 <!--                  <form id="{{obj.pk}}" class="row packed_image" name="packed_image" enctype="multipart/form-data">-->
 <!--                      <label for="packed_images">Добавить изображение со склада:</label>-->
 <!--                        <input type="file" id="packed_images" name="pack_img" accept="image/png, image/jpeg">-->
 <!--                      <button id="button_image" type="submit" class="btn btn-success">Сохранить</button>-->
 <!--                  </form>-->
+
+                  <div id="comments_{{obj.pk}}">
+                  {% if obj.delivery_notes.all %}
+                      {% for comment in obj.delivery_notes.all %}
+                        <div class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
+                            <div class="row comment" style="margin:0;">
+                                <div class="col-3" style="background-color:#f2feff; margin-left: auto; margin-right: auto;">
+                                    <div class="row" style="margin-left: auto; margin-right: auto;">
+                                        <p class="p-size">{{ comment.owner.username }}</p>
+                                    </div>
+                                    <div class="row" style="margin-left: auto; margin-right: auto;">
+                                        <p class="p-size">{{ comment.date_create }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-8">
+                                    <p class="p-size">{{ comment.comment }}</p>
+                                </div>
+
+                                <div class="col-1">
+                                    {% if comment.owner == request.user %}
+                                    <a href="{% url 'core:delete_notes_delivery' comment.pk %}">удалить</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                      {% endfor %}
+                {% endif %}
+              </div>
+                  <form id="{{obj.pk}}" name="notes" method="post" class="notes" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-error">{{ form.non_field_errors }}</div>
+                    {{ notes_form|crispy }}
+                    <button class="btn btn-secondary" type="submit">Сохранить</button>
+                </form>
                   <hr>
                   <div class="row">
                     <div class="col">
@@ -123,7 +195,7 @@
             {% endfor %}
                 </div>
         {% else %}
-    <h3>Нет товаров.</h3>
+    <h3>Нет грузов.</h3>
     </div>
     </div>
     {% endif %}
@@ -200,6 +272,53 @@ console.log($(this).attr('name'))
         error: function() {
             console.log('it broke');
         },
+    });
+});
+
+$('.notes').on('submit', function(e)
+    {
+    e.preventDefault();
+    var $form = $(this);
+    console.log($form)
+    var data = {
+            note: $form.find("[name='comment']").val(),
+            id: $form.attr('id'),
+        };
+
+
+    var token = '{{ csrf_token }}';
+    console.log(data)
+
+    $.ajax({
+            type        : 'POST',
+            url         : "{% url 'core:save_notes_delivery' %}",
+            data: data,
+            headers: {'X-CSRFToken': token},
+
+            success:function(response){
+            $($form)[0].reset();
+                var card = '<div class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">' +
+                           '<div class="row comment" style="margin:0;">' +
+                           '<div class="col-3" style="background-color:#f2feff; margin-left: auto; margin-right: auto;">' +
+                           '<div class="row" style="margin-left: auto; margin-right: auto;">' +
+                           '<p class="p-size">' + response.user + '</p>' +
+                           '</div>' +
+                           '<div class="row" style="margin-left: auto; margin-right: auto;">' +
+                           '<p class="p-size">' + response.date + '</p>' +
+                           '</div>' +
+                           '</div>' +
+                           '<div class="col-8">' +
+                           '<p class="p-size">' + response.note + '</p>' +
+                           '</div>' +
+                           '<div class="col-1">' +
+                           '<a href="#">' + 'удалить' +'</a>' +
+                           '</div>' +
+                           '</div>' +
+                           '</div>';
+                var comm = 'comments' + '_' + response.delivery
+                $('#' + comm).append(card);
+
+          },
     });
 });
   </script>

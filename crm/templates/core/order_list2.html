@@ -3,7 +3,7 @@
 
 
 {% block content %}
-    <div class="row">
+    <div class="row" style="align-items: flex-start;">
 
         <div class="col-lg-12 secondcolor pad_list" style="background-color:#f5f5f5;">
                 <br>
@@ -23,20 +23,22 @@
             <hr>
         {% if object_list %}
         <div class="row" style="margin-top:1%; margin-bottom:1%;">
-            <div class="col"><p class="p-size">Клиент</p></div>
-            <div class="col"><p class="p-size">Маркировка</p></div>
-            <div class="col"><p class="p-size">Статус</p></div>
-            <div class="col"><p class="p-size">Дата оформления</p></div>
+            <div class="col center"><p class="p-size">Клиент</p></div>
+            <div class="col center"><p class="p-size">Маркировка</p></div>
+            <div class="col center"><p class="p-size">Статус</p></div>
+            <div class="col center"><p class="p-size">Дата оформления</p></div>
+            <div class="col center"><p class="p-size">Менеджер</p></div>
         </div>
           {% for order in object_list %}
 
           {% if order.status == 'Оформление' %}
             <a href="{% url 'core:upd' order.pk %}">
                 <div class="row list-height" style="font-weight: 700; border-color:#ead1dc; margin-top:1%; margin-bottom:1%; background-color:#fff;">
-                    <div class="col"><p>{{order.client}}</p></div>
-                    <div class="col"><p>{{order.marker}}</p></div>
-                    <div class="col"><p>{{order.status}}</p></div>
-                    <div class="col"><p>{{order.date_create}}</p></div>
+                    <div class="col center"><p class="p-size">{{order.client}}</p></div>
+                    <div class="col center"><p class="p-size">{{order.marker}}</p></div>
+                    <div class="col center"><p class="p-size">{{order.status}}</p></div>
+                    <div class="col center"><p class="p-size">{{order.date_create}}</p></div>
+                    <div class="col center"><p class="p-size">{{order.owner}}</p></div>
                 </div>
             </a>
 
@@ -44,19 +46,21 @@
           {% elif order.status == 'Завершен' %}
             <a href="{% url 'core:upd' order.pk %}">
                 <div class="row list-height" style="font-weight: 700; border-color:#cff2bf; margin-top:1%; margin-bottom:1%; background-color:#fff;">
-                    <div class="col"><p>{{order.client}}</p></div>
-                    <div class="col"><p>{{order.marker}}</p></div>
-                    <div class="col"><p>{{order.status}}</p></div>
-                    <div class="col"><p>{{order.date_create}}</p></div>
+                    <div class="col center"><p class="p-size">{{order.client}}</p></div>
+                    <div class="col center"><p class="p-size">{{order.marker}}</p></div>
+                    <div class="col center"><p class="p-size">>{{order.status}}</p></div>
+                    <div class="col center"><p class="p-size">{{order.date_create}}</p></div>
+                    <div class="col center"><p class="p-size">{{order.owner}}</p></div>
                 </div>
             </a>
           {% else %}
             <a href="{% url 'core:upd' order.pk %}">
                 <div class="row list-height" style="font-weight: 700; border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
-                    <div class="col"><p>{{order.client}}</p></div>
-                    <div class="col"><p>{{order.marker}}</p></div>
-                    <div class="col"><p>{{order.status}}</p></div>
-                    <div class="col"><p>{{order.date_create}}</p></div>
+                    <div class="col center"><p class="p-size">{{order.client}}</p></div>
+                    <div class="col center"><p class="p-size">{{order.marker}}</p></div>
+                    <div class="col center"><p class="p-size">{{order.status}}</p></div>
+                    <div class="col center"><p class="p-size">{{order.date_create}}</p></div>
+                    <div class="col center"><p class="p-size">{{order.owner}}</p></div>
                 </div>
             </a>
           {% endif %}
@@ -66,4 +70,5 @@
     </div>
     </div>
     {% endif %}
+
 {% endblock %}

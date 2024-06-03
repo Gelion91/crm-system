@@ -3,7 +3,7 @@ from django import forms
 from django_filters import DateFromToRangeFilter, MultipleChoiceFilter, AllValuesMultipleFilter
 from django_filters.widgets import RangeWidget, DateRangeWidget
 
-from core.models import Order, Product
+from core.models import Order, Product, Logistics
 
 
 class DatInput(forms.DateInput):
@@ -55,3 +55,51 @@ class ProductFilter(django_filters.FilterSet):
     class Meta:
         model = Product
         fields = ['paid', 'arrive']
+
+
+class DeliveryFilter(django_filters.FilterSet):
+    CHOICES = (
+        ('all', 'Все'),
+        ('in_work', 'Текущие'),
+    )
+
+    DELIVERY_CHOICES = [
+        ('auto', "Авто"),
+        ('auto_express', "Авто-экспресс"),
+        ('rail', "Жд"),
+        ('avia', "Авиа"),
+    ]
+    marker = django_filters.CharFilter(label='Поиск по маркировке', method='filter_by_marker')
+    status = django_filters.ChoiceFilter(label='Статус', choices=CHOICES, method='filter_by_status')
+    type_arrive = django_filters.ChoiceFilter(label='Тип отправления', choices=DELIVERY_CHOICES,
+                                              method='filter_by_type')
+    date_create = DateFromToRangeFilter(widget=DateRangeWidget(attrs={'class': "form-control", 'type': 'date'}))
+
+    @property
+    def qs(self):
+        parent = super().qs
+        owner = self.request.user
+        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
+            return parent
+        else:
+            return parent.filter(owner=owner)
+
+    def filter_by_marker(self, queryset, name, value):
+        return Logistics.objects.filter(marker__icontains=value)
+
+    def filter_by_status(self, queryset, name, value):
+        if value == 'all':
+            queryset = Logistics.objects.all()
+        return queryset
+
+    def filter_by_type(self, queryset, name, value):
+        if value:
+            choices = self.DELIVERY_CHOICES
+            for choice in choices:
+                if value in choice:
+                    queryset = queryset.filter(delivery=choice[-1])
+            return queryset
+        else:
+            queryset = queryset
+            return queryset
+
