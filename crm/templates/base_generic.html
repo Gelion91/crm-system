@@ -61,6 +61,8 @@
                         {{user.username}}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="{{m.title}}">
+
+                            {% if request.user.is_superuser %}<li><a class="dropdown-item" href="{% url 'login:register' %}">Регистрация нового пользователя</a></li>{% endif %}
                             <li><a class="dropdown-item" href="{% url 'login:logout' %}">Выйти</a></li>
                     </ul>
                 </div>

@@ -1,5 +1,7 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from django.forms import ModelForm
 
 from clients.models import Comments
@@ -48,3 +50,5 @@ class CommentForm(ModelForm):
         model = Comments
         fields = '__all__'
         exclude = ('owner', 'client')
+
+

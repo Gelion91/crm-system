@@ -212,7 +212,7 @@ class UpdateProduct(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     def form_valid(self, form):
         """If the form is valid, save the associated model."""
         form.instance.id = self.object.pk
-        form.instance.owner = self.request.user
+        form.instance.owner = self.object.owner
         self.object = form.save()
         return super().form_valid(form)
 
@@ -597,7 +597,7 @@ class AddAccount(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Добавить аккаунт'
         context['accounts'] = [{
-            'user': i.username,
+            'user': i,
             'accounts': [acc for acc in i.accounts.all()]
         }
             for i in User.objects.all()]
