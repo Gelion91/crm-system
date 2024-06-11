@@ -55,8 +55,13 @@ window.onload = function () {
             $("#show_info")
                 .css("display", "block")
                 .animate({ opacity: 1 }, 198);
+            console.log(e.clientX, e.clientY)
+            if (e.clientX > 700) {
+                    $('#show_info').css({'left': e.clientX - 700, 'top': e.clientY + 10});
+                    }
+            else {
             $('#show_info').css({'left': e.clientX + 10, 'top': e.clientY + 10});
-
+            }
     $.ajax({
             type        : 'POST',
             url         : "{% url 'core:show_product_info' %}",
