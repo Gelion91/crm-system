@@ -30,6 +30,7 @@ urlpatterns = [
     path('get_price', views.get_price, name='get_price'),
     path('save_image', views.save_image, name='save_image'),
     path('logistic/add_delivery', views.AddDelivery.as_view(), name='add_delivery'),
+    path('show_product_info', views.show_product_info, name='show_product_info'),
     path('logistic/update_delivery/<int:logistic_id>/', views.UpdateDelivery.as_view(), name='update_delivery'),
     path('account/add_acc/', views.AddAccount.as_view(), name='add_account'),
     path('account/delete/<int:account_id>/', views.DeleteAccount.as_view(), name='delete_account'),

@@ -25,28 +25,30 @@
             <hr>
         {% if object_list %}
         <div class="row" style="margin-top:1%; margin-bottom:1%;">
-            <div class="col center"><p class="p-size">Маркировка</p></div>
-            <div class="col center"><p class="p-size">Наименование</p></div>
-            <div class="col center"><p class="p-size">Оплачен</p></div>
-            <div class="col center"><p class="p-size">Прибыл</p></div>
-            <div class="col center"><p class="p-size"></p></div>
+            <div class="col-2 center"><p class="p-size">Маркировка</p></div>
+            <div class="col-2 center"><p class="p-size">Наименование</p></div>
+            <div class="col-2 center"><p class="p-size">Оплачен</p></div>
+            <div class="col-2 center"><p class="p-size">Прибыл</p></div>
+            <div class="col-2 center"><p class="p-size">Менеджер</p></div>
+            <div class="col-2 center"><p class="p-size"></p></div>
         </div>
             <div class="col accordion accordion-flush" id="accordionFlushExample">
           {% for obj in object_list %}
             <div class="row list-height" style="font-weight: 700; border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
-                <div class="col center"><p>{{obj.product_marker}}</p></div>
-                <div class="col center"><p>{{obj.name}}</p></div>
-                <div class="col checkbox-wr"><input id="paid_{{obj.pk}}" name="{{obj.pk}}" class="toggle_paid checkbox_margin" type="checkbox" {% if obj.paid %} checked="true" {% endif %}>
+                <div class="col-2 center"><p class="p-size">{{obj.product_marker}}</p></div>
+                <div class="col-2 center"><p class="p-size">{{obj.name}}</p></div>
+                <div class="col-2 checkbox-wr"><input id="paid_{{obj.pk}}" name="{{obj.pk}}" class="toggle_paid checkbox_margin" type="checkbox" {% if obj.paid %} checked="true" {% endif %}>
                     <label for="paid_{{obj.pk}}">
                         <div class="tick_mark"></div>
                     </label>
                 </div>
-                <div class="col checkbox-wr"><input id="arrive_{{obj.pk}}" name="{{obj.pk}}" class="toggle_arrive checkbox_margin" type="checkbox" {% if obj.arrive %} checked="true" {% endif %}{% if request.user.is_superuser or groups %}{% else %}disabled{% endif %}>
+                <div class="col-2 checkbox-wr"><input id="arrive_{{obj.pk}}" name="{{obj.pk}}" class="toggle_arrive checkbox_margin" type="checkbox" {% if obj.arrive %} checked="true" {% endif %}{% if request.user.is_superuser or groups %}{% else %}disabled{% endif %}>
                     <label for="arrive_{{obj.pk}}">
                         <div class="tick_mark"></div>
                     </label>
                 </div>
-                <div class="col">
+                <div class="col-2 center"><p class="p-size">{{obj.owner}}</p></div>
+                <div class="col-2">
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                         <button class="accordion-button collapsed" style="background-color:white;" type="button" data-bs-toggle="collapse" data-bs-target="#acc{{forloop.counter}}" aria-expanded="false" aria-controls="flush-collapseOne"></button>
@@ -66,6 +68,7 @@
                             <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img{{forloop.counter}}_{{obj.pk}}">
                                   <img src="{{ im.url }}" class="image-detail">
                             </a>
+                        {% endthumbnail %}
                                         <div class="modal fade" id="img{{forloop.counter}}_{{obj.pk}}" tabindex="-1" aria-labelledby="img{{forloop.counter}}" aria-hidden="true">
                                           <div class="modal-dialog modal-xl">
                                             <div class="modal-content">
@@ -83,7 +86,6 @@
                                             </div>
                                           </div>
                                         </div>
-                        {% endthumbnail %}
                   {% endfor %}
                   <hr>
                   <p>Фотографии товара на складе</p>
@@ -95,6 +97,7 @@
                             <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#packed_img{{forloop.counter}}_{{obj.pk}}">
                                   <img src="{{ im.url }}" class="image-detail">
                             </a>
+                        {% endthumbnail %}
                                         <div class="modal fade" id="packed_img{{forloop.counter}}_{{obj.pk}}" tabindex="-1" aria-labelledby="packed_img{{forloop.counter}}" aria-hidden="true">
                                           <div class="modal-dialog modal-xl">
                                             <div class="modal-content">
@@ -112,7 +115,6 @@
                                             </div>
                                           </div>
                                         </div>
-                        {% endthumbnail %}
                   {% endfor %}
                   <hr>
 
@@ -267,7 +269,7 @@ $('.notes').on('submit', function(e)
                            '<p class="p-size">' + response.note + '</p>' +
                            '</div>' +
                            '<div class="col-1">' +
-                           '<a href="#">' + 'удалить' +'</a>' +
+                           '<a href=' + response.url + '>' + 'удалить' + '</a>' +
                            '</div>' +
                            '</div>' +
                            '</div>';

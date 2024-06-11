@@ -281,6 +281,7 @@ class AddDelivery(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Оформить доставку'
+        context['products'] = Product.objects.prefetch_related('logistics').filter(paid=True, arrive=True).filter(logistics__product__isnull=True)
         return context
 
     def get_form_kwargs(self):
@@ -291,6 +292,23 @@ class AddDelivery(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.owner = self.request.user
         return super().form_valid(form)
+
+
+def show_product_info(request):
+    product_id = request.POST.get("id")
+    product = Product.objects.get(pk=product_id)
+
+    response = {
+        'marker': product.product_marker,
+        'name': product.name,
+        'owner': product.owner.username if product.owner else None,
+        'price_company': float(product.price_company),
+        'price_client': float(product.price),
+        'image': [i.image.url for i in product.images.all() if product.images.all()],
+        'user': request.user.username if request.user else None,
+    }
+
+    return HttpResponse(json.dumps(response), content_type='application/json')
 
 
 class UpdateDelivery(LoginRequiredMixin, UpdateView):
@@ -322,10 +340,9 @@ class ProductStatus(LoginRequiredMixin, FormMixin, FilterView):
     form_class = PackedImageForm
 
     def get_queryset(self):
-        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
-            return Product.objects.filter(logistics=None)
-        else:
-            return Product.objects.filter(logistics=None).filter(owner=self.request.user)
+        queryset = super(ProductStatus, self).get_queryset()
+        return queryset.filter(logistics=None)
+
 
     def get_success_url(self):
         return reverse('core:status_product')
@@ -430,7 +447,8 @@ def save_notes_product(request):
         'note': note,
         'product': product_id,
         'user': request.user.username,
-        'date': dateformat.format(comment.date_create, settings.DATE_FORMAT).lstrip('0')
+        'date': dateformat.format(comment.date_create, settings.DATE_FORMAT).lstrip('0'),
+        'url': reverse("core:delete_notes_product", kwargs={"pk": comment.pk})
     }
     print(response)
 
@@ -537,7 +555,8 @@ def save_notes_delivery(request):
         'note': note,
         'delivery': delivery_id,
         'user': request.user.username,
-        'date': dateformat.format(comment.date_create, settings.DATE_FORMAT).lstrip('0')
+        'date': dateformat.format(comment.date_create, settings.DATE_FORMAT).lstrip('0'),
+        'url': reverse("core:delete_notes_delivery", kwargs={"pk": comment.pk})
     }
     print(response)
 

@@ -5,6 +5,9 @@
 
 {% if form %}
     <div class="col secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
+        <div id="show_info">
+        </div>
+<div id="myOverlay"></div>
     <form id="delivery-form" action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-error">{{ form.non_field_errors }}</div>
@@ -33,6 +36,68 @@ window.onload = function () {
     })
 
 };
+
+    $('[name="product"]').on( "mouseenter", function(e) {
+            var show_info = $(this).attr('rel');
+            $("#show_info")
+                .css("display", "block")
+                .animate({ opacity: 1 }, 198);
+            $('#show_info').css({'left': e.clientX + 10, 'top': e.clientY + 10});
+
+    $.ajax({
+            type        : 'POST',
+            url         : "{% url 'core:show_product_info' %}",
+            data: {
+                id: $(this).attr('value'),
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+
+            success:function(response){
+                var card = '<div class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">' +
+                           '<div class="row comment" style="margin:0;">' +
+                           '<div class="col-3" style="background-color:#f2feff; margin-left: auto; margin-right: auto;">' +
+                           '<div class="row" style="margin-left: auto; margin-right: auto;">' +
+                           '<p class="p-size">' + response.marker + '</p>' +
+                           '</div>' +
+                           '<div class="row" style="margin-left: auto; margin-right: auto;">' +
+                           '<p class="p-size">' + response.name + '</p>' +
+                           '</div>' +
+                           '</div>' +
+                           '<div class="col-8">' +
+                           '<p class="p-size">' + response.owner + '</p>' +
+                           '</div>' +
+                           '<div class="col-1">' +
+                           '</div>' +
+                           '</div>' +
+                           '</div>';
+
+               var card_image = '<div class="col">' +
+                                '<p class="p-size">' + response.marker + '</p>' +
+                                '</div>' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + response.name + '</p>' +
+                                '</div>'
+
+
+                var comm = 'comments' + '_' + response.product
+                $('#show_info').append(card_image);
+                $.each(response.image, function(k, v) {
+                    var img = '<img class="img" src="' + v + '">'
+                    $('#show_info').append(img);
+                    if (k == 3) {
+                    return false;
+                    }
+                });
+
+          },
+    });
+});
+
+
+$('[name="product"]').on( "mouseout", function() {
+            $("#show_info").css("display", "none");
+            $("#show_info").empty();
+});
 
 
     $('[name="product"]').click(function() {
