@@ -111,12 +111,12 @@ class DeliveryFilter(django_filters.FilterSet):
 
     @property
     def qs(self):
-        parent = super().qs
+        queryset = super().qs
         owner = self.request.user
         if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
-            return parent
+            return queryset
         else:
-            return parent.filter(owner=owner)
+            return queryset.filter(product__owner=self.request.user.pk).distinct()
 
     def filter_by_order(self, queryset, name, value):
         return queryset.order_by(value)
@@ -144,4 +144,37 @@ class DeliveryFilter(django_filters.FilterSet):
         else:
             queryset = queryset
             return queryset
+
+
+class DeliveryListFilter(django_filters.FilterSet):
+    CHOICES_ORDER = (
+        ('marker', 'По маркировке'),
+        ('-marker', 'По маркировке в обратном порядке'),
+        ('owner', 'По менеджерам'),
+        ('-owner', 'По менеджерам в обратном порядке')
+    )
+    date_create = DateFromToRangeFilter(widget=DateRangeWidget(attrs={'class': "form-control", 'type': 'date'}))
+
+    CHOICES = (
+        ('all', 'Все'),
+        ('in_work', 'Текущие'),
+    )
+
+    ordering = django_filters.ChoiceFilter(label='Сортировать', choices=CHOICES_ORDER, method='filter_by_order')
+    marker = django_filters.CharFilter(label='Поиск по маркировке', method='filter_by_marker')
+    date_create = DateFromToRangeFilter(widget=DateRangeWidget(attrs={'class': "form-control", 'type': 'date'}))
+
+    @property
+    def qs(self):
+        queryset = super().qs
+        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
+            return queryset
+        else:
+            return queryset.filter(product__owner=self.request.user.pk).distinct()
+
+    def filter_by_order(self, queryset, name, value):
+        return queryset.order_by(value)
+
+    def filter_by_marker(self, queryset, name, value):
+        return queryset.filter(marker__icontains=value)
 

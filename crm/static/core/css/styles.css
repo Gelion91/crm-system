@@ -1041,3 +1041,11 @@ align-self: center;
 .img {
     width: 50%;
 }
+
+
+@media (max-width: 768px) {
+  .fl_image {
+    flex-direction: column;
+    }
+}
+

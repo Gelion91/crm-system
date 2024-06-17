@@ -16,9 +16,9 @@ from django.views.generic.edit import FormMixin
 from django_filters.views import FilterView
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 
-from core.filters import OrderFilter, ProductFilter, DeliveryFilter
+from core.filters import OrderFilter, ProductFilter, DeliveryFilter, DeliveryListFilter
 from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
-    ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm, ProductImageInlineFormset, PackedImageForm, \
+    ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm, PackedImageForm, \
     LogisticImageForm, AddAccountForm, ProductNotesForm, DeliveryNotesForm
 from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics, Account, \
     NotesProduct, NotesDelivery
@@ -259,30 +259,34 @@ class DeliveryListView(LoginRequiredMixin, FilterView):
     model = Logistics
     paginate_by = 16
     template_name = 'core/delivery_list.html'
+    filterset_class = DeliveryListFilter
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Доставки'
+        context['form'] = DeliveryListFilter.form
         return context
 
     def get_queryset(self):
         if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
-            return Logistics.objects.all()
+            return Logistics.objects.filter(third_step=True)
         else:
-            return Logistics.objects.filter(owner=self.request.user)
+            return Logistics.objects.filter(third_step=True).filter(product__owner=self.request.user.pk).distinct()
 
 
 class AddDelivery(LoginRequiredMixin, CreateView):
     model = Logistics
     form_class = DeliveryAddForm
     template_name = 'core/add_delivery.html'
-    success_url = '/'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Оформить доставку'
         context['products'] = Product.objects.prefetch_related('logistics').filter(paid=True, arrive=True).filter(logistics__product__isnull=True)
         return context
+
+    def get_success_url(self):
+        return reverse('core:status_delivery')
 
     def get_form_kwargs(self):
         kwargs = super(AddDelivery, self).get_form_kwargs()

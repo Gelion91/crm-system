@@ -32,10 +32,13 @@
     <div class="col-xs-12 col-sm-4">
         <div class="accordion accordion-flush" id="accordionFlushExample">
         {% for prod in products %}
-
             <div class="accordion-item">
             <h2 class="accordion-header">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc{{forloop.counter}}" aria-expanded="false" aria-controls="flush-collapseOne">
+                {% if prod.product.logistics.all %}
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc{{forloop.counter}}" aria-expanded="false" aria-controls="flush-collapseOne" style="background-color:#d1dee3;">
+                {% else %}
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc{{forloop.counter}}" aria-expanded="false" aria-controls="flush-collapseOne">
+                {% endif %}
                 <div class="row"><a href="{% url 'core:upd_product' prod.product.pk %}">{{prod.product.product_marker}} | {{prod.product.name}} | Оплачен: {% if prod.product.paid %}&#9989;{% else %}&#10060;{% endif %} | На складе {% if prod.product.arrive %}&#9989;{% else %}&#10060;{% endif %}</a></div>
               </button>
             </h2>

@@ -32,7 +32,7 @@
             <div class="col-2 center"><p class="p-size">Отправлен</p></div>
             <div class="col-2 center"><p class="p-size">В Москве</p></div>
             <div class="col-2 center"><p class="p-size">Прибыл клиенту</p></div>
-            <div class="col-2 center"><p class="p-size">Менеджер</p></div>
+            <div class="col-2 center"><p class="p-size">Оформил</p></div>
             <div class="col-2 center"><p class="p-size"></p></div>
         </div>
 
@@ -71,44 +71,90 @@
         <div id="acc{{forloop.counter}}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
               <div class="accordion-body">
 
-<!--                  <p>Фотографии упакованных товаров</p>-->
-<!--                  {% for product in obj.product.all %}-->
-<!--                  -->
-<!--                    {% for img in product.packed_images.all %}-->
-<!--                  <img src="{{ img.url }}" class="image-detail">-->
-<!--                    {% load thumbnail %}-->
-<!--                        {% thumbnail img.image "100x100" as im %}-->
-<!--                    &lt;!&ndash; Modal &ndash;&gt;-->
-<!--                            <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img{{forloop.counter}}_{{obj.pk}}">-->
-<!--                                  <img src="{{ im.url }}" class="image-detail">-->
-<!--                            </a>-->
-<!--                                        <div class="modal fade" id="img{{forloop.counter}}_{{obj.pk}}" tabindex="-1" aria-labelledby="img{{forloop.counter}}" aria-hidden="true">-->
-<!--                                          <div class="modal-dialog modal-xl">-->
-<!--                                            <div class="modal-content">-->
-<!--                                              <div class="modal-header">-->
-<!--                                                <h1 class="modal-title fs-5" id="exampleModalLabel">{{img.product}}</h1>-->
-<!--                                              </div>-->
-<!--                                              <div class="modal-body">-->
-<!--                                                <img src="{{ img.image.url }}">-->
-<!--                                              </div>-->
-<!--                                              <div class="modal-footer">-->
-<!--                                                <form method="POST" action="{% url 'core:delete_logistic_image' img.pk %}">-->
-<!--                                                    {% csrf_token %}<input type="submit" value="Удалить">-->
-<!--                                                </form>-->
-<!--                                              </div>-->
-<!--                                            </div>-->
-<!--                                          </div>-->
-<!--                                        </div>-->
-<!--                        {% endthumbnail %}-->
-<!--                  {% endfor %}-->
-<!--                  {% endfor %}-->
-<!--                  <hr>-->
+                  {% for product in obj.product.all %}
+                  {% with outer_counter=forloop.counter %}
+                  {% if outer_counter >= 2 %}
+                  <hr>
+                  {% endif %}
+                  <div class="row">
+                  {% if product.images.all %}
+                      <p class="p-size" style="font-weight: bold;">{{product.name}}</p>
+                  <div class="col">
+                    <p class="p-size">Фото продавца</p>
+                    {% for img in product.images.all %}
+                  <img src="{{ img.url }}" class="image-detail">
+                    {% load thumbnail %}
+                        {% thumbnail img.image "64x64" as im %}
+                    <!-- Modal -->
+                            <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img{{forloop.counter}}_{{outer_counter}}_{{obj.pk}}">
+                                  <img src="{{ im.url }}" class="image-detail">
+                            </a>
+                                        <div class="modal fade" id="img{{forloop.counter}}_{{outer_counter}}_{{obj.pk}}" tabindex="-1" aria-labelledby="img{{forloop.counter}}" aria-hidden="true">
+                                          <div class="modal-dialog modal-xl">
+                                            <div class="modal-content">
+                                              <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="exampleModalLabel">{{img.product}}</h1>
+                                              </div>
+                                              <div class="modal-body">
+                                                <img src="{{ img.image.url }}">
+                                              </div>
+                                              <div class="modal-footer">
+                                                <form method="POST" action="{% url 'core:delete_logistic_image' img.pk %}">
+                                                    {% csrf_token %}<input type="submit" value="Удалить">
+                                                </form>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                        {% endthumbnail %}
+                  {% endfor %}
+                  </div>
+                  {% endif %}
 
-                  <p>Фотографии груза</p>
+                  {% if product.packed_images.all %}
+                  <div class="col">
+                    <p class="p-size">фото на складе</p>
+                    {% for img in product.packed_images.all %}
+                  <img src="{{ img.url }}" class="image-detail">
+                    {% load thumbnail %}
+                        {% thumbnail img.image "64x64" as im %}
+                    <!-- Modal -->
+                            <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img{{forloop.counter}}_{{outer_counter}}_{{obj.pk}}_packed">
+                                  <img src="{{ im.url }}" class="image-detail">
+                            </a>
+                                        <div class="modal fade" id="img{{forloop.counter}}_{{outer_counter}}_{{obj.pk}}_packed" tabindex="-1" aria-labelledby="img{{forloop.counter}}" aria-hidden="true">
+                                          <div class="modal-dialog modal-xl">
+                                            <div class="modal-content">
+                                              <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="exampleModalLabel">{{img.product}}</h1>
+                                              </div>
+                                              <div class="modal-body">
+                                                <img src="{{ img.image.url }}">
+                                              </div>
+                                              <div class="modal-footer">
+                                                <form method="POST" action="{% url 'core:delete_logistic_image' img.pk %}">
+                                                    {% csrf_token %}<input type="submit" value="Удалить">
+                                                </form>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                        {% endthumbnail %}
+                  {% endfor %}
+                  </div>
+                  {% endif %}
+                  </div>
+                  {% endwith %}
+                  {% endfor %}
+                  <br>
+
+                  {% if obj.logistic_images.all %}
+                  <hr style="border-width: 3px;">
+                  <p class="p-size">Фотографии груза</p>
                   {% for img in obj.logistic_images.all %}
                   <img src="{{ img.url }}" class="image-detail">
                     {% load thumbnail %}
-                        {% thumbnail img.image "100x100" as im %}
+                        {% thumbnail img.image "64x64" as im %}
                     <!-- Modal -->
                             <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img{{forloop.counter}}_{{obj.pk}}">
                                   <img src="{{ im.url }}" class="image-detail">
@@ -133,13 +179,15 @@
                         {% endthumbnail %}
                   {% endfor %}
                   <hr>
+                  {% endif %}
 
                     <form id="image_form_{{obj.pk}}" class="row" name="{{obj.pk}}" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <input type='hidden' value='{{obj.pk}}' name='id'>
-                        {{ image_form | crispy}}
-                        <button class="btn btn-outline-secondary" type="submit">Сохранить</button>
-
+                        <div class="row fl_image">
+                        <div class="col-11">{{ image_form | crispy}}</div>
+                        <div class="col-1"><button class="btn btn-secondary" type="submit">Сохранить</button></div>
+                        </div>
                      </form>
 <!--                  <form id="{{obj.pk}}" class="row packed_image" name="packed_image" enctype="multipart/form-data">-->
 <!--                      <label for="packed_images">Добавить изображение со склада:</label>-->

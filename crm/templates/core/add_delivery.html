@@ -36,6 +36,32 @@ window.onload = function () {
     const csrf = document.getElementsByName('csrfmiddlewaretoken')
     const order_price = document.getElementById('id_order_price')
 
+    const full_price = document.getElementById('id_full_price')
+    const tariff = document.getElementById('id_tariff')
+    const insurance = document.getElementById('id_insurance')
+    const package_price = document.getElementById('id_package_price')
+
+    tariff.addEventListener('input', ()=>{
+                    if(tariff.value == ''){
+                            tariff.value = 0;
+                        }
+                    full_price.value = (parseFloat(tariff.value) +  parseFloat(insurance.value) +  parseFloat(package_price.value)).toFixed(2)
+    })
+
+    insurance.addEventListener('input', ()=>{
+                    if(insurance.value == ''){
+                            insurance.value = 0;
+                        }
+                    full_price.value = (parseFloat(tariff.value) +  parseFloat(insurance.value) +  parseFloat(package_price.value)).toFixed(2)
+    })
+
+    package_price.addEventListener('input', ()=>{
+                    if(package_price.value == ''){
+                            package_price.value = 0;
+                        }
+                    full_price.value = (parseFloat(tariff.value) +  parseFloat(insurance.value) +  parseFloat(package_price.value)).toFixed(2)
+    })
+
     volume.addEventListener('input', ()=>{
                     const volume_data = volume.value
                     console.log(volume_data)
@@ -55,7 +81,6 @@ window.onload = function () {
             $("#show_info")
                 .css("display", "block")
                 .animate({ opacity: 1 }, 198);
-            console.log(e.clientX, e.clientY)
             if (e.clientX > 700) {
                     $('#show_info').css({'left': e.clientX - 700, 'top': e.clientY + 10});
                     }
@@ -71,33 +96,15 @@ window.onload = function () {
                 },
 
             success:function(response){
-                var card = '<div class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">' +
-                           '<div class="row comment" style="margin:0;">' +
-                           '<div class="col-3" style="background-color:#f2feff; margin-left: auto; margin-right: auto;">' +
-                           '<div class="row" style="margin-left: auto; margin-right: auto;">' +
-                           '<p class="p-size">' + response.marker + '</p>' +
-                           '</div>' +
-                           '<div class="row" style="margin-left: auto; margin-right: auto;">' +
-                           '<p class="p-size">' + response.name + '</p>' +
-                           '</div>' +
-                           '</div>' +
-                           '<div class="col-8">' +
-                           '<p class="p-size">' + response.owner + '</p>' +
-                           '</div>' +
-                           '<div class="col-1">' +
-                           '</div>' +
-                           '</div>' +
-                           '</div>';
-
                var card_image = '<div class="col">' +
-                                '<p class="p-size">' + response.marker + '</p>' +
+                                '<p class="p-size">' + 'Маркировка: ' + response.marker + '</p>' +
                                 '</div>' +
                                 '<div class="col">' +
-                                '<p class="p-size">' + response.name + '</p>' +
+                                '<p class="p-size">' + 'Наименование: ' + response.name + '</p>' +
                                 '</div>'
 
 
-                var comm = 'comments' + '_' + response.product
+                $("#show_info").empty();
                 $('#show_info').append(card_image);
                 $.each(response.image, function(k, v) {
                     var img = '<img class="img" src="' + v + '">'
@@ -119,10 +126,7 @@ $('[name="product"]').on( "mouseout", function() {
 
 
     $('[name="product"]').click(function() {
-    console.log('работает')
     var checked_paid = $(this).is(':checked');
-    console.log(checked_paid);
-    console.log($(this).attr('value'))
     const order_price = document.getElementById('id_order_price')
 
     $.ajax({

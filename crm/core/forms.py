@@ -169,7 +169,7 @@ class ImageForm(ModelForm):
 
 
 class PackedImageForm(forms.Form):
-    image = MultipleFileField(label='Добавить фото товара со склада')
+    image = MultipleFileField(label='')
 
 # class PackedImageForm(ModelForm):
 #     def __init__(self, *args, **kwargs):
@@ -250,12 +250,15 @@ class DeliveryAddForm(ModelForm):
 
             Div(Div('package_price', css_class='col-6'),
                 Div('order_price', css_class='col-6'), css_class='row'),
+            'full_price',
+            Div(Div('exchange_rate', css_class='col-6'),
+                Div('paid_cash', css_class='col-6'), css_class='row'),
         )
 
     class Meta:
         model = Logistics
         fields = '__all__'
-        exclude = ('height', 'width', 'lenght', 'full_price', 'first_step', 'second_step', 'third_step', 'owner')
+        exclude = ('height', 'width', 'lenght', 'first_step', 'second_step', 'third_step', 'owner')
 
 
 
@@ -279,7 +282,7 @@ def render_js(cls):
 
 
 class LogisticImageForm(forms.Form):
-    image = MultipleFileField(label='Добавить фото груза')
+    image = MultipleFileField(label='')
 
 
 class AddAccountForm(ModelForm):

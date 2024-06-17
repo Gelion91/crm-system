@@ -15,7 +15,10 @@
                     </div>
 
                     <div class="offcanvas-body">
-                        Привет
+                        <form action="" method="get">
+                            {{ filter.form|crispy }}
+                         <button class="btn btn-outline-secondary" type="submit">Поиск</button>
+                         </form>
                     </div>
 
                 </div>
@@ -25,7 +28,7 @@
             <div class="col center"><p class="p-size">Маркировка</p></div>
             <div class="col center"><p class="p-size">Упаковка</p></div>
             <div class="col center"><p class="p-size">Дата оформления</p></div>
-            <div class="col center"><p class="p-size">Менеджер</p></div>
+            <div class="col center"><p class="p-size">Оформил</p></div>
         </div>
           {% for obj in object_list %}
             <a href="{% url 'core:update_delivery' obj.pk %}">

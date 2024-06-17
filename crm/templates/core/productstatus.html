@@ -59,11 +59,12 @@
 
         <div id="acc{{forloop.counter}}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
               <div class="accordion-body">
+                  {% if obj.images.all %}
                   <p>Фотографии товара у продавца</p>
                   {% for img in obj.images.all %}
                   <img src="{{ img.url }}" class="image-detail">
                     {% load thumbnail %}
-                        {% thumbnail img.image "100x100" as im %}
+                        {% thumbnail img.image "64x64" as im %}
                     <!-- Modal -->
                             <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img{{forloop.counter}}_{{obj.pk}}">
                                   <img src="{{ im.url }}" class="image-detail">
@@ -88,16 +89,18 @@
                                         </div>
                   {% endfor %}
                   <hr>
+                  {% endif %}
+
+                  {% if obj.packed_images.all %}
                   <p>Фотографии товара на складе</p>
                   {% for img in obj.packed_images.all %}
                   <img src="{{ img.url }}" class="image-detail">
                     {% load thumbnail %}
-                        {% thumbnail img.image "100x100" as im %}
+                        {% thumbnail img.image "64x64" as im %}
                     <!-- Modal -->
                             <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#packed_img{{forloop.counter}}_{{obj.pk}}">
                                   <img src="{{ im.url }}" class="image-detail">
                             </a>
-                        {% endthumbnail %}
                                         <div class="modal fade" id="packed_img{{forloop.counter}}_{{obj.pk}}" tabindex="-1" aria-labelledby="packed_img{{forloop.counter}}" aria-hidden="true">
                                           <div class="modal-dialog modal-xl">
                                             <div class="modal-content">
@@ -115,14 +118,18 @@
                                             </div>
                                           </div>
                                         </div>
+                  {% endthumbnail %}
                   {% endfor %}
                   <hr>
+                  {% endif %}
 
                     <form id="image_form_{{obj.pk}}" class="row" name="{{obj.pk}}" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <input type='hidden' value='{{obj.pk}}' name='id'>
-                        {{ image_form | crispy}}
-                        <button class="btn btn-outline-secondary" type="submit">Сохранить</button>
+                        <div class="row fl_image">
+                        <div class="col-11">{{ image_form | crispy}}</div>
+                        <div class="col-1"><button class="btn btn-secondary" type="submit">Сохранить</button></div>
+                        </div>
                      </form>
 
                   <div id="comments_{{obj.pk}}">

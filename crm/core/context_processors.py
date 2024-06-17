@@ -25,11 +25,11 @@ def menu_manager(request):
                              {'title': 'Ожидают отправки', 'url_name': 'core:on_pay', 'path': 'orders/on_pay/'},
                              {'title': 'Завершенные заказы', 'url_name': 'core:finish', 'path': 'orders/finish/'}]},
 
-                {'title': 'Доставка', 'url_name': 'core:logistic',
+                {'title': 'Доставка', 'url_name': 'core:status_delivery',
                  'submenu': [
                      {'title': 'Оформить доставку', 'url_name': 'core:add_delivery', 'path': 'logistic/add_delivery'},
                      {'title': 'Статус товаров', 'url_name': 'core:status_product', 'path': 'logistic/sp'},
-                     {'title': 'Статус грузов', 'url_name': 'core:status_delivery', 'path': 'logistic/status_delivery'},
+                     {'title': 'Завершенные доставки', 'url_name': 'core:archive', 'path': 'logistic/archive'},
                      ]},
                 {'title': 'Управление аккаунтами', 'url_name': 'core:add_account'}
                 ]
@@ -47,10 +47,10 @@ def menu_manager(request):
                              {'title': 'Ожидают отправки', 'url_name': 'core:on_pay', 'path': 'orders/on_pay/'},
                              {'title': 'Завершенные заказы', 'url_name': 'core:finish', 'path': 'orders/finish/'}]},
 
-                {'title': 'Доставка', 'url_name': 'core:logistic',
+                {'title': 'Доставка', 'url_name': 'core:status_delivery',
                  'submenu': [{'title': 'Оформить доставку', 'url_name': 'core:add_delivery', 'path': 'logistic/add_delivery'},
                              {'title': 'Статус товаров', 'url_name': 'core:status_product', 'path': 'logistic/sp'},
-                             {'title': 'Статус грузов', 'url_name': 'core:status_delivery', 'path': 'logistic/status_delivery'},
+                             {'title': 'Завершенные доставки', 'url_name': 'core:archive', 'path': 'logistic/archive'},
                              ]}
                 ]
         return {'menu': menu}
@@ -62,11 +62,11 @@ def menu_manager(request):
                      {'title': 'Активные клиенты', 'url_name': 'clients:active', 'path': 'clients/active_clients'},
                      {'title': 'Мои клиенты', 'url_name': 'clients:my_clients', 'path': 'clients/my_clients'}]},
 
-                {'title': 'Доставка', 'url_name': 'core:logistic',
+                {'title': 'Доставка', 'url_name': 'core:status_delivery',
                  'submenu': [
                      {'title': 'Оформить доставку', 'url_name': 'core:add_delivery', 'path': 'logistic/add_delivery'},
                      {'title': 'Статус товаров', 'url_name': 'core:status_product', 'path': 'logistic/sp'},
-                     {'title': 'Статус грузов', 'url_name': 'core:status_delivery', 'path': 'logistic/status_delivery'},
+                     {'title': 'Завершенные доставки', 'url_name': 'core:archive', 'path': 'logistic/archive'},
                      ]}
                 ]
         return {'menu': menu}
