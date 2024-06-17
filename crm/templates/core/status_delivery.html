@@ -77,10 +77,10 @@
                   <hr>
                   {% endif %}
                   <div class="row">
-                  {% if product.images.all %}
-                      <p class="p-size" style="font-weight: bold;">{{product.name}}</p>
+                  <p class="p-size" style="font-weight: bold;">{{product.name}} | {{product.product_marker}}</p>
                   <div class="col">
-                    <p class="p-size">Фото продавца</p>
+                  <p class="p-size">Фото продавца</p>
+                  {% if product.images.all %}
                     {% for img in product.images.all %}
                   <img src="{{ img.url }}" class="image-detail">
                     {% load thumbnail %}
@@ -108,11 +108,10 @@
                                         </div>
                         {% endthumbnail %}
                   {% endfor %}
-                  </div>
                   {% endif %}
-
-                  {% if product.packed_images.all %}
+                      </div>
                   <div class="col">
+                  {% if product.packed_images.all %}
                     <p class="p-size">фото на складе</p>
                     {% for img in product.packed_images.all %}
                   <img src="{{ img.url }}" class="image-detail">
@@ -141,8 +140,8 @@
                                         </div>
                         {% endthumbnail %}
                   {% endfor %}
-                  </div>
                   {% endif %}
+                  </div>
                   </div>
                   {% endwith %}
                   {% endfor %}
