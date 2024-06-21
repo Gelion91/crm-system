@@ -797,6 +797,15 @@ tr {
     border-radius: 3px; /* Скругляем уголки */
    }
 
+.btn_url {
+    text-align: center;
+    background: #f80; /* Серый цвет фона */
+    color: #fff; /* Белый цвет текста */
+    padding: 0.5rem 0.5rem; /* Поля вокруг текста */
+    text-decoration: none; /* Убираем подчёркивание */
+    border-radius: 3px; /* Скругляем уголки */
+   }
+
 .btn_delete {
     display: inline-block; /* Строчно-блочный элемент */
     background: #CD5C5C; /* Серый цвет фона */

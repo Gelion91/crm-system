@@ -78,7 +78,8 @@
                   <hr>
                   {% endif %}
                   <div class="row">
-                  <p class="p-size" style="font-weight: bold;">{{product.name}} | {{product.product_marker}}</p>
+                      <p class="p-size" style="font-weight: bold;">{{product.name}} | {{product.product_marker}} <a href="{{product.url}}" class="btn_url" target="_blank">Ссылка на товар</a></p>
+
                   <div class="col">
                   <p class="p-size">Фото продавца</p>
                   {% if product.images.all %}
