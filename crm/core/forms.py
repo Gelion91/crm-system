@@ -25,6 +25,7 @@ class AddOrderForm(ModelForm):
         self.helper.form_method = 'post'
         self.helper.form_action = 'submit_survey'
         self.fields["account"].queryset = Account.objects.filter(user=self.current_user)
+        self.fields["client"].queryset = Clients.objects.filter(owner=self.current_user)
         self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn-secondary'))
 
     class Meta:

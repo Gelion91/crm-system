@@ -15,6 +15,7 @@ from django.views.generic.base import ContextMixin
 from django.views.generic.edit import FormMixin
 from django_filters.views import FilterView
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
+from sorl.thumbnail import get_thumbnail
 
 from core.filters import OrderFilter, ProductFilter, DeliveryFilter, DeliveryListFilter
 from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
@@ -422,20 +423,24 @@ def get_price(request):
     return JsonResponse(response)
 
 
-# Временно не работает, отключил в productstatus.html
-
-def save_image(request):
+def save_image_product(request):
     image = request.FILES.get('image')
-    product_id = request.POST.get("id")
+    product_id = request.POST.get("id").split('_')[-1]
+    print(image)
+    print(product_id)
     product = Product.objects.get(pk=product_id)
     img = PackedImagesProduct(product=product, image=image)
     img.save()
+    print(img.image.url)
 
     response = {
+        'image_mini': get_thumbnail(img.image, '64', crop='center', quality=99).url,
         'image': img.image.url,
-        'product': product_id
+        'image_id': img.pk,
+        'product_id': product.pk,
     }
 
+    # response = {'ok':200}
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 
@@ -521,6 +526,42 @@ class DeliveryStatus(LoginRequiredMixin, FormMixin, FilterView):
             img = ImagesLogistics(logistic=Logistics.objects.get(pk=logistic_id), image=img)
             img.save()
         return super().form_valid(form)
+
+
+def load_delivery_info(request):
+    delivery_id = request.POST.get("id")
+    logistic = Logistics.objects.get(pk=delivery_id)
+    products = logistic.product.all()
+    response = {
+        'delivery_id': delivery_id,
+        'product_image': {product.name: [get_thumbnail(prod.image, '64x64', crop='center', quality=99).url for prod in product.images.all()] for product in products},
+        'product_packed_image': {product.name: [prod.image.url for prod in product.packed_images.all()] for product in
+                          products},
+    }
+    print(response)
+
+    return HttpResponse(json.dumps(response), content_type='application/json')
+
+
+def save_image(request):
+    image = request.FILES.get('image')
+    logistic_id = request.POST.get("id").split('_')[-1]
+    print(image)
+    print(logistic_id)
+    logistic = Logistics.objects.get(pk=logistic_id)
+    img = ImagesLogistics(logistic=logistic, image=image)
+    img.save()
+    print(img.image.url)
+
+    response = {
+        'image_mini': get_thumbnail(img.image, '64', crop='center', quality=99).url,
+        'image': img.image.url,
+        'image_id': img.pk,
+        'delivery_id': logistic.pk,
+    }
+
+    # response = {'ok':200}
+    return HttpResponse(json.dumps(response), content_type='application/json')
 
 
 def change_logistic_status(request):

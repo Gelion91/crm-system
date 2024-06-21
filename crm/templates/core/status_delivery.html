@@ -62,7 +62,7 @@
                 <div class="col-2 center">
                     <div class="accordion-item">
                         <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" style="background-color:white;" type="button" data-bs-toggle="collapse" data-bs-target="#acc{{forloop.counter}}" aria-expanded="false" aria-controls="flush-collapseOne"></button>
+                        <button id="{{obj.pk}}" class="accordion-button collapsed" style="background-color:white;" type="button" data-bs-toggle="collapse" data-bs-target="#acc{{forloop.counter}}" aria-expanded="false" aria-controls="flush-collapseOne"></button>
                         </h2>
                     </div>
                 </div>
@@ -70,6 +70,7 @@
 
         <div id="acc{{forloop.counter}}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
               <div class="accordion-body">
+                  <div id="acc_{{obj.pk}}_photo"></div>
 
                   {% for product in obj.product.all %}
                   {% with outer_counter=forloop.counter %}
@@ -93,7 +94,7 @@
                                           <div class="modal-dialog modal-xl">
                                             <div class="modal-content">
                                               <div class="modal-header">
-                                                <h1 class="modal-title fs-5" id="exampleModalLabel">{{img.product}}</h1>
+                                                <h1 class="modal-title fs-5">{{img.product}}</h1>
                                               </div>
                                               <div class="modal-body">
                                                 <img src="{{ img.image.url }}">
@@ -177,22 +178,65 @@
                                         </div>
                         {% endthumbnail %}
                   {% endfor %}
-                  <hr>
                   {% endif %}
+                  <div id="ajax_photo_{{obj.pk}}"></div>
+                    <hr>
+<!--                    <form id="image_form_{{obj.pk}}" class="row" name="{{obj.pk}}" method="post" enctype="multipart/form-data">-->
+<!--                        {% csrf_token %}-->
+<!--                        <input type='hidden' value='{{obj.pk}}' name='id'>-->
+<!--                        <div class="row fl_image">-->
+<!--                        <div class="col-11">{{ image_form | crispy}}</div>-->
+<!--                        <div class="col-1"><button class="btn btn-secondary" type="submit">Сохранить</button></div>-->
+<!--                        </div>-->
+<!--                     </form>-->
+                  <form id="imageform_{{obj.pk}}" method='post' class="row packed_image" name="packed_image" enctype="multipart/form-data">
+                      <div class="row fl_image">
+                          <div class="col-11"><input class="form-control" id="packed_images_{{obj.pk}}" name="packed_images" type="file" accept="image/*"></div>
+                        <div class="col-1"><button class="btn btn-secondary" name="button_image" type="submit">Сохранить</button></div>
+                      </div>
+                  </form>
+                    <div id="preview_{{obj.pk}}"></div>
 
-                    <form id="image_form_{{obj.pk}}" class="row" name="{{obj.pk}}" method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <input type='hidden' value='{{obj.pk}}' name='id'>
-                        <div class="row fl_image">
-                        <div class="col-11">{{ image_form | crispy}}</div>
-                        <div class="col-1"><button class="btn btn-secondary" type="submit">Сохранить</button></div>
-                        </div>
-                     </form>
-<!--                  <form id="{{obj.pk}}" class="row packed_image" name="packed_image" enctype="multipart/form-data">-->
-<!--                      <label for="packed_images">Добавить изображение со склада:</label>-->
-<!--                        <input type="file" id="packed_images" name="pack_img" accept="image/png, image/jpeg">-->
-<!--                      <button id="button_image" type="submit" class="btn btn-success">Сохранить</button>-->
-<!--                  </form>-->
+                    <script>
+                        document.querySelector('#packed_images_{{obj.pk}}').addEventListener('change', function(event) {
+                        var files = event.target.files;
+                        var preview = document.getElementById('preview_{{obj.pk}}');
+
+                        // Clear any existing content
+                        preview.innerHTML = '';
+
+                        // Loop through all selected files
+                        for (var i = 0; i < files.length; i++) {
+                          var file = files[i];
+
+                          // Only process image files
+                          if (!file.type.match('image.*')) {
+                            continue;
+                          }
+
+                          var imgContainer = document.createElement('div');
+                          imgContainer.style.marginBottom = '20px'; // Spacing between each image container
+                          imgContainer.style.marginTop = '20px';
+                          var img = document.createElement('img');
+                          img.src = URL.createObjectURL(file);
+                          img.style.height = '64px';
+                          img.style.display = 'block'; // Ensure the image is displayed in a block to put it on a new line
+                          img.style.marginBottom = '10px';
+
+                          var fileInfo = document.createElement('p');
+                          fileInfo.textContent = `Имя файла: ${file.name}`;
+                          fileInfo.style.fontSize = '14px';
+                          fileInfo.style.marginTop = '0';
+
+                          // Append the image and file info to the container
+                          imgContainer.appendChild(img);
+                          imgContainer.appendChild(fileInfo);
+
+                          // Append the container to the preview div
+                          preview.appendChild(imgContainer);
+                        }
+                      });
+                    </script>
 
                   <div id="comments_{{obj.pk}}">
                   {% if obj.delivery_notes.all %}
@@ -253,9 +297,6 @@
 
 $('.first_step').click(function() {
 var checked_first_step = $(this).is(':checked');
-console.log(checked_first_step);
-console.log($(this).attr('id'))
-console.log($(this).attr('name'))
 
     $.ajax({
 
@@ -266,8 +307,6 @@ console.log($(this).attr('name'))
                 attribut: $(this).attr('id'),
                 csrfmiddlewaretoken: '{{ csrf_token }}'},
         success: function(response) {
-        console.log(response)
-        console.log('it work');
         },
         error: function() {
             console.log('it broke');
@@ -277,9 +316,7 @@ console.log($(this).attr('name'))
 
 $('.second_step').click(function() {
 var checked_first_step = $(this).is(':checked');
-console.log(checked_first_step);
-console.log($(this).attr('id'))
-console.log($(this).attr('name'))
+
 
     $.ajax({
 
@@ -290,8 +327,6 @@ console.log($(this).attr('name'))
                 attribut: $(this).attr('id'),
                 csrfmiddlewaretoken: '{{ csrf_token }}'},
         success: function(response) {
-        console.log(response)
-        console.log('it work');
         },
         error: function() {
             console.log('it broke');
@@ -301,9 +336,7 @@ console.log($(this).attr('name'))
 
 $('.third_step').click(function() {
 var checked_first_step = $(this).is(':checked');
-console.log(checked_first_step);
-console.log($(this).attr('id'))
-console.log($(this).attr('name'))
+
 
     $.ajax({
 
@@ -314,8 +347,6 @@ console.log($(this).attr('name'))
                 attribut: $(this).attr('id'),
                 csrfmiddlewaretoken: '{{ csrf_token }}'},
         success: function(response) {
-        console.log(response)
-        console.log('it work');
         },
         error: function() {
             console.log('it broke');
@@ -323,26 +354,47 @@ console.log($(this).attr('name'))
     });
 });
 
+<!--$('.accordion-button').on('click', function(e)-->
+<!--    {-->
+<!--    e.preventDefault();-->
+<!--    var item = $(this);-->
+<!--    var token = '{{ csrf_token }}';-->
+<!--    var data = {-->
+<!--            id: item.attr('id'),-->
+<!--        };-->
+<!--$.ajax({-->
+<!--            type        : 'POST',-->
+<!--            url         : "{% url 'core:load_delivery_info' %}",-->
+<!--            data: data,-->
+<!--            headers: {'X-CSRFToken': token},-->
+<!--            success:function(response){-->
+<!--                var need = 'acc_' + response.delivery_id + '_photo'-->
+<!--                $('#' + need).empty();-->
+<!--                $.each(response.product_image, function(k, v) {-->
+<!--                    $.each(v, function(i, b) {-->
+<!--                    var img = '<img src="' + b + '">'-->
+<!--                    $('#' + need).append(img);-->
+<!--                    });-->
+<!--                });-->
+<!--          },-->
+<!--    });-->
+<!--});-->
+
+
 $('.notes').on('submit', function(e)
     {
     e.preventDefault();
     var $form = $(this);
-    console.log($form)
     var data = {
             note: $form.find("[name='comment']").val(),
             id: $form.attr('id'),
         };
-
-
     var token = '{{ csrf_token }}';
-    console.log(data)
-
     $.ajax({
             type        : 'POST',
             url         : "{% url 'core:save_notes_delivery' %}",
             data: data,
             headers: {'X-CSRFToken': token},
-
             success:function(response){
             $($form)[0].reset();
                 var card = '<div class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">' +
@@ -369,5 +421,54 @@ $('.notes').on('submit', function(e)
           },
     });
 });
+
+
+$("form[name='packed_image']").on('submit', function(e){
+                       e.preventDefault();
+                       var token = '{{ csrf_token }}';
+                       var $form = $(this)[0];
+                       var formData = new FormData($(this)[0]);
+                       console.log($(this)[0])
+
+                       console.log($(this).find("[name='packed_images']").val())
+                       formData.append('image', $(this).find("[name='packed_images']")[0].files[0]);
+                       formData.append('id', $(this)[0].id);
+                          $.ajax({
+                              url: "{% url 'core:save_image' %}",
+                              type: 'POST',
+                              data: formData,
+                              headers: {'X-CSRFToken': token},
+                              async: false,
+                              cache: false,
+                              contentType: false,
+                              processData: false,
+                              success: function (response) {
+                                var img = '<a href="' + response.image + '" data-bs-toggle="modal" data-bs-target="#ajax_image_' + response.delivery_id + response.image_id + '">' +
+                                          '<img src="' + response.image_mini + '" class="image-detail ajax_image">' +
+                                           '</a>' +
+                                           '<div class="modal fade" id="ajax_image_' + response.delivery_id + response.image_id + '" tabindex="-1" aria-hidden="true" aria-labelledby="ajax_image_' + response.delivery_id + '">' +
+                                           '<div class="modal-dialog modal-xl">' +
+                                           '<div class="modal-content">' +
+                                           '<div class="modal-header">' +
+                                           '<h1 class="modal-title fs-5" id="exampleModalLabel"></h1>' +
+                                           '</div>' +
+                                           '<div class="modal-body">' +
+                                           '<img src="' + response.image + '">' +
+                                           '</div>' +
+                                           '<div class="modal-footer">' +
+                                           '</div>' +
+                                           '</div>' +
+                                           '</div>' +
+                                           '</div>'
+
+                                var need = 'ajax_photo_' + response.delivery_id
+                                $('#' + need).append(img);
+                                $form.reset();
+                                preview = 'preview_' + response.delivery_id
+                                $("#" + preview).empty();
+                              }
+                           });
+                    });
   </script>
+
 {% endblock %}
