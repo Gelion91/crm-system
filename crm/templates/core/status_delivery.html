@@ -78,7 +78,7 @@
                   <hr>
                   {% endif %}
                   <div class="row">
-                      <p class="p-size" style="font-weight: bold;">{{product.name}} | {{product.product_marker}} <a href="{{product.url}}" class="btn_url" target="_blank">Ссылка на товар</a></p>
+                      <p class="p-size" style="font-weight: bold;">{{product.name}} | {{product.product_marker}} {% if product.url %}<a href="{{product.url}}" class="btn_url" target="_blank">Ссылка на товар</a>{% endif %}</p>
 
                   <div class="col">
                   <p class="p-size">Фото продавца</p>
@@ -101,9 +101,6 @@
                                                 <img src="{{ img.image.url }}">
                                               </div>
                                               <div class="modal-footer">
-                                                <form method="POST" action="{% url 'core:delete_logistic_image' img.pk %}">
-                                                    {% csrf_token %}<input type="submit" value="Удалить">
-                                                </form>
                                               </div>
                                             </div>
                                           </div>
@@ -133,9 +130,6 @@
                                                 <img src="{{ img.image.url }}">
                                               </div>
                                               <div class="modal-footer">
-                                                <form method="POST" action="{% url 'core:delete_logistic_image' img.pk %}">
-                                                    {% csrf_token %}<input type="submit" value="Удалить">
-                                                </form>
                                               </div>
                                             </div>
                                           </div>
@@ -152,15 +146,16 @@
                   {% if obj.logistic_images.all %}
                   <hr style="border-width: 3px;">
                   <p class="p-size">Фотографии груза</p>
+                  <div id="ajax_photo_{{obj.pk}}" style="display:flex;flex-wrap: wrap;">
                   {% for img in obj.logistic_images.all %}
-                  <img src="{{ img.url }}" class="image-detail">
+                  <div id="div_image_{{img.pk}}" name="div_image">
                     {% load thumbnail %}
                         {% thumbnail img.image "64x64" as im %}
                     <!-- Modal -->
-                            <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img{{forloop.counter}}_{{obj.pk}}">
-                                  <img src="{{ im.url }}" class="image-detail">
+                            <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img_{{obj.pk}}_{{img.pk}}">
+                                  <img src="{{ im.url }}" class="image-detail ajax_image">
                             </a>
-                                        <div class="modal fade" id="img{{forloop.counter}}_{{obj.pk}}" tabindex="-1" aria-labelledby="img{{forloop.counter}}" aria-hidden="true">
+                                        <div class="modal fade" id="img_{{obj.pk}}_{{img.pk}}" tabindex="-1" aria-labelledby="img" aria-hidden="true">
                                           <div class="modal-dialog modal-xl">
                                             <div class="modal-content">
                                               <div class="modal-header">
@@ -170,17 +165,21 @@
                                                 <img src="{{ img.image.url }}">
                                               </div>
                                               <div class="modal-footer">
-                                                <form method="POST" action="{% url 'core:delete_logistic_image' img.pk %}">
+                                                <form id="form_delete_img_{{img.pk}}" method="POST" name="del_form">
                                                     {% csrf_token %}<input type="submit" value="Удалить">
                                                 </form>
                                               </div>
                                             </div>
                                           </div>
                                         </div>
+
                         {% endthumbnail %}
+                      </div>
                   {% endfor %}
-                  {% endif %}
+                  </div>
+                  {% else %}
                   <div id="ajax_photo_{{obj.pk}}"></div>
+                  {% endif %}
                     <hr>
 <!--                    <form id="image_form_{{obj.pk}}" class="row" name="{{obj.pk}}" method="post" enctype="multipart/form-data">-->
 <!--                        {% csrf_token %}-->
@@ -242,9 +241,9 @@
                   <div id="comments_{{obj.pk}}">
                   {% if obj.delivery_notes.all %}
                       {% for comment in obj.delivery_notes.all %}
-                        <div class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
+                        <div id="comment_div_{{comment.pk}}" class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
                             <div class="row comment" style="margin:0; padding-right:0; padding-left:0;">
-                                <div class="col-4" style="background-color:#f2feff; margin-left: auto; margin-right: auto;">
+                                <div class="col-3" style="background-color:#f2feff; margin-left: auto; margin-right: auto;">
                                     <div class="row" style="margin-left: auto; margin-right: auto; padding-right:0; padding-left:0;">
                                         <p class="p-size">{{ comment.owner.username }}</p>
                                     </div>
@@ -252,13 +251,13 @@
                                         <p class="p-size">{{ comment.date_create }}</p>
                                     </div>
                                 </div>
-                                <div class="col-6">
+                                <div class="col-8">
                                     <p class="p-size">{{ comment.comment }}</p>
                                 </div>
 
-                                <div class="col-2">
+                                <div class="col-1">
                                     {% if comment.owner == request.user %}
-                                    <a href="{% url 'core:delete_notes_delivery' comment.pk %}"><p class="p-size">удалить</p></a>
+                                    <input id="inp_{{comment.pk}}" name="del_comment" type="button" value="Удалить">
                                     {% endif %}
                                 </div>
                             </div>
@@ -398,7 +397,7 @@ $('.notes').on('submit', function(e)
             headers: {'X-CSRFToken': token},
             success:function(response){
             $($form)[0].reset();
-                var card = '<div class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">' +
+                var card = '<div id="comment_div_' + response.comment_id + '" class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">' +
                            '<div class="row comment" style="margin:0;">' +
                            '<div class="col-3" style="background-color:#f2feff; margin-left: auto; margin-right: auto;">' +
                            '<div class="row" style="margin-left: auto; margin-right: auto;">' +
@@ -412,7 +411,7 @@ $('.notes').on('submit', function(e)
                            '<p class="p-size">' + response.note + '</p>' +
                            '</div>' +
                            '<div class="col-1">' +
-                           '<a href=' + response.url + '>' + 'удалить' + '</a>' +
+                           '<input id="inp_' + response.comment_id + '"name="del_comment" type="button" value="Удалить">' +
                            '</div>' +
                            '</div>' +
                            '</div>';
@@ -444,10 +443,11 @@ $("form[name='packed_image']").on('submit', function(e){
                               contentType: false,
                               processData: false,
                               success: function (response) {
-                                var img = '<a href="' + response.image + '" data-bs-toggle="modal" data-bs-target="#ajax_image_' + response.delivery_id + response.image_id + '">' +
-                                          '<img src="' + response.image_mini + '" class="image-detail ajax_image">' +
+                                var img =  '<div id="div_image_' + response.image_id + '" name="div_image">' +
+                                           '<a href="' + response.image + '" data-bs-toggle="modal" data-bs-target="#img_' + response.delivery_id + '_' + response.image_id + '">' +
+                                           '<img src="' + response.image_mini + '" class="image-detail ajax_image">' +
                                            '</a>' +
-                                           '<div class="modal fade" id="ajax_image_' + response.delivery_id + response.image_id + '" tabindex="-1" aria-hidden="true" aria-labelledby="ajax_image_' + response.delivery_id + '">' +
+                                           '<div class="modal fade" id="img_' + response.delivery_id + '_' + response.image_id + '" tabindex="-1" aria-hidden="true" aria-labelledby="img">' +
                                            '<div class="modal-dialog modal-xl">' +
                                            '<div class="modal-content">' +
                                            '<div class="modal-header">' +
@@ -457,6 +457,11 @@ $("form[name='packed_image']").on('submit', function(e){
                                            '<img src="' + response.image + '">' +
                                            '</div>' +
                                            '<div class="modal-footer">' +
+                                                '<form id="form_delete_img_' + response.image_id +'" name="delete_form" method="post">' +
+                                                '<input type="hidden" name="csrfmiddlewaretoken" value="' + token + '">' +
+                                                '<input type="submit" value="Удалить">' +
+                                                '</form>'
+                                           '</div>' +
                                            '</div>' +
                                            '</div>' +
                                            '</div>' +
@@ -468,8 +473,82 @@ $("form[name='packed_image']").on('submit', function(e){
                                 preview = 'preview_' + response.delivery_id
                                 $("#" + preview).empty();
                               }
-                           });
-                    });
-  </script>
+                          });
+});
+
+$("form[name='del_form']").on('submit', function(e){
+   e.preventDefault();
+   var token = '{{ csrf_token }}';
+   var formData = new FormData($(this)[0]);
+   formData.append('id', $(this)[0].id);
+   console.log($(this)[0])
+    $.ajax({
+        type: "POST",
+        url: "{% url 'core:delete_image_logistic' %}",
+        headers: {'X-CSRFToken': token},
+        data: formData,
+        async: false,
+          cache: false,
+          contentType: false,
+          processData: false,
+        success: function(response) {
+        divimage = 'div_image_' + response.image_id
+        log_id = 'img_' + response.logistic_id + '_' + response.image_id
+         $("#" + log_id).modal('hide');
+            $("#" + divimage).remove();
+        },
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+
+$(document).on('submit', "form[name='delete_form']", function (e) {
+    e.preventDefault();
+   var token = '{{ csrf_token }}';
+   var formData = new FormData($(this)[0]);
+   formData.append('id', $(this)[0].id);
+    $.ajax({
+        type: "POST",
+        url: "{% url 'core:delete_image_logistic' %}",
+        headers: {'X-CSRFToken': token},
+        data: formData,
+        async: false,
+          cache: false,
+          contentType: false,
+          processData: false,
+        success: function(response) {
+        divimage = 'div_image_' + response.image_id
+        log_id = 'img_' + response.logistic_id + '_' + response.image_id
+         $("#" + log_id).modal('hide');
+            $("#" + divimage).remove();
+        },
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+
+
+$(document).on('click', "input[name='del_comment']", function (e) {
+    e.preventDefault();
+    var token = '{{ csrf_token }}';
+    console.log($(this)[0].id);
+    $.ajax({
+        type: "POST",
+        url: "{% url 'core:delete_notes_delivery' %}",
+        headers: {'X-CSRFToken': token},
+        data: {'id': $(this)[0].id},
+        success: function(response) {
+        console.log(response)
+        notes = 'comment_div_' + response.notes_id
+        $("#" + notes).remove();
+        },
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+ </script>
 
 {% endblock %}

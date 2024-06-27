@@ -444,6 +444,21 @@ def save_image_product(request):
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 
+def delete_image_product(request):
+    img_id = request.POST.get("id").split('_')[-1]
+    print(img_id)
+    product_id = Product.objects.get(packed_images=img_id)
+    img = PackedImagesProduct.objects.get(pk=img_id)
+    img.delete()
+    response = {
+        'image_id': img_id,
+        'logistic_id': product_id.pk
+    }
+
+    # response = {'ok':200}
+    return HttpResponse(json.dumps(response), content_type='application/json')
+
+
 def save_notes_product(request):
     note = request.POST.get("note")
     product_id = request.POST.get("id")
@@ -455,19 +470,25 @@ def save_notes_product(request):
     response = {
         'note': note,
         'product': product_id,
+        'comment_id': comment.pk,
         'user': request.user.username,
         'date': dateformat.format(comment.date_create, settings.DATE_FORMAT).lstrip('0'),
-        'url': reverse("core:delete_notes_product", kwargs={"pk": comment.pk})
     }
     print(response)
 
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 
-def delete_notes_product(request, pk):
-    comment = NotesProduct.objects.get(pk=pk)
+def delete_notes_product(request):
+    notes_id = request.POST.get("id").split('_')[-1]
+    print(notes_id)
+    comment = NotesProduct.objects.get(pk=notes_id)
     comment.delete()
-    return redirect(request.META.get('HTTP_REFERER'))
+    response = {
+        'notes_id': notes_id,
+    }
+    print(response)
+    return HttpResponse(json.dumps(response), content_type='application/json')
 
 
 class DeletePackedImage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
@@ -564,6 +585,20 @@ def save_image(request):
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 
+def delete_image_logistic(request):
+    img_id = request.POST.get("id").split('_')[-1]
+    logistic_id = Logistics.objects.get(logistic_images=img_id)
+    img = ImagesLogistics.objects.get(pk=img_id)
+    img.delete()
+    response = {
+        'image_id': img_id,
+        'logistic_id': logistic_id.pk
+    }
+
+    # response = {'ok':200}
+    return HttpResponse(json.dumps(response), content_type='application/json')
+
+
 def change_logistic_status(request):
     """Проверка доступности логина"""
     logistic_id = request.POST.get("id")
@@ -599,19 +634,25 @@ def save_notes_delivery(request):
     response = {
         'note': note,
         'delivery': delivery_id,
+        'comment_id': comment.pk,
         'user': request.user.username,
         'date': dateformat.format(comment.date_create, settings.DATE_FORMAT).lstrip('0'),
-        'url': reverse("core:delete_notes_delivery", kwargs={"pk": comment.pk})
     }
     print(response)
 
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 
-def delete_notes_delivery(request, pk):
-    comment = NotesDelivery.objects.get(pk=pk)
+def delete_notes_delivery(request):
+    notes_id = request.POST.get("id").split('_')[-1]
+    print(notes_id)
+    comment = NotesDelivery.objects.get(pk=notes_id)
     comment.delete()
-    return redirect(request.META.get('HTTP_REFERER'))
+    response = {
+        'notes_id': notes_id,
+    }
+    print(response)
+    return HttpResponse(json.dumps(response), content_type='application/json')
 
 
 class DeleteLogisticImage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
