@@ -16,7 +16,7 @@ from sendings.forms import SendingCreateForm, CarrierAddForm, SendingNotesForm, 
 from sendings.models import Sending, Carriers, NotesSending
 
 
-class SendingsStatus(LoginRequiredMixin, FormMixin, FilterView):
+class SendingsStatus(LoginRequiredMixin, FilterView):
     model = Sending
     paginate_by = 16
     template_name = 'sendings/sendings_list.html'
