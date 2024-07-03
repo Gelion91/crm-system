@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils import dateformat
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django_filters.views import FilterView
-from formset.utils import FormMixin
+from django.views.generic.edit import FormMixin
 
 from core.models import Logistics
 from crm import settings
