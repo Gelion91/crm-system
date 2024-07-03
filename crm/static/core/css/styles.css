@@ -1061,3 +1061,33 @@ align-self: center;
 .ajax_image {
     margin: 2px;
 }
+
+#modal_add_carrier {
+  display: none; /* скрыт по умолчанию */
+  /* темный фон при открытии модалки должен быть на всю страницу */
+  position: fixed;
+  z-index: 1; /* поверх всех элементов */
+  left: 0;
+  top: 0;
+  width: 100vw; /* полная ширина */
+  height: 100vh; /* полная высота */
+  background-color: rgba(0,0,0,0.4); /* цвет фона - прозрачный черный */
+}
+
+/* само модальное окно с контентом */
+.modal-content {
+  background-color: #fff;
+  /* окно будет находится по центру по горизонтали и с отступом сверху в 100 px */
+  margin: 100px auto;
+  padding: 20px;
+  font-size: 20px;
+  /* разнесем текст и кнопоку по краям окна */
+  display: flex;
+  justify-content: space-between;
+ }
+
+ @media (min-width: 768px) {
+  .btn_place {
+    justify-content: flex-end;
+    }
+}

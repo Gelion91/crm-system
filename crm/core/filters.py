@@ -50,7 +50,7 @@ class ProductFilter(django_filters.FilterSet):
     def qs(self):
         parent = super().qs
         owner = self.request.user
-        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
+        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists() or self.request.user.groups.filter(name='china').exists():
             return parent
         else:
             return parent.filter(owner=owner)
@@ -113,7 +113,7 @@ class DeliveryFilter(django_filters.FilterSet):
     def qs(self):
         queryset = super().qs
         owner = self.request.user
-        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
+        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists() or self.request.user.groups.filter(name='china').exists():
             return queryset
         else:
             return queryset.filter(product__owner=self.request.user.pk).distinct()
@@ -167,7 +167,7 @@ class DeliveryListFilter(django_filters.FilterSet):
     @property
     def qs(self):
         queryset = super().qs
-        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
+        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists() or self.request.user.groups.filter(name='china').exists():
             return queryset
         else:
             return queryset.filter(product__owner=self.request.user.pk).distinct()

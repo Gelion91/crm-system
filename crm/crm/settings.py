@@ -31,6 +31,8 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'clients.apps.ClientsConfig',
     'login.apps.LoginConfig',
+    'sendings.apps.SendingsConfig',
+    'china_logistic.apps.ChinaLogisticConfig',
     'dashboard.apps.DashboardConfig',
     'phonenumber_field',
     'django.forms',

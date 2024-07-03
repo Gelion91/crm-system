@@ -3,14 +3,55 @@ import django.dispatch
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete
 from django.dispatch import receiver
 
-from core.models import Order, Clients, Product, Logistics
+from core.models import Order, Clients, Product, Logistics, Notification
 
 
-# @receiver(post_save, sender=Logistics)
-# def create_logistic(sender, instance, created, **kwargs):
-#     logistic = Logistics.objects.get(pk=instance.pk)
-#     print(logistic)
-#     print(logistic.product.all())
+@receiver(post_save, sender=Logistics)
+def create_logistic(sender, instance, created, **kwargs):
+    act = 'изменил'
+    if created:
+        act = 'создал'
+    notification = Notification(owner=instance.owner, subject=f'доставку {instance.marker}', action=act)
+    notification.save()
+
+
+@receiver(post_delete, sender=Logistics)
+def delete_logistic(sender, instance, **kwargs):
+    act = 'удалил'
+    notification = Notification(owner=instance.owner, subject=f'доставку {instance.marker}', action=act)
+    notification.save()
+
+
+@receiver(post_save, sender=Product)
+def create_product(sender, instance, created, **kwargs):
+    act = 'изменил'
+    if created:
+        act = 'создал'
+    notification = Notification(owner=instance.owner, subject=f'продукт {instance.product_marker}({instance.name})', action=act)
+    notification.save()
+
+
+@receiver(post_delete, sender=Product)
+def create_product(sender, instance, **kwargs):
+    act = 'удалил'
+    notification = Notification(owner=instance.owner, subject=f'продукт {instance.product_marker}({instance.name})', action=act)
+    notification.save()
+
+
+@receiver(post_save, sender=Order)
+def create_product(sender, instance, created, **kwargs):
+    act = 'изменил'
+    if created:
+        act = 'создал'
+    notification = Notification(owner=instance.owner, subject=f'заказ {instance.marker}', action=act)
+    notification.save()
+
+
+@receiver(post_delete, sender=Order)
+def create_product(sender, instance, **kwargs):
+    act = 'удалил'
+    notification = Notification(owner=instance.owner, subject=f'заказ {instance.marker}', action=act)
+    notification.save()
 
 
 @receiver(post_save, sender=Product)
@@ -30,6 +71,7 @@ def model_post_save(sender, instance, **kwargs):
         order.total_price_company = total_price_company
         order.total_price_rub_company = order.total_price_company * order.exchange_for_company
         order.save()
+    print('это старый сигнал!')
 
 
 @receiver(pre_delete, sender=Product)

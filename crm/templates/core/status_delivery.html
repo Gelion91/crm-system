@@ -1,7 +1,6 @@
 {% extends "base_generic.html" %}
 {% load crispy_forms_tags %}
-
-
+{% load l10n %}
 
 {% block content %}
 
@@ -10,7 +9,14 @@
 
         <div class="col-lg-12 secondcolor pad_list" style="background-color:#f5f5f5;">
             <br>
-                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Фильтры</button>
+                <div class="row">
+                    <div class="col-3">
+                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Фильтры</button>
+                    </div>
+                    <div class="col-9">
+                        <h2 style="text-align:end;">{{title}}</h2>
+                    </div>
+                </div>
                 <div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
 
                     <div class="offcanvas-header">
@@ -39,7 +45,7 @@
             <div class="col accordion accordion-flush" id="accordionFlushExample">
           {% for obj in object_list %}
             <div class="row list-height" style="font-weight: 700; border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
-                <div class="col-2 center"><p>{{obj.marker}}</p></div>
+                <div id="marker_{{obj.pk}}" class="col-2 center"><p class="p-size">{{obj.marker}}</p></div>
 
                 <div class="col-2 checkbox-wr"><input id="first_step-{{obj.pk}}" name="{{obj.pk}}" class="first_step checkbox_margin" type="checkbox" {% if obj.first_step %} checked="true" {% endif %}{% if request.user.is_superuser or groups %}{% else %}disabled{% endif %}>
                     <label for="first_step-{{obj.pk}}">
@@ -70,6 +76,37 @@
 
         <div id="acc{{forloop.counter}}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
               <div class="accordion-body">
+                  <form id="change_delivery-form_{{obj.pk}}" name="change_delivery_form" method="post" enctype="multipart/form-data">
+                          <div class="row">
+                          <div class="col">
+                              <label for="marker" class="form-label">Маркировка:</label>
+                              <input type="text" id="marker" class="numberinput form-control" name="marker" value="{{ obj.marker }}"><br><br>
+                          </div>
+                          <div class="col">
+                              <label for="weight_{{obj.pk}}" class="form-label">Вес:</label>
+                              <input type="number" class="numberinput form-control" step="any" id="weight_{{obj.pk}}" name="weight" value='{{ obj.weight|unlocalize }}'><br><br>
+                          </div>
+                          <div class="col">
+                              <label for="volume_{{obj.pk}}" class="form-label">Объем:</label>
+                              <input type="number" class="numberinput form-control" step="any" id="volume_{{obj.pk}}" name="volume" value='{{ obj.volume|unlocalize }}'><br><br>
+                          </div>
+                          <div class="col">
+                              <label for="density_{{obj.pk}}" class="form-label">Плотность:</label>
+                              <input type="number" class="numberinput form-control" step="any" id="density_{{obj.pk}}" name="density" value='{{ obj.density|unlocalize }}' disabled><br><br>
+                          </div>
+                          <div class="col">
+                              <label for="places" class="form-label">Количество мест:</label>
+                              <input type="number" class="numberinput form-control" id="places" name="places" value='{{ obj.places|unlocalize }}'><br><br>
+                          </div>
+                          <div class="row btn_place">
+                              <div class="col-3">
+                                <button class="btn btn-secondary" type="submit" >Подтвердить изменения</button>
+                              </div>
+                          </div>
+                          </div>
+                      </form>
+                  <div id="message_{{obj.pk}}" style="display: none;"><p class="p-size">Успешно сохранено!</p></div>
+                  <br>
                   <div id="acc_{{obj.pk}}_photo"></div>
 
                   {% for product in obj.product.all %}
@@ -181,14 +218,7 @@
                   <div id="ajax_photo_{{obj.pk}}"></div>
                   {% endif %}
                     <hr>
-<!--                    <form id="image_form_{{obj.pk}}" class="row" name="{{obj.pk}}" method="post" enctype="multipart/form-data">-->
-<!--                        {% csrf_token %}-->
-<!--                        <input type='hidden' value='{{obj.pk}}' name='id'>-->
-<!--                        <div class="row fl_image">-->
-<!--                        <div class="col-11">{{ image_form | crispy}}</div>-->
-<!--                        <div class="col-1"><button class="btn btn-secondary" type="submit">Сохранить</button></div>-->
-<!--                        </div>-->
-<!--                     </form>-->
+
                   <form id="imageform_{{obj.pk}}" method='post' class="row packed_image" name="packed_image" enctype="multipart/form-data">
                       <div class="row fl_image">
                           <div class="col-11"><input class="form-control" id="packed_images_{{obj.pk}}" name="packed_images" type="file" accept="image/*"></div>
@@ -272,6 +302,7 @@
                     <button class="btn btn-secondary" type="submit">Сохранить</button>
                 </form>
                   <hr>
+                  {% if not china %}
                   <div class="row">
                     <div class="col">
                         <a href="{% url 'core:update_delivery' obj.pk %}" class="btn_edit">Редактировать</a>
@@ -282,6 +313,7 @@
                         </form>
                     </div>
                   </div>
+                  {% endif %}
               </div>
             </div>
             {% endfor %}
@@ -294,6 +326,63 @@
 
 
 <script>
+
+$(document).on('submit', "form[name='change_delivery_form']", function (e) {
+    e.preventDefault();
+    var $form = $(this);
+    var data = {
+            id: $form.attr('id'),
+            weight: $form.find("[name='weight']").val(),
+            volume: $form.find("[name='volume']").val(),
+            marker: $form.find("[name='marker']").val(),
+            places: $form.find("[name='places']").val(),
+            density: $form.find("[name='density']").val(),
+        };
+    var token = '{{ csrf_token }}';
+    $.ajax({
+        type: "POST",
+        url: "{% url 'core:change_delivery' %}",
+        headers: {'X-CSRFToken': token},
+        data: data,
+        success: function(response) {
+        marker_div = 'marker_' + response.delivery_id
+        $("#" + marker_div).empty();
+        var card = '<p class="p-size">' + response.marker + '</p>'
+        $("#" + marker_div).append(card)
+
+        message = 'message_' + response.delivery_id
+        $("#" + message).show(500, function(){
+          setTimeout(function(){
+            $("#" + message).hide(500);
+          }, 5000);
+        });
+        },
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+
+$(document).on('change keyup paste', "input[name='volume']", function () {
+    var density_id = 'density_' + $(this)[0].id.split('_')[1]
+    var volume_id = 'volume_' + $(this)[0].id.split('_')[1]
+    var weight_id = 'weight_' + $(this)[0].id.split('_')[1]
+    const density = document.getElementById(density_id)
+    const volume = document.getElementById(volume_id)
+    const weight = document.getElementById(weight_id)
+   density.value = parseFloat((weight.value / volume.value).toFixed(2))
+});
+
+$(document).on('change keyup paste', "input[name='weight']", function () {
+    var density_id = 'density_' + $(this)[0].id.split('_')[1]
+    var volume_id = 'volume_' + $(this)[0].id.split('_')[1]
+    var weight_id = 'weight_' + $(this)[0].id.split('_')[1]
+    const density = document.getElementById(density_id)
+    const volume = document.getElementById(volume_id)
+    const weight = document.getElementById(weight_id)
+   density.value = parseFloat((weight.value / volume.value).toFixed(2))
+});
+
 
 $('.first_step').click(function() {
 var checked_first_step = $(this).is(':checked');
@@ -353,32 +442,6 @@ var checked_first_step = $(this).is(':checked');
         },
     });
 });
-
-<!--$('.accordion-button').on('click', function(e)-->
-<!--    {-->
-<!--    e.preventDefault();-->
-<!--    var item = $(this);-->
-<!--    var token = '{{ csrf_token }}';-->
-<!--    var data = {-->
-<!--            id: item.attr('id'),-->
-<!--        };-->
-<!--$.ajax({-->
-<!--            type        : 'POST',-->
-<!--            url         : "{% url 'core:load_delivery_info' %}",-->
-<!--            data: data,-->
-<!--            headers: {'X-CSRFToken': token},-->
-<!--            success:function(response){-->
-<!--                var need = 'acc_' + response.delivery_id + '_photo'-->
-<!--                $('#' + need).empty();-->
-<!--                $.each(response.product_image, function(k, v) {-->
-<!--                    $.each(v, function(i, b) {-->
-<!--                    var img = '<img src="' + b + '">'-->
-<!--                    $('#' + need).append(img);-->
-<!--                    });-->
-<!--                });-->
-<!--          },-->
-<!--    });-->
-<!--});-->
 
 
 $('.notes').on('submit', function(e)
@@ -548,6 +611,10 @@ $(document).on('click', "input[name='del_comment']", function (e) {
             console.log('it broke');
         },
     });
+});
+
+$("input").focus(function(){
+  $(this).select();
 });
  </script>
 

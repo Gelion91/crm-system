@@ -1,0 +1,341 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+{% load l10n %}
+{% block content %}
+
+
+    <div class="row" >
+
+        <div class="col-lg-12 secondcolor pad_list" style="background-color:#f5f5f5;">
+            <br>
+                <div class="row">
+                    <div class="col-3">
+                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Фильтры</button>
+                    </div>
+                    <div class="col-9">
+                        <h2 style="text-align:end;">{{title}}</h2>
+                    </div>
+                </div>
+                <div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
+
+                    <div class="offcanvas-header">
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+                    </div>
+
+                    <div class="offcanvas-body">
+                         <form action="" method="get">
+                            {{ filter.form|crispy }}
+                         <button class="btn btn-outline-secondary" type="submit">Поиск</button>
+                         </form>
+                    </div>
+
+                </div>
+            <hr>
+        {% if object_list %}
+        <div class="row" style="margin-top:1%; margin-bottom:1%;">
+            <div class="col-3 center"><p class="p-size">Номер отправления</p></div>
+            <div class="col-2 center"><p class="p-size">Отправлен</p></div>
+            <div class="col-2 center"><p class="p-size">В Москве</p></div>
+            <div class="col-4 center"><p class="p-size">Дата отправки</p></div>
+            <div class="col-1 center"><p class="p-size"></p></div>
+        </div>
+
+            <div class="col accordion accordion-flush" id="accordionFlushExample">
+          {% for obj in object_list %}
+            <div class="row list-height" style="font-weight: 700; border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
+                <div id="marker_{{obj.pk}}" class="col-3 col-lg-3 center"><p class="p-size">{{obj.marker}}</p></div>
+
+                <div class="col-2 checkbox-wr"><input id="first_step-{{obj.pk}}" name="{{obj.pk}}" class="first_step checkbox_margin" type="checkbox" {% if obj.first_step %} checked="true" {% endif %}{% if request.user.is_superuser or groups %}{% else %}disabled{% endif %}>
+                    <label for="first_step-{{obj.pk}}">
+                        <div class="tick_mark"></div>
+                    </label>
+                </div>
+
+                <div class="col-2 checkbox-wr"><input id="second_step-{{obj.pk}}" name="{{obj.pk}}" class="second_step checkbox_margin" type="checkbox" {% if obj.second_step %} checked="true" {% endif %}{% if request.user.is_superuser or groups %}{% else %}disabled{% endif %}>
+                    <label for="second_step-{{obj.pk}}">
+                        <div class="tick_mark"></div>
+                    </label>
+                </div>
+
+                <div class="col-3 col-lg-4 center"><p class="p-size">{{obj.date_create}}</p></div>
+                <div class="col-1 center">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                        <button id="{{obj.pk}}" class="accordion-button collapsed" style="background-color:white;" type="button" data-bs-toggle="collapse" data-bs-target="#acc{{forloop.counter}}" aria-expanded="false" aria-controls="flush-collapseOne"></button>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+
+        <div id="acc{{forloop.counter}}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+              <div class="accordion-body">
+                  {% for logistic in obj.logistics.all %}
+                        {% with outer_counter=forloop.counter %}
+                          <div class="row">
+                              <p class="p-size" style="font-weight: bold;">{{logistic.marker}} | <a href="{% url 'core:update_delivery' logistic.pk %}" class="btn_url" target="_blank">Ссылка на груз</a></p>
+                          <div class="col">
+                          <p class="p-size">Фото груза</p>
+                        {% if logistic.logistic_images.all %}
+                            {% for img in logistic.logistic_images.all %}
+                                <img src="{{ img.url }}" class="image-detail">
+                                    {% load thumbnail %}
+                                    {% thumbnail img.image "64x64" as im %}
+                        <!-- Modal -->
+                                        <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img{{forloop.counter}}_{{outer_counter}}_{{obj.pk}}">
+                                              <img src="{{ im.url }}" class="image-detail">
+                                        </a>
+                                                    <div class="modal fade" id="img{{forloop.counter}}_{{outer_counter}}_{{obj.pk}}" tabindex="-1" aria-labelledby="img{{forloop.counter}}" aria-hidden="true">
+                                                      <div class="modal-dialog modal-xl">
+                                                        <div class="modal-content">
+                                                          <div class="modal-header">
+                                                            <h1 class="modal-title fs-5">{{img.logistic}}</h1>
+                                                          </div>
+                                                          <div class="modal-body">
+                                                            <img src="{{ img.image.url }}">
+                                                          </div>
+                                                          <div class="modal-footer">
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+                                    {% endthumbnail %}
+                            {% endfor %}
+                        {% endif %}
+                              <hr>
+                        </div>
+                        {% endwith %}
+                  {% endfor %}
+                      </div>
+                  <div>
+                      <form id="change_sending-form_{{obj.pk}}" name="change_sending_form" method="post" enctype="multipart/form-data">
+                          <div class="row">
+                          <div class="col">
+                              <label for="marker" class="form-label">Маркировка:</label>
+                              <input type="text" id="marker" class="numberinput form-control" name="marker" value="{{ obj.marker }}"><br><br>
+                          </div>
+                          <div class="col">
+                              <label for="weight" class="form-label">Вес:</label>
+                              <input type="number" class="numberinput form-control" step="any" id="weight" name="weight" value='{{ obj.weight|unlocalize }}'><br><br>
+                          </div>
+                          <div class="col">
+                              <label for="volume" class="form-label">Объем:</label>
+                              <input type="number" class="numberinput form-control" step="any" id="volume" name="volume" value='{{ obj.volume|unlocalize }}'><br><br>
+                          </div>
+                          <div class="col">
+                              <label for="places" class="form-label">Количество мест:</label>
+                              <input type="number" class="numberinput form-control" step="any" id="places" name="places" value='{{ obj.places|unlocalize }}' disabled><br><br>
+                          </div>
+                          <div class="row btn_place">
+                              <div class="col-3">
+                                <button class="btn btn-secondary" type="submit" >Подтвердить изменения</button>
+                              </div>
+                          </div>
+                          </div>
+                      </form>
+                      <div id="message_{{obj.pk}}" style="display: none;"><p class="p-size">Успешно сохранено!</p></div>
+                  </div>
+
+                  <div id="comments_{{obj.pk}}">
+                  {% if obj.sending_notes.all %}
+                      {% for comment in obj.sending_notes.all %}
+                        <div id="comment_div_{{comment.pk}}" class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
+                            <div class="row comment" style="margin:0; padding-right:0; padding-left:0;">
+                                <div class="col-3" style="background-color:#f2feff; margin-left: auto; margin-right: auto;">
+                                    <div class="row" style="margin-left: auto; margin-right: auto; padding-right:0; padding-left:0;">
+                                        <p class="p-size">{{ comment.owner.username }}</p>
+                                    </div>
+                                    <div class="row" style="margin-left: auto; margin-right: auto; padding-right:0; padding-left:0;">
+                                        <p class="p-size">{{ comment.date_create }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-8">
+                                    <p class="p-size">{{ comment.comment }}</p>
+                                </div>
+
+                                <div class="col-1">
+                                    {% if comment.owner == request.user %}
+                                    <input id="inp_{{comment.pk}}" name="del_comment" type="button" value="Удалить">
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                      {% endfor %}
+                {% endif %}
+              </div>
+                  <form id="{{obj.pk}}" name="notes" method="post" class="notes" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-error">{{ form.non_field_errors }}</div>
+                    {{ notes_form|crispy }}
+                    <button class="btn btn-secondary" type="submit">Сохранить</button>
+                </form>
+                  <hr>
+                  {% if not china %}
+                  <div class="row">
+                    <div class="col">
+                        <a href="{% url 'sendings:sending_update' obj.pk %}" class="btn_edit">Редактировать</a>
+                    </div>
+                    <div class="col">
+                        <form method="POST" action="{% url 'sendings:sending_delete' obj.pk %}" class="form">
+                            {% csrf_token %}<input type="submit" class="btn_delete" value="Удалить">
+                        </form>
+                    </div>
+                  </div>
+                  {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+                </div>
+        {% else %}
+    <h3>Нет отправок.</h3>
+    </div>
+    </div>
+    {% endif %}
+
+
+<script>
+
+$(document).on('submit', "form[name='change_sending_form']", function (e) {
+    e.preventDefault();
+    var $form = $(this);
+    var data = {
+            id: $form.attr('id'),
+            weight: $form.find("[name='weight']").val(),
+            volume: $form.find("[name='volume']").val(),
+            marker: $form.find("[name='marker']").val(),
+            places: $form.find("[name='places']").val(),
+        };
+    var token = '{{ csrf_token }}';
+    console.log($(this)[0].id);
+    $.ajax({
+        type: "POST",
+        url: "{% url 'sendings:change_sending' %}",
+        headers: {'X-CSRFToken': token},
+        data: data,
+        success: function(response) {
+        console.log(response)
+        marker_div = 'marker_' + response.sending_id
+        $("#" + marker_div).empty();
+        var card = '<p class="p-size">' + response.marker + '</p>'
+        $("#" + marker_div).append(card)
+        message = 'message_' + response.sending_id
+        $("#" + message).show(500, function(){
+          setTimeout(function(){
+            $("#" + message).hide(500);
+          }, 5000);
+        });
+        },
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+
+
+$('.first_step').click(function() {
+var checked_first_step = $(this).is(':checked');
+
+    $.ajax({
+
+        type: "POST",
+        url: "{% url 'sendings:change_sending_status' %}",
+        data: { checked: checked_first_step,
+                id: $(this).attr('name'),
+                attribut: $(this).attr('id'),
+                csrfmiddlewaretoken: '{{ csrf_token }}'},
+        success: function(response) {
+        },
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+
+$('.second_step').click(function() {
+var checked_first_step = $(this).is(':checked');
+
+
+    $.ajax({
+
+        type: "POST",
+        url: "{% url 'sendings:change_sending_status' %}",
+        data: { checked: checked_first_step,
+                id: $(this).attr('name'),
+                attribut: $(this).attr('id'),
+                csrfmiddlewaretoken: '{{ csrf_token }}'},
+        success: function(response) {
+        },
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+
+
+$('.notes').on('submit', function(e)
+    {
+    e.preventDefault();
+    var $form = $(this);
+    var data = {
+            note: $form.find("[name='comment']").val(),
+            id: $form.attr('id'),
+        };
+    var token = '{{ csrf_token }}';
+    $.ajax({
+            type        : 'POST',
+            url         : "{% url 'sendings:save_notes_sending' %}",
+            data: data,
+            headers: {'X-CSRFToken': token},
+            success:function(response){
+            $($form)[0].reset();
+                var card = '<div id="comment_div_' + response.comment_id + '" class="col list-height" style="border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">' +
+                           '<div class="row comment" style="margin:0;">' +
+                           '<div class="col-3" style="background-color:#f2feff; margin-left: auto; margin-right: auto;">' +
+                           '<div class="row" style="margin-left: auto; margin-right: auto;">' +
+                           '<p class="p-size">' + response.user + '</p>' +
+                           '</div>' +
+                           '<div class="row" style="margin-left: auto; margin-right: auto;">' +
+                           '<p class="p-size">' + response.date + '</p>' +
+                           '</div>' +
+                           '</div>' +
+                           '<div class="col-8">' +
+                           '<p class="p-size">' + response.note + '</p>' +
+                           '</div>' +
+                           '<div class="col-1">' +
+                           '<input id="inp_' + response.comment_id + '"name="del_comment" type="button" value="Удалить">' +
+                           '</div>' +
+                           '</div>' +
+                           '</div>';
+                var comm = 'comments' + '_' + response.sending
+                $('#' + comm).append(card);
+
+          },
+    });
+});
+
+
+$(document).on('click', "input[name='del_comment']", function (e) {
+    e.preventDefault();
+    var token = '{{ csrf_token }}';
+    console.log($(this)[0].id);
+    $.ajax({
+        type: "POST",
+        url: "{% url 'sendings:delete_notes_sending' %}",
+        headers: {'X-CSRFToken': token},
+        data: {'id': $(this)[0].id},
+        success: function(response) {
+        console.log(response)
+        notes = 'comment_div_' + response.notes_id
+        $("#" + notes).remove();
+        },
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+
+$("input").focus(function(){
+  $(this).select();
+});
+ </script>
+
+{% endblock %}

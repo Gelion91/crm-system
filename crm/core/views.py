@@ -20,9 +20,10 @@ from sorl.thumbnail import get_thumbnail
 from core.filters import OrderFilter, ProductFilter, DeliveryFilter, DeliveryListFilter
 from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
     ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm, PackedImageForm, \
-    LogisticImageForm, AddAccountForm, ProductNotesForm, DeliveryNotesForm
+    LogisticImageForm, AddAccountForm, ProductNotesForm, DeliveryNotesForm, ChangeOrderDateForm, ChangeProductDateForm, \
+    ChangeDeliveryDateForm
 from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics, Account, \
-    NotesProduct, NotesDelivery
+    NotesProduct, NotesDelivery, Notification
 from crm import settings
 from crm.settings import LOGIN_URL
 
@@ -264,12 +265,13 @@ class DeliveryListView(LoginRequiredMixin, FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Доставки'
+        context['title'] = 'Завершенные доставки'
         context['form'] = DeliveryListFilter.form
         return context
 
     def get_queryset(self):
-        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
+        if self.request.user.is_superuser or self.request.user.groups.filter(
+                name='logist').exists() or self.request.user.groups.filter(name='china').exists():
             return Logistics.objects.filter(third_step=True)
         else:
             return Logistics.objects.filter(third_step=True).filter(product__owner=self.request.user.pk).distinct()
@@ -283,7 +285,8 @@ class AddDelivery(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Оформить доставку'
-        context['products'] = Product.objects.prefetch_related('logistics').filter(paid=True, arrive=True).filter(logistics__product__isnull=True)
+        context['products'] = Product.objects.prefetch_related('logistics').filter(paid=True, arrive=True).filter(
+            logistics__product__isnull=True)
         return context
 
     def get_success_url(self):
@@ -348,7 +351,6 @@ class ProductStatus(LoginRequiredMixin, FormMixin, FilterView):
         queryset = super(ProductStatus, self).get_queryset()
         return queryset.filter(logistics=None)
 
-
     def get_success_url(self):
         return reverse('core:status_product')
 
@@ -358,7 +360,9 @@ class ProductStatus(LoginRequiredMixin, FormMixin, FilterView):
         context['image_form'] = PackedImageForm
         context['notes_form'] = ProductNotesForm
         context['title'] = 'Статус товаров'
-        context['groups'] = self.request.user.groups.filter(name='logist').exists()
+        context['groups'] = [self.request.user.groups.filter(name='logist').exists(),
+                             self.request.user.groups.filter(name='china').exists()]
+        context['china'] = self.request.user.groups.filter(name='china').exists()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -529,7 +533,9 @@ class DeliveryStatus(LoginRequiredMixin, FormMixin, FilterView):
         context['image_form'] = LogisticImageForm
         context['notes_form'] = DeliveryNotesForm
         context['title'] = 'Статус грузов'
-        context['groups'] = self.request.user.groups.filter(name='logist').exists()
+        context['groups'] = [self.request.user.groups.filter(name='logist').exists(),
+                             self.request.user.groups.filter(name='china').exists()]
+        context['china'] = self.request.user.groups.filter(name='china').exists()
         return context
 
     def post(self, request, *args, **kwargs):
@@ -555,9 +561,10 @@ def load_delivery_info(request):
     products = logistic.product.all()
     response = {
         'delivery_id': delivery_id,
-        'product_image': {product.name: [get_thumbnail(prod.image, '64x64', crop='center', quality=99).url for prod in product.images.all()] for product in products},
+        'product_image': {product.name: [get_thumbnail(prod.image, '64x64', crop='center', quality=99).url for prod in
+                                         product.images.all()] for product in products},
         'product_packed_image': {product.name: [prod.image.url for prod in product.packed_images.all()] for product in
-                          products},
+                                 products},
     }
     print(response)
 
@@ -655,6 +662,25 @@ def delete_notes_delivery(request):
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 
+def change_delivery(request):
+    delivery_id = request.POST.get("id").split('_')[-1]
+    marker = request.POST.get("marker")
+    weight = request.POST.get("weight")
+    volume = request.POST.get("volume")
+    density = request.POST.get("density")
+    places = request.POST.get("places")
+    logistic = Logistics.objects.get(pk=delivery_id)
+    logistic.marker, logistic.weight, logistic.volume, logistic.density, logistic.places = marker, weight, volume, density, places
+    logistic.save()
+    response = {
+        'marker': marker,
+        'delivery_id': delivery_id,
+    }
+    print(response)
+
+    return HttpResponse(json.dumps(response), content_type='application/json')
+
+
 class DeleteLogisticImage(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = ImagesLogistics
     permission_required = 'core.delete_imageslogistics'
@@ -722,3 +748,60 @@ class DeleteAccount(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return self.request.META.get('HTTP_REFERER')
+
+
+def change_datetime(request):
+    form = ChangeOrderDateForm()
+    form2 = ChangeProductDateForm()
+    form3 = ChangeDeliveryDateForm()
+
+    if request.method == 'POST' and 'btnform1' in request.POST:
+        form = ChangeOrderDateForm(request.POST)
+        if form.is_valid():
+            order = form.cleaned_data['order']
+            ord = Order.objects.get(pk=order.pk)
+            ord.date_create = form.cleaned_data['date']
+            ord.save()
+        return redirect('core:change_date')
+    if request.method == 'POST' and 'btnform2' in request.POST:
+        form2 = ChangeProductDateForm(request.POST)
+        if form2.is_valid():
+            product = form2.cleaned_data['product']
+            prod = Product.objects.get(pk=product.pk)
+            prod.date_create = form2.cleaned_data['date']
+            prod.save()
+        return redirect('core:change_date')
+    if request.method == 'POST' and 'btnform3' in request.POST:
+        form3 = ChangeDeliveryDateForm(request.POST)
+        if form3.is_valid():
+            delivery = form3.cleaned_data['delivery']
+            deliv = Logistics.objects.get(pk=delivery.pk)
+            deliv.date_create = form3.cleaned_data['date']
+            deliv.save()
+        return redirect('core:change_date')
+
+    else:
+        form = ChangeOrderDateForm()
+        form2 = ChangeProductDateForm()
+        form3 = ChangeDeliveryDateForm()
+    context = {
+        'order_form': form,
+        'product_form': form2,
+        'delivery_form': form3,
+        'products': []
+    }
+
+    return render(request, 'core/change_date.html', context)
+
+
+class ViewNotifications(FilterView):
+    model = Notification
+    paginate_by = 32
+    template_name = 'core/notifications_list.html'
+    # filterset_class = ProductFilter
+    # form_class = PackedImageForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Журнал событий'
+        return context

@@ -84,6 +84,7 @@ class ProductForm(ModelForm):
         self.helper.form_method = 'post'
         self.helper.form_action = 'submit_survey'
         self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn-secondary'))
+        self.fields['paid'].default = True
 
     class Meta:
         model = Product
@@ -256,6 +257,12 @@ class DeliveryAddForm(ModelForm):
                 Div('paid_cash', css_class='col-6'), css_class='row'),
         )
 
+        if self.initial:
+            if Logistics.objects.get(pk=self.initial['id']).sendings.all():
+                print(Logistics.objects.get(pk=self.initial['id']).sendings.all())
+                for field in self.fields:
+                    self.fields[f'{field}'].disabled=True
+
     class Meta:
         model = Logistics
         fields = '__all__'
@@ -333,3 +340,22 @@ class DeliveryNotesForm(ModelForm):
         model = NotesDelivery
         fields = '__all__'
         exclude = ('owner', 'delivery')
+
+
+class DatInput(forms.DateInput):
+    input_type = 'date'
+
+
+class ChangeOrderDateForm(forms.Form):
+    order = forms.ModelChoiceField(queryset=Order.objects.all())
+    date = forms.DateTimeField(widget=DatInput)
+
+
+class ChangeProductDateForm(forms.Form):
+    product = forms.ModelChoiceField(queryset=Product.objects.all())
+    date = forms.DateTimeField(widget=DatInput)
+
+
+class ChangeDeliveryDateForm(forms.Form):
+    delivery = forms.ModelChoiceField(queryset=Logistics.objects.all())
+    date = forms.DateTimeField(widget=DatInput)

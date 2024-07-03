@@ -1,0 +1,250 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+{% if form %}
+    <div class="col secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
+        <div id="show_info">
+        </div>
+<div id="myOverlay"></div>
+
+    <form id="sending-form" action="{% url 'sendings:sending_create' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-error">{{ form.non_field_errors }}</div>
+        {% crispy form %}
+    </form>
+    </div>
+{% endif %}
+
+
+<div id="modal_add_carrier">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-body">
+          <form id="carrier-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-error">{{ form.non_field_errors }}</div>
+        {% crispy carrier_form %}
+    </form>
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script defer>
+    $('[name="add_carrier"]').on( "click", function(e) {
+            var show_info = $(this).attr('rel');
+            $("#modal_add_carrier")
+                .css("display", "block")
+                .animate({ opacity: 1 }, 198);
+    });
+
+
+    $(document).on('submit', "#carrier-form", function (e) {
+        e.preventDefault();
+        $("#modal_add_carrier").css("display", "none");
+        var data = $('#carrier-form').serializeArray();
+        var token = '{{ csrf_token }}';
+        var formData = new FormData($(this)[0]);
+        formData.append('name', data.find(x => x.name === 'name').value);
+        formData.append('comment', data.find(x => x.name === 'comment').value);
+        console.log(data.find(x => x.name === 'comment').value);
+        $.ajax({
+                type: "POST",
+                url: "{% url 'sendings:create_carrier' %}",
+                headers: {'X-CSRFToken': token},
+                data: formData,
+                async: false,
+                  cache: false,
+                  contentType: false,
+                  processData: false,
+                success: function(response) {
+                $('#id_carrier').append('<option value=' + response.carrier_id + ' selected >' + response.carrier_name + '</option>');
+                $('#carrier-form')[0].reset();
+                },
+                error: function() {
+                    console.log('it broke');
+                },
+            });
+        });
+
+
+
+
+<!--    tariff.addEventListener('input', ()=>{-->
+<!--                    if(tariff.value == ''){-->
+<!--                            tariff.value = 0;-->
+<!--                        }-->
+<!--                    full_price.value = (parseFloat(tariff.value) +  parseFloat(insurance.value) +  parseFloat(package_price.value)).toFixed(2)-->
+<!--    })-->
+
+<!--    insurance.addEventListener('input', ()=>{-->
+<!--                    if(insurance.value == ''){-->
+<!--                            insurance.value = 0;-->
+<!--                        }-->
+<!--                    full_price.value = (parseFloat(tariff.value) +  parseFloat(insurance.value) +  parseFloat(package_price.value)).toFixed(2)-->
+<!--    })-->
+
+<!--    package_price.addEventListener('input', ()=>{-->
+<!--                    if(package_price.value == ''){-->
+<!--                            package_price.value = 0;-->
+<!--                        }-->
+<!--                    full_price.value = (parseFloat(tariff.value) +  parseFloat(insurance.value) +  parseFloat(package_price.value)).toFixed(2)-->
+<!--    })-->
+
+<!--    volume.addEventListener('input', ()=>{-->
+<!--                    const volume_data = volume.value-->
+<!--                    console.log(volume_data)-->
+<!--                    density.value = parseFloat((weight.value / volume.value).toFixed(2))-->
+<!--    })-->
+<!--    weight.addEventListener('input', ()=>{-->
+<!--                    const volume_data = volume.value-->
+<!--                    console.log(volume_data)-->
+<!--                    density.value = parseFloat((weight.value / volume.value).toFixed(2))-->
+<!--    })-->
+
+<!--};-->
+
+
+    $('[name="logistics"]').on( "mouseenter", function(e) {
+            var show_info = $(this).attr('rel');
+            $("#show_info")
+                .css("display", "block")
+                .animate({ opacity: 1 }, 198);
+            if (e.clientX > 700) {
+                    $('#show_info').css({'left': e.clientX - 700, 'top': e.clientY + 10});
+                    }
+            else {
+            $('#show_info').css({'left': e.clientX + 10, 'top': e.clientY + 10});
+            }
+    $.ajax({
+            type        : 'POST',
+            url         : "{% url 'sendings:show_logistic_info' %}",
+            data: {
+                id: $(this).attr('value'),
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+
+            success:function(response){
+               var card_image = '<div class="row">' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + 'Маркировка: ' + '</p>' +
+                                '</div>' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + response.marker + '</p>' +
+                                '</div>' +
+                                '</div>' + '<hr>' +
+
+                                '<div class="row">' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + 'Вес: ' + '</p>' +
+                                '</div>' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + response.weight + ' кг.' + '</p>' +
+                                '</div>' +
+                                '</div>' + '<hr>' +
+
+                                '<div class="row">' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + 'Объем: ' + '</p>' +
+                                '</div>' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + response.volume + ' м<sup>3</sup>' + '</p>' +
+                                '</div>' +
+                                '</div>' + '<hr>' +
+
+                                '<div class="row">' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + 'Плотность: ' + '</p>' +
+                                '</div>' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + response.density + '</p>' +
+                                '</div>' +
+                                '</div>' + '<hr>' +
+
+                                '<div class="row">' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + 'Стоимость страховки: ' + '</p>' +
+                                '</div>' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + response.insurance + ' $' + '</p>' +
+                                '</div>' +
+                                '</div>' + '<hr>' +
+
+                                '<div class="row">' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + 'Стоимость доставки: ' + '</p>' +
+                                '</div>' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + response.delivery_price + ' $' + '</p>' +
+                                '</div>' +
+                                '</div>' + '<hr>' +
+
+                                '<div class="row">' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + 'Стоимость товаров: ' + '</p>' +
+                                '</div>' +
+                                '<div class="col">' +
+                                '<p class="p-size">' + response.products_price + ' ¥' + '</p>' +
+                                '</div>' +
+                                '</div>'
+
+
+                $("#show_info").empty();
+                $('#show_info').append(card_image);
+
+          },
+    });
+});
+
+
+$('[name="logistics"]').on( "mouseout", function() {
+            $("#show_info").css("display", "none");
+            $("#show_info").empty();
+});
+
+
+   $('[name="logistics"]').click(function() {
+    var checked_paid = $(this).is(':checked');
+    const order_price = document.getElementById('id_order_price')
+    const weight = document.getElementById('id_weight')
+    const volume = document.getElementById('id_volume')
+    const places = document.getElementById('id_places')
+    id_places
+    $.ajax({
+
+        type: "POST",
+        url: "{% url 'sendings:get_info' %}",
+        data: { checked: checked_paid,
+                id: $(this).attr('value'),
+                csrfmiddlewaretoken: '{{ csrf_token }}'},
+
+        success: function(response) {
+               if (checked_paid) {
+                      order_price.value = parseFloat(parseFloat(order_price.value) + parseFloat(response.price)).toFixed(2)
+                      weight.value = parseFloat(parseFloat(weight.value) + parseFloat(response.weight)).toFixed(2)
+                      volume.value = parseFloat(parseFloat(volume.value) + parseFloat(response.volume)).toFixed(3)
+                      places.value = Number(parseFloat(places.value) + parseFloat(response.places))
+                    } else {
+                      order_price.value = parseFloat(parseFloat(order_price.value) - parseFloat(response.price)).toFixed(2)
+                      weight.value = parseFloat(parseFloat(weight.value) - parseFloat(response.weight)).toFixed(2)
+                      volume.value = parseFloat(parseFloat(volume.value) - parseFloat(response.volume)).toFixed(3)
+                      places.value = Number(parseFloat(places.value) - parseFloat(response.places))
+                    }
+        },
+
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+
+$("input").focus(function(){
+  $(this).select();
+});
+<!--</script>-->
+{% endblock %}

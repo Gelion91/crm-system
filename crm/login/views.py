@@ -45,23 +45,6 @@ def change_user_info(request, user_id):
     return render(request, 'login/update_user.html', {'form': form})
 
 
-# def change_user_info(request, user_id):
-#     user = User.objects.get(pk=user_id)
-#     if request.method == 'POST':
-#         form = UpdateUserForm(request.POST, instance=user)
-#         if form.is_valid():
-#             user = form.save(commit=False)
-#             user.save()
-#             user.groups.clear()
-#             for gp in form.cleaned_data['groups']:
-#                 group = Group.objects.get(pk=gp.pk)
-#                 user.groups.add(group)
-#             return render(request, 'login/update_user.html')
-#     else:
-#         form = UpdateUserForm(instance=user)
-#     return render(request, 'login/update_user.html', {'form': form})
-
-
 class LoginUser(LoginView):
     form_class = CustomAuthForm
     template_name = 'login/login.html'
@@ -79,6 +62,8 @@ class LoginUser(LoginView):
             return reverse_lazy('core:home')
         elif self.request.user.groups.filter(name='logist'):
             return reverse_lazy('core:status_product')
+        elif self.request.user.groups.filter(name='china'):
+            return reverse_lazy('sendings:sendings_list')
         else:
             return reverse_lazy('core:home')
 

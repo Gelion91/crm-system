@@ -27,11 +27,13 @@ class Product(models.Model):
                                      default=0)
     full_price_company = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Общая цена для компании ¥',
                                              default=0)
+    date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    date_update = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
 
     class Meta:
         verbose_name = 'Товар'
         verbose_name_plural = 'Товары'
-        ordering = ['-id']
+        ordering = ['-date_create']
 
     def __str__(self):
         """
@@ -199,7 +201,7 @@ class Order(models.Model):
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
-        ordering = ['-id']
+        ordering = ['-date_create']
 
     def __str__(self):
         """
@@ -301,7 +303,7 @@ class Logistics(models.Model):
     class Meta:
         verbose_name = 'Доставка'
         verbose_name_plural = 'Доставки'
-        ordering = ['-id']
+        ordering = ['-date_create']
 
     def __str__(self):
         """
@@ -376,3 +378,27 @@ class NotesDelivery(models.Model):
 
     def get_absolute_url(self):
         return reverse('note', kwargs={'note_id': self.pk})
+
+
+class Notification(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Сотрудник')
+    action = models.TextField(verbose_name='Действие', blank=True)
+    subject = models.CharField(max_length=100, verbose_name='Объект')
+    date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата')
+
+    class Meta:
+        verbose_name = 'Уведомление'
+        verbose_name_plural = 'Уведомления'
+        ordering = ['-date_create']
+
+    def __str__(self):
+        """
+        String for representing the Model object.
+        """
+        if self.owner:
+            return self.owner.username
+        else:
+            return 'без имени'
+
+    def get_absolute_url(self):
+        return reverse('notification', kwargs={'notification_id': self.pk})

@@ -31,6 +31,10 @@ def menu_manager(request):
                      {'title': 'Статус товаров', 'url_name': 'core:status_product', 'path': 'logistic/sp'},
                      {'title': 'Завершенные доставки', 'url_name': 'core:archive', 'path': 'logistic/archive'},
                      ]},
+                {'title': 'Отправки', 'url_name': 'sendings:sendings_list',
+                 'submenu': [
+                     {'title': 'Оформить отправку', 'url_name': 'sendings:sending_create', 'path': '/sending_create'},
+                 ]},
                 {'title': 'Управление аккаунтами', 'url_name': 'core:add_account'}
                 ]
         return {'menu': menu}
@@ -67,7 +71,23 @@ def menu_manager(request):
                      {'title': 'Оформить доставку', 'url_name': 'core:add_delivery', 'path': 'logistic/add_delivery'},
                      {'title': 'Статус товаров', 'url_name': 'core:status_product', 'path': 'logistic/sp'},
                      {'title': 'Завершенные доставки', 'url_name': 'core:archive', 'path': 'logistic/archive'},
-                     ]}
+                     ]},
+                {'title': 'Отправки', 'url_name': 'sendings:sendings_list',
+                 'submenu': [
+                     {'title': 'Оформить отправку', 'url_name': 'sendings:sending_create', 'path': '/sending_create'},
+                 ]}
+                ]
+        return {'menu': menu}
+
+    elif request.user.groups.filter(name='china'):
+        menu = [{'title': 'Доставка', 'url_name': 'core:status_delivery',
+                 'submenu': [
+                     {'title': 'Статус товаров', 'url_name': 'core:status_product', 'path': 'logistic/sp'},
+                     {'title': 'Завершенные доставки', 'url_name': 'core:archive', 'path': 'logistic/archive'},
+                     ]},
+                {'title': 'Отправки', 'url_name': 'sendings:sendings_list',
+                 'submenu': [
+                 ]}
                 ]
         return {'menu': menu}
 

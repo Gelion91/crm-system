@@ -38,4 +38,7 @@ urlpatterns = [
     path('logistic/update_delivery/<int:logistic_id>/', views.UpdateDelivery.as_view(), name='update_delivery'),
     path('account/add_acc/', views.AddAccount.as_view(), name='add_account'),
     path('account/delete/<int:account_id>/', views.DeleteAccount.as_view(), name='delete_account'),
+    path('ajax_change_delivery', views.change_delivery, name='change_delivery'),
+    path('change_date', views.change_datetime, name='change_date'),
+    path('notifications', views.ViewNotifications.as_view(), name='notifications'),
 ]
