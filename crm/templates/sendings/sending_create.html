@@ -30,6 +30,7 @@
     </form>
       </div>
       <div class="modal-footer">
+          <input name='close_modal' type="button" value="закрыть">
       </div>
     </div>
   </div>
@@ -43,6 +44,11 @@
                 .animate({ opacity: 1 }, 198);
     });
 
+    $('input[name="close_modal"]').on( "click", function(e) {
+            $("#modal_add_carrier")
+                .css("display", "none")
+                .animate({ opacity: 1 }, 198);
+    });
 
     $(document).on('submit', "#carrier-form", function (e) {
         e.preventDefault();
