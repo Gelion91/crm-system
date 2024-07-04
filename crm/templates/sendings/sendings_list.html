@@ -69,6 +69,7 @@
 
         <div id="acc{{forloop.counter}}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
               <div class="accordion-body">
+
                   {% for logistic in obj.logistics.all %}
                         {% with outer_counter=forloop.counter %}
                           <div class="row">
@@ -103,10 +104,11 @@
                         {% endif %}
                               <hr>
                         </div>
+                          </div>
                         {% endwith %}
                   {% endfor %}
-                      </div>
-                  <div>
+
+                    <div>
                       <form id="change_sending-form_{{obj.pk}}" name="change_sending_form" method="post" enctype="multipart/form-data">
                           <div class="row">
                           <div class="col">
