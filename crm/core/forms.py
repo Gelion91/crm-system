@@ -48,7 +48,6 @@ class UpdateOrderForm(ModelForm):
         self.fields["total_price_company"].disabled = True
         self.fields["total_price_rub_company"].disabled = True
 
-
     class Meta:
         model = Order
         fields = '__all__'
@@ -173,6 +172,7 @@ class ImageForm(ModelForm):
 class PackedImageForm(forms.Form):
     image = MultipleFileField(label='')
 
+
 # class PackedImageForm(ModelForm):
 #     def __init__(self, *args, **kwargs):
 #         super().__init__(*args, **kwargs)
@@ -240,7 +240,7 @@ class DeliveryAddForm(ModelForm):
         self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn-secondary'))
         self.helper.layout = Layout(
             'marker',
-            InlineRadios('product', css_class='col-12 product_select',),
+            InlineRadios('product', css_class='col-12 product_select', ),
             Div(Div('package', 'delivery', css_class='col-12'), css_class='row'),
             Div(Div('extra_package', css_class='col-12'), css_class='row'),
             Div(Div('weight', css_class='col-6'),
@@ -259,15 +259,15 @@ class DeliveryAddForm(ModelForm):
 
         if self.initial:
             if Logistics.objects.get(pk=self.initial['id']).sendings.all():
-                print(Logistics.objects.get(pk=self.initial['id']).sendings.all())
                 for field in self.fields:
-                    self.fields[f'{field}'].disabled=True
+                    if field == 'exchange_rate' or field == 'paid_cash':
+                        continue
+                    self.fields[f'{field}'].disabled = True
 
     class Meta:
         model = Logistics
         fields = '__all__'
         exclude = ('height', 'width', 'lenght', 'first_step', 'second_step', 'third_step', 'owner')
-
 
 
 def render_js(cls):

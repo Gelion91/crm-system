@@ -87,6 +87,7 @@ def menu_manager(request):
                      ]},
                 {'title': 'Отправки', 'url_name': 'sendings:sendings_list',
                  'submenu': [
+                     {'title': 'Оформить отправку', 'url_name': 'sendings:sending_create', 'path': '/sending_create'},
                  ]}
                 ]
         return {'menu': menu}

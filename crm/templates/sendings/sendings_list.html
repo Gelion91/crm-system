@@ -169,7 +169,6 @@
                     <button class="btn btn-secondary" type="submit">Сохранить</button>
                 </form>
                   <hr>
-                  {% if not china %}
                   <div class="row">
                     <div class="col">
                         <a href="{% url 'sendings:sending_update' obj.pk %}" class="btn_edit">Редактировать</a>
@@ -180,11 +179,10 @@
                         </form>
                     </div>
                   </div>
-                  {% endif %}
               </div>
             </div>
             {% endfor %}
-                </div>
+            </div>
         {% else %}
     <h3>Нет отправок.</h3>
     </div>

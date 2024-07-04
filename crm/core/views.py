@@ -215,6 +215,7 @@ class UpdateProduct(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         """If the form is valid, save the associated model."""
         form.instance.id = self.object.pk
         form.instance.owner = self.object.owner
+        form.instance.date_create = self.object.date_create
         self.object = form.save()
         return super().form_valid(form)
 
