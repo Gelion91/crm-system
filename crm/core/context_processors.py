@@ -116,5 +116,9 @@ def get_clients_info(request):
 
 def course_today(request):
     crs = Course.objects.last()
-    return {'dollar_course': crs.course,
-            'date_review_course': crs.date_create}
+    if crs:
+        return {'dollar_course': crs.course,
+                'date_review_course': crs.date_create}
+    else:
+        return {'dollar_course': 'Еще нету данных',
+                'date_review_course': 'Еще нету данных'}
