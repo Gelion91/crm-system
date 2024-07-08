@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.models import LogEntry
-from core.models import Order, Clients
+from core.models import Order, Clients, Course
 
 '''{'title': 'Панель управления', 'url_name': 'dashboard:home',
              'submenu': [{'title': 'Общее', 'url_name': 'dashboard:home'},
@@ -113,3 +113,8 @@ def get_clients_info(request):
                 'my_clients': Clients.objects.none(),
                 'success_client': Clients.objects.none()}
 
+
+def course_today(request):
+    crs = Course.objects.last()
+    return {'dollar_course': crs.course,
+            'date_review_course': crs.date_create}

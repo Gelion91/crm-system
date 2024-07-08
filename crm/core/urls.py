@@ -41,4 +41,5 @@ urlpatterns = [
     path('ajax_change_delivery', views.change_delivery, name='change_delivery'),
     path('change_date', views.change_datetime, name='change_date'),
     path('notifications', views.ViewNotifications.as_view(), name='notifications'),
+    path('ajax_get_course', views.getcourse, name='get_course'),
 ]

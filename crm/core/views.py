@@ -1,5 +1,7 @@
+import asyncio
 import datetime
 import json
+from pytz import timezone
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
@@ -24,8 +26,20 @@ from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
     ChangeDeliveryDateForm
 from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics, Account, \
     NotesProduct, NotesDelivery, Notification
+from core.utils import get_course
 from crm import settings
 from crm.settings import LOGIN_URL
+
+
+def getcourse(request):
+    crs = get_course()
+    tz = timezone('Europe/Moscow')
+    response = {
+        'course': str(crs.course),
+        'date': dateformat.format(datetime.datetime.now(tz=tz), settings.DATE_FORMAT).lstrip('0'),
+    }
+
+    return HttpResponse(json.dumps(response), content_type='application/json')
 
 
 class CustomHtmxMixin:
@@ -361,9 +375,9 @@ class ProductStatus(LoginRequiredMixin, FormMixin, FilterView):
         context['image_form'] = PackedImageForm
         context['notes_form'] = ProductNotesForm
         context['title'] = 'Статус товаров'
-        context['groups'] = [self.request.user.groups.filter(name='logist').exists(),
-                             self.request.user.groups.filter(name='china').exists()]
+        context['logist'] = self.request.user.groups.filter(name='logist').exists()
         context['china'] = self.request.user.groups.filter(name='china').exists()
+        print(get_course())
         return context
 
     def post(self, request, *args, **kwargs):

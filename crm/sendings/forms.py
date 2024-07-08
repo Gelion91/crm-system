@@ -60,7 +60,7 @@ class SendingCreateForm(ModelForm):
         self.fields['logistics'].widget = CheckboxSelectMultiple(choices=self.fields["logistics"].queryset)
         # self.fields['product'].widget = FilteredSelectMultiple("Товары", is_stacked=False)
         self.fields['delivery'].widget = RadioSelect(choices=DELIVERY_CHOICES)
-        if self.current_user.is_superuser or self.current_user.groups.filter(name='logist'):
+        if self.current_user.is_superuser or self.current_user.groups.filter(name='logist') or self.current_user.groups.filter(name='china'):
             self.fields['logistics'].queryset = queryset
         else:
             self.fields['logistics'].queryset = queryset.filter(owner=self.current_user)

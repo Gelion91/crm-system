@@ -71,6 +71,7 @@ TEMPLATES = [
                 'core.context_processors.menu_manager',
                 'core.context_processors.get_complete_orders',
                 'core.context_processors.get_clients_info',
+                'core.context_processors.course_today'
             ],
         },
     },

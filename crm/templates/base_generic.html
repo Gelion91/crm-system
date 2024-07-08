@@ -55,6 +55,16 @@
                 {% endfor %}
 
             </div>
+            <div id="get_course" class="dropdown order-2 order-md-last" style="padding-right:5px;">
+                    <h4 style="color:white;">курс $: {{dollar_course}}</h4>
+                    <p class="p-size" style="line-height: 0; color:white; margin:0px;">{{date_review_course}}</p>
+                </div>
+            <div id="reniew" class="dropdown order-2 order-md-last">
+                <button type="button" style="margin: 0; padding: 0; border: 0; outline: none; background-color: transparent;">
+                        <img width="30px;" src="{% static 'core/image/repeat.svg' %}">
+                </button>
+                </div>
+
             {% if request.user.is_authenticated %}
                 <div class="dropdown order-2 order-md-last">
                     <button class="btn btn_cab" type="button" id={{user.username}} data-toggle="dropdown" data-bs-toggle="dropdown" aria-expanded="false" data-display="static" aria-expanded="false">
@@ -123,7 +133,29 @@
 </div>
 </div>
 </div>
+<script>
+    $(document).on('click', "#reniew", function () {
+                        var token = '{{ csrf_token }}';
+                        $.ajax({
+                            type: "POST",
+                            url: "{% url 'core:get_course' %}",
+                            headers: {'X-CSRFToken': token},
 
+                            success: function(response) {
+                            console.log(response);
+                            new_data =
+                                        '<h4 style="color:white;">курс $: ' + response.course + '</h4>' +
+                                        '<p class="p-size" style="line-height: 0; color:white; margin:0px;">' + response.date + '</p>'
+
+                            $("#get_course").empty();
+                            $("#get_course").append(new_data);
+                            },
+                            error: function() {
+                                console.log('it broke');
+                            },
+                        });
+                    });
+</script>
 
 
 <!-- Конец footer'а и страницы -->

@@ -37,9 +37,15 @@ window.onload = function () {
     const order_price = document.getElementById('id_order_price')
 
     const full_price = document.getElementById('id_full_price')
+    const tariff_one_kg = document.getElementById('id_tariff_one_kg')
     const tariff = document.getElementById('id_tariff')
     const insurance = document.getElementById('id_insurance')
     const package_price = document.getElementById('id_package_price')
+
+    tariff_one_kg.addEventListener('input', ()=>{
+                        tariff.value = (parseFloat(tariff_one_kg.value) * parseFloat(weight.value)).toFixed(2)
+                        full_price.value = (parseFloat(tariff.value) +  parseFloat(insurance.value) +  parseFloat(package_price.value)).toFixed(2)
+        })
 
     tariff.addEventListener('input', ()=>{
                     if(tariff.value == ''){
@@ -47,6 +53,7 @@ window.onload = function () {
                         }
                     full_price.value = (parseFloat(tariff.value) +  parseFloat(insurance.value) +  parseFloat(package_price.value)).toFixed(2)
     })
+
 
     insurance.addEventListener('input', ()=>{
                     if(insurance.value == ''){
@@ -65,15 +72,65 @@ window.onload = function () {
     volume.addEventListener('input', ()=>{
                     const volume_data = volume.value
                     console.log(volume_data)
-                    density.value = parseFloat((weight.value / volume.value).toFixed(2))
+                    if(weight.value == 0){
+                            density.value = 0;
+                        }
+                    else {
+                        density.value = parseFloat((weight.value / volume.value).toFixed(2))
+                        }
     })
     weight.addEventListener('input', ()=>{
                     const volume_data = volume.value
                     console.log(volume_data)
-                    density.value = parseFloat((weight.value / volume.value).toFixed(2))
+                    if(volume.value == 0){
+                            density.value = 0;
+                        }
+                    else {
+                        density.value = parseFloat((weight.value / volume.value).toFixed(2))
+                        }
+    })
+
+    weight.addEventListener('input', ()=>{
+                    const volume_data = volume.value
+                    console.log(volume_data)
+                    if(volume.value == 0){
+                            density.value = 0;
+                        }
+                    else {
+                        density.value = parseFloat((weight.value / volume.value).toFixed(2))
+                        }
+                    tariff.value = (parseFloat(tariff_one_kg.value) * parseFloat(weight.value)).toFixed(2)
+                    full_price.value = (parseFloat(tariff.value) +  parseFloat(insurance.value) +  parseFloat(package_price.value)).toFixed(2)
     })
 
 };
+
+
+$(document).on('click', "button[name='add_course']", function () {
+                        const exchange_rate = document.getElementById('id_exchange_rate')
+                        var token = '{{ csrf_token }}';
+                        $.ajax({
+                            type: "POST",
+                            url: "{% url 'core:get_course' %}",
+                            headers: {'X-CSRFToken': token},
+
+                            success: function(response) {
+                            console.log(response);
+                            new_data =
+                                        '<h4 style="color:white;">курс $: ' + response.course + '</h4>' +
+                                        '<p class="p-size" style="line-height: 0; color:white; margin:0px;">' + response.date + '</p>'
+
+                            $("#get_course").empty();
+                            $("#get_course").append(new_data);
+                            exchange_rate.value = parseFloat(response.course)
+
+                            },
+                            error: function() {
+                                console.log('it broke');
+                            },
+                        });
+                    });
+
 
 
     $('[name="product"]').on( "mouseenter", function(e) {

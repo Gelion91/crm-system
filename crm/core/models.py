@@ -276,7 +276,8 @@ class Logistics(models.Model):
     weight = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Вес, кг.', default=0)
     volume = models.DecimalField(decimal_places=3, max_digits=100, verbose_name='Объем', default=0)
     density = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Плотность', default=0)
-    tariff = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость доставки $', default=0)
+    tariff_one_kg = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость доставки за 1кг. $', default=0)
+    tariff = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость доставки общая $', default=0)
     order_price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость товаров в заказах ¥',
                                       default=0)
     insurance = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость страховки $', default=0)
@@ -402,3 +403,8 @@ class Notification(models.Model):
 
     def get_absolute_url(self):
         return reverse('notification', kwargs={'notification_id': self.pk})
+
+
+class Course(models.Model):
+    course = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Курс $', default=0)
+    date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата')

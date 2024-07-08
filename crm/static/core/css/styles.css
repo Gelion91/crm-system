@@ -1091,3 +1091,8 @@ align-self: center;
     justify-content: flex-end;
     }
 }
+
+.dcol {
+    align-self: center;
+    padding-top: 1%;
+}

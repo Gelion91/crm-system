@@ -1,4 +1,4 @@
-from crispy_forms.bootstrap import InlineRadios
+from crispy_forms.bootstrap import InlineRadios, StrictButton, FieldWithButtons
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Field, Div, HTML, Button
 from django.contrib.admin.widgets import FilteredSelectMultiple
@@ -247,22 +247,23 @@ class DeliveryAddForm(ModelForm):
                 Div('volume', css_class='col-6'), css_class='row'),
             Div(Div('density', css_class='col-6'),
                 Div('places', css_class='col-6'), css_class='row'),
-            Div(Div('tariff', css_class='col-6'),
-                Div('insurance', css_class='col-6'), css_class='row'),
+            Div(Div('tariff_one_kg', css_class='col-6'),
+                Div('tariff', css_class='col-6'), css_class='row'),
 
             Div(Div('package_price', css_class='col-6'),
                 Div('order_price', css_class='col-6'), css_class='row'),
-            'full_price',
-            Div(Div('exchange_rate', css_class='col-6'),
+            Div(Div('insurance', css_class='col-6'),
+                Div('full_price', css_class='col-6'), css_class='row'),
+            Div(Div(FieldWithButtons('exchange_rate', StrictButton("заполнить", name='add_course', css_class='btn-secondary')), css_class='col-6'),
                 Div('paid_cash', css_class='col-6'), css_class='row'),
         )
-
-        if self.initial:
-            if Logistics.objects.get(pk=self.initial['id']).sendings.all():
-                for field in self.fields:
-                    if field == 'exchange_rate' or field == 'paid_cash':
-                        continue
-                    self.fields[f'{field}'].disabled = True
+        if not self.current_user.is_superuser:
+            if self.initial:
+                if Logistics.objects.get(pk=self.initial['id']).sendings.all():
+                    for field in self.fields:
+                        if field == 'exchange_rate' or field == 'paid_cash':
+                            continue
+                        self.fields[f'{field}'].disabled = True
 
     class Meta:
         model = Logistics
