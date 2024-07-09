@@ -65,6 +65,19 @@ class ImagesProduct(models.Model):
         return reverse('core', kwargs={'image_id': self.pk})
 
 
+class FilesProduct(models.Model):
+    product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE, related_name='files')
+    file = models.FileField(upload_to='files/')
+
+    class Meta:
+        verbose_name = 'Файл'
+        verbose_name_plural = 'Файлы'
+        ordering = ['-id']
+
+    def get_absolute_url(self):
+        return reverse('core', kwargs={'file_id': self.pk})
+
+
 class PackedImagesProduct(models.Model):
     product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE, related_name='packed_images')
     image = models.ImageField(upload_to='packed_images/', validators=[validate_image_file_extension])

@@ -25,7 +25,7 @@ from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
     LogisticImageForm, AddAccountForm, ProductNotesForm, DeliveryNotesForm, ChangeOrderDateForm, ChangeProductDateForm, \
     ChangeDeliveryDateForm
 from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics, Account, \
-    NotesProduct, NotesDelivery, Notification
+    NotesProduct, NotesDelivery, Notification, FilesProduct
 from core.utils import get_course
 from crm import settings
 from crm.settings import LOGIN_URL
@@ -167,7 +167,9 @@ def update(request, order_id):
 
     if request.method == 'POST':
         form = UpdateOrderForm(request.POST, instance=data)
-        form2 = ProductForm(request.POST, request.FILES)
+        form2 = ProductForm(request.POST)
+        files = ProductForm(request.FILES)
+        print(form2.errors)
         # Проверяем валидность форм
         if form.is_valid():
             print('форма1 валидна')
@@ -175,9 +177,20 @@ def update(request, order_id):
 
         if form2.is_valid():
             print('форма2 валидна')
+            print(request.FILES.getlist('image'))
+            print(request.FILES.getlist('file'))
             form2.instance.owner = request.user
+
             form2.save()
             product = Product.objects.get(id=form2.instance.id)
+            if request.FILES.getlist('image'):
+                for f in request.FILES.getlist('image'):
+                    img = ImagesProduct(product=product, image=f)
+                    img.save()
+            if request.FILES.getlist('file'):
+                for f in request.FILES.getlist('file'):
+                    file = FilesProduct(product=product, file=f)
+                    file.save()
             data.product.add(product)
             data.save()
         return redirect('core:upd', order_id=order_id)
