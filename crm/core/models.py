@@ -1,3 +1,4 @@
+import os
 from decimal import Decimal
 from django.contrib.auth.models import User
 from django.core.validators import validate_image_file_extension
@@ -68,6 +69,9 @@ class ImagesProduct(models.Model):
 class FilesProduct(models.Model):
     product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE, related_name='files')
     file = models.FileField(upload_to='files/')
+
+    def filename(self):
+        return os.path.basename(self.file.name)
 
     class Meta:
         verbose_name = 'Файл'

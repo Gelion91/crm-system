@@ -68,6 +68,14 @@
                         {% endthumbnail %}
                   {% endfor %}
                   <hr>
+                  {% for file in prod.product.files.all %}
+                  {% if '.pdf' in file.filename %}
+                      <a href={{file.file.url}} target="_blank"><img width="30px;" src="{% static 'core/image/pdf.png' %}">{{file.filename}}</a>
+                  {% else %}
+                      <a href={{file.file.url}}><img width="30px;" src="{% static 'core/image/xls.png' %}">{{file.filename}}</a>
+                  <br>
+                  {% endif %}
+                  {% endfor %}
                   <div class="row">
                     <div class="col">
                         <a href="{% url 'core:upd_product' prod.product.pk %}" class="btn_edit">Редактировать</a>

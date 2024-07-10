@@ -1,5 +1,6 @@
 {% extends "base_generic.html" %}
 {% load crispy_forms_tags %}
+{% load static %}
 {% load l10n %}
 
 {% block content %}
@@ -13,7 +14,7 @@
                     <div class="col-3">
                         <button class="btn btn-outline-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Фильтры</button>
                     </div>
-                    <div class="col-9">
+                    <div class="col-5">
                         <h2 style="text-align:end;">{{title}}</h2>
                     </div>
                 </div>

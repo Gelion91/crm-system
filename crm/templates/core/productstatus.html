@@ -1,6 +1,6 @@
 {% extends "base_generic.html" %}
 {% load crispy_forms_tags %}
-
+{% load static %}
 
 {% block content %}
     <div class="row" >
@@ -99,7 +99,7 @@
                   {% endfor %}
                   {% endif %}
                   <br>
-                  <hr style="border-width: 3px;">
+                  <hr>
                   <p class="p-size">Фотографии товара на складе</p>
                   {% if obj.packed_images.all %}
                   <div id="ajax_photo_{{obj.pk}}" style="display:flex;flex-wrap: wrap;">
@@ -134,7 +134,15 @@
                   <div id="ajax_photo_{{obj.pk}}" style="display:flex;flex-wrap: wrap;"></div>
                   {% endif %}
                   <hr>
-
+                  {% for file in obj.files.all %}
+                        {% if '.pdf' in file.filename %}
+                            <a href={{file.file.url}} target="_blank"><img width="30px;" src="{% static 'core/image/pdf.png' %}">{{file.filename}}</a>
+                        {% else %}
+                            <a href={{file.file.url}}><img width="30px;" src="{% static 'core/image/xls.png' %}">{{file.filename}}</a>
+                        {% endif %}
+                        <br>
+                    {% endfor %}
+                  <br>
                   <form id="imageform_{{obj.pk}}" method='post' class="row packed_image" name="packed_image" enctype="multipart/form-data">
                       <div class="row fl_image">
                           <div class="col-11"><input class="form-control" id="packed_images_{{obj.pk}}" name="packed_images" type="file" accept="image/*"></div>

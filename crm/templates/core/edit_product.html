@@ -1,6 +1,6 @@
 {% extends "base_generic.html" %}
 {% load crispy_forms_tags %}
-
+{% load static %}
 {% block content %}
 
 {% if form %}
@@ -41,6 +41,15 @@
         {% endthumbnail %}
         {% endfor %}
         {% endif %}
+        <hr>
+        {% for file in object.files.all %}
+            {% if '.pdf' in file.filename %}
+                <a href={{file.file.url}} target="_blank"><img width="30px;" src="{% static 'core/image/pdf.png' %}">{{file.filename}}</a>
+            {% else %}
+                <a href={{file.file.url}}><img width="30px;" src="{% static 'core/image/xls.png' %}">{{file.filename}}</a>
+                <br>
+            {% endif %}
+        {% endfor %}
 
     </div>
 {% endif %}

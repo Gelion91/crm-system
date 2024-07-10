@@ -73,8 +73,8 @@ class MultipleFileField(forms.ImageField):
 
 
 class ProductForm(ModelForm):
-    image = forms.ImageField(widget=MultipleFileInput, validators=[validate_image_file_extension], required=False)
-    file = forms.FileField(required=False)
+    image = forms.ImageField(widget=MultipleFileInput, validators=[validate_image_file_extension], required=False, label='Добавить изображения')
+    file = forms.FileField(required=False, label='Добавить файл')
     DELETE = forms.BooleanField(initial=True, widget=HiddenInput)
 
     def __init__(self, *args, **kwargs):
@@ -84,7 +84,7 @@ class ProductForm(ModelForm):
         self.helper.form_method = 'post'
         self.helper.form_action = 'submit_survey'
         self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn-secondary'))
-        self.fields['paid'].default = True
+        self.fields['paid'].initial = True
 
     class Meta:
         model = Product
@@ -132,10 +132,10 @@ class ProductFormSetHelper(FormHelper):
             Div(Div('quantity', css_class='col-12'), css_class='row'),
             Div(Div('fraht', css_class='col-12'), css_class='row'),
             Div(Div('fraht_company', css_class='col-12'), css_class='row'),
+            Div(Div('image', css_class='col-12'),
+                Div('file', css_class='col-12'), css_class='row'),
             Div(Div('arrive', css_class='col-6'),
                 Div('paid', css_class='col-6'), css_class='row'),
-            Div(Div('image', css_class='col-6'),
-                Div('file', css_class='col-6'), css_class='row'),
             Div('DELETE', css_class='input-small'),
             HTML("""<hr>""")
         )

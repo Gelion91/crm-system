@@ -177,8 +177,6 @@ def update(request, order_id):
 
         if form2.is_valid():
             print('форма2 валидна')
-            print(request.FILES.getlist('image'))
-            print(request.FILES.getlist('file'))
             form2.instance.owner = request.user
 
             form2.save()
@@ -234,6 +232,10 @@ class UpdateProduct(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
                 for f in files:
                     img = ImagesProduct(product=self.object, image=f)
                     img.save()
+            if request.FILES.getlist('file'):
+                for f in request.FILES.getlist('file'):
+                    file = FilesProduct(product=self.object, file=f)
+                    file.save()
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
