@@ -1,15 +1,248 @@
 {% extends "base_generic.html" %}
 {% load crispy_forms_tags %}
-
+{% load static %}
 {% block content %}
-{% if form %}
-    <div class="col secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
+<script src="{% static 'core/js/order.js' %}" defer></script>
+    <div class="col secondcolor" style="padding:1%; background:radial-gradient(#f5f5f5, transparent);">
+    <div class="row justify-content-around">
+        <div class="col-xs-12 col-sm-5 shdw_form" style="max-height:75vh;">
+    <h3 align="center">Заказ</h3>
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-error">{{ form.non_field_errors }}</div>
-        {% crispy form %}
+        {% crispy order_form %}
     </form>
-     <a href="{% url 'core:addproduct' object.pk %}">Добавить товар</a>
+        </div>
+    {% if data.product.all %}
+    <div class="col-xs-12 col-sm-5 shdw_form">
+        <div class="row justify-content-between">
+            <div class="col-4"><button type="button" class="btn btn-primary btn-secondary shdw_btn" name="add_product">Добавить товар</button></div>
+            <div class="col-4"><h3>Товары</h3></div>
+        </div>
+        <br>
+        <div class="accordion accordion-flush" id="accordionFlushExample">
+        {% for prod in products %}
+            <div class="accordion-item">
+            <h2 class="accordion-header">
+                {% if prod.product.logistics.all %}
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc{{forloop.counter}}" aria-expanded="false" aria-controls="flush-collapseOne" style="background-color:#d1dee3;">
+                {% else %}
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc{{forloop.counter}}" aria-expanded="false" aria-controls="flush-collapseOne">
+                {% endif %}
+                <div class="row"><p class="p-size">{{prod.product.product_marker}} | {{prod.product.name}} <br> Оплачен: {% if prod.product.paid %}&#9989;{% else %}&#10060;{% endif %} | На складе {% if prod.product.arrive %}&#9989;{% else %}&#10060;{% endif %}</p></div>
+              </button>
+            </h2>
+            <div id="acc{{forloop.counter}}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+              <div class="accordion-body">
+                  {% for img in prod.images %}
+                    {% load thumbnail %}
+                        {% thumbnail img.image "100x100" as im %}
+                    <!-- Modal -->
+                            <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img{{forloop.counter}}_{{prod.product.pk}}">
+                                  <img src="{{ im.url }}" class="image-detail">
+                            </a>
+                                        <div class="modal fade" id="img{{forloop.counter}}_{{prod.product.pk}}" tabindex="-1" aria-labelledby="img{{forloop.counter}}" aria-hidden="true">
+                                          <div class="modal-dialog modal-xl">
+                                            <div class="modal-content">
+                                              <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="exampleModalLabel">{{img.product}}</h1>
+                                              </div>
+                                              <div class="modal-body">
+                                                <img src="{{ img.image.url }}">
+                                              </div>
+                                              <div class="modal-footer">
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                        {% endthumbnail %}
+                  {% endfor %}
+                  <hr>
+                  {% for file in prod.product.files.all %}
+                  {% if '.pdf' in file.filename %}
+                      <a href={{file.file.url}} target="_blank"><img width="30px;" src="{% static 'core/image/pdf.png' %}">{{file.filename}}</a>
+                  {% else %}
+                      <a href={{file.file.url}}><img width="30px;" src="{% static 'core/image/xls.png' %}">{{file.filename}}</a>
+                  <br>
+                  {% endif %}
+                  {% endfor %}
+                  <div class="row">
+                    <div class="col">
+                        <a href="{% url 'core:upd_product' prod.product.pk %}" class="btn_edit">Редактировать</a>
+                    </div>
+                    <div class="col">
+                        <form method="POST" action="{% url 'core:delete_product' prod.product.pk %}" class="form">
+                            {% csrf_token %}<input type="submit" class="btn_delete" value="Удалить">
+                        </form>
+                    </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
     </div>
-{% endif %}
+    </div>
+    {% else %}
+        <div class="col-xs-12 col-sm-5 shdw_form">
+            <div class="row justify-content-between">
+            <div class="col-4"><button type="button" class="btn btn-primary btn-secondary shdw_btn" name="add_product">Добавить товар</button></div>
+            <div class="col-4"><h3>Товары</h3></div>
+        </div>
+            <div class="accordion accordion-flush" id="accordionFlushExample"></div>
+        </div>
+    {% endif %}
+    </div>
+        <div id="modal_add_product">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content content_product">
+          <div class="modal-body">
+              <form id="product-form" name="{{data.pk}}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="form-error">{{ form.non_field_errors }}</div>
+                    {% crispy product_form helper %}
+              </form>
+          </div>
+
+          <div class="modal-footer">
+              <input name='close_modal' type="button" value="закрыть">
+          </div>
+
+        </div>
+    </div>
+</div>
+    </div>
+    </div>
+<script defer>
+    const exchange_for_client = document.getElementById('id_exchange_for_client')
+    const exchange_for_company = document.getElementById('id_exchange_for_company')
+    const total_price_rub = document.getElementById('id_total_price_rub')
+    const total_price_rub_company = document.getElementById('id_total_price_rub_company')
+    const total_price = document.getElementById('id_total_price')
+    const total_price_company = document.getElementById('id_total_price_company')
+    const profit = document.getElementById('id_profit')
+    //const id_margin = document.getElementById('id_margin')
+    const price = total_price.value
+
+    exchange_for_company.addEventListener('input', ()=>{
+                    total_price_rub.value =  parseFloat(exchange_for_client.value*total_price.value).toFixed(2)
+                    total_price_rub_company.value = parseFloat(exchange_for_company.value*total_price_company.value).toFixed(2)
+                    profit.value = parseFloat(total_price_rub.value - total_price_rub_company.value).toFixed(2)
+
+    })
+    exchange_for_client.addEventListener('input', ()=>{
+                    exchange_for_company.value = parseFloat(exchange_for_client.value - parseFloat(0.3)).toFixed(2)
+                    total_price_rub.value =  parseFloat(exchange_for_client.value*total_price.value).toFixed(2)
+                    total_price_rub_company.value = parseFloat(exchange_for_company.value*total_price_company.value).toFixed(2)
+                    profit.value = parseFloat(total_price_rub.value - total_price_rub_company.value).toFixed(2)
+    })
+
+    $("input").focus(function(){
+    $(this).select();
+    });
+
+    $('[name="add_product"]').on( "click", function(e) {
+            $("#modal_add_product")
+                .css("display", "block")
+                .animate({ opacity: 1 }, 198);
+    });
+
+    $('input[name="close_modal"]').on( "click", function(e) {
+            $("#modal_add_product")
+                .css("display", "none")
+                .animate({ opacity: 1 }, 198);
+    });
+
+    $(document).on('submit', "#product-form", function (e) {
+        e.preventDefault();
+        $("#modal_add_product").css("display", "none");
+        var data = $('#product-form').serializeArray();
+        var token = '{{ csrf_token }}';
+        console.log($(this)[0]);
+        var formData = new FormData($(this)[0]);
+        formData.append('id', $(this).attr('name'));
+        formData.append('product_marker', data.find(x => x.name === 'product_marker').value);
+        formData.append('name', data.find(x => x.name === 'name').value);
+        formData.append('url', data.find(x => x.name === 'url').value);
+        formData.append('number_order', data.find(x => x.name === 'number_order').value);
+        formData.append('price', data.find(x => x.name === 'price').value);
+        formData.append('price_company', data.find(x => x.name === 'price_company').value);
+        formData.append('fraht', data.find(x => x.name === 'fraht').value);
+        formData.append('fraht_company', data.find(x => x.name === 'fraht_company').value);
+        formData.append('quantity', data.find(x => x.name === 'quantity').value);
+        formData.append('arrive', $(this).find("[name='arrive']").is(":checked"));
+        formData.append('paid', $(this).find("[name='paid']").is(":checked"));
+        $.ajax({
+                type: "POST",
+                url: "{% url 'core:add_product' %}",
+                headers: {'X-CSRFToken': token},
+                data: formData,
+                async: false,
+                  cache: false,
+                  contentType: false,
+                  processData: false,
+                success: function(response) {
+                $('#product-form')[0].reset();
+                card = '<div class="accordion-item">' +
+                        '<h2 class="accordion-header">' +
+                        '<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#new_button' + response.product_id + '" aria-expanded="false" aria-controls="flush-collapseOne">' +
+                        '<div class="row"><p class="p-size">' + response.product_marker + ' | ' + response.name + ' <br> Оплачен: &#9989; | На складе &#10060;</p></div>' +
+                        '</button>' +
+                        '</h2>' +
+                        '<div id="new_button' + response.product_id + '" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">' +
+                        '<div class="accordion-body" id="ab_' + response.product_id + '">' +
+                        '</div>' +
+                        '<hr>' +
+                        '<div class="row">' +
+                        '<div class="col">' +
+                        '<a href="" class="btn_edit">Редактировать</a>' +
+                        '</div>' +
+                        '<div class="col">' +
+                        '<form method="POST" action="" class="form">' +
+                        '<input type="submit" class="btn_delete" value="Удалить">' +
+                        '</form>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>'
+                $('#accordionFlushExample').prepend(card);
+                var acc_body = '#ab_' + response.product_id
+                response.image.forEach(function (img, index) {
+                  const image_card ='<a href="' + img[0] + '" data-bs-toggle="modal" data-bs-target="#modal' + response.product_id + index + '">' +
+                                    '<img src="' + img[1] + '" class="image-detail">' +
+                                    '</a>' +
+                                    '<div class="modal fade" id="modal' + response.product_id + index + '" tabindex="-1"  aria-hidden="true">' +
+                                    '<div class="modal-dialog modal-xl">' +
+                                    '<div class="modal-content">' +
+                                    '<div class="modal-header">' +
+                                    '<h1 class="modal-title fs-5" id="exampleModalLabel">' + response.name + '</h1>' +
+                                    '</div>' +
+                                    '<div class="modal-body">' +
+                                    '<img src="' + img[0] + '">' +
+                                    '</div>' +
+                                    '<div class="modal-footer">' +
+                                    '</div>' +
+                                    '</div>' +
+                                    '</div>' +
+                                    '</div>'
+                  console.log(img);
+                $(acc_body).append(image_card);
+                })
+
+
+
+                total_price.value = parseFloat(response.total_price).toFixed(2)
+                total_price_company.value = parseFloat(response.total_price_company).toFixed(2)
+                total_price_rub.value =  parseFloat(exchange_for_client.value*total_price.value).toFixed(2)
+                total_price_rub_company.value = parseFloat(exchange_for_company.value*total_price_company.value).toFixed(2)
+                profit.value = parseFloat(total_price_rub.value - total_price_rub_company.value).toFixed(2)
+                },
+
+                error: function() {
+                    console.log('it broke');
+                },
+            });
+        });
+</script>
 {% endblock %}

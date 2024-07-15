@@ -42,4 +42,5 @@ urlpatterns = [
     path('change_date', views.change_datetime, name='change_date'),
     path('notifications', views.ViewNotifications.as_view(), name='notifications'),
     path('ajax_get_course', views.getcourse, name='get_course'),
+    path('ajax_add_product', views.add_product, name='add_product'),
 ]

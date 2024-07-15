@@ -42,7 +42,7 @@
 
             <div class="col accordion accordion-flush" id="accordionFlushExample">
           {% for obj in object_list %}
-            <div class="row list-height" style="font-weight: 700; border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
+            <div class="row list-height shdw_list" style="font-weight: 700; border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
                 <div id="marker_{{obj.pk}}" class="col-3 col-lg-3 center"><p class="p-size">{{obj.marker}}</p></div>
 
                 <div class="col-2 checkbox-wr"><input id="first_step-{{obj.pk}}" name="{{obj.pk}}" class="first_step checkbox_margin" type="checkbox" {% if obj.first_step %} checked="true" {% endif %}{% if request.user.is_superuser or groups %}{% else %}disabled{% endif %}>

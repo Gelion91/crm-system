@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import decimal
 import json
 from pytz import timezone
 
@@ -23,7 +24,7 @@ from core.filters import OrderFilter, ProductFilter, DeliveryFilter, DeliveryLis
 from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
     ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm, PackedImageForm, \
     LogisticImageForm, AddAccountForm, ProductNotesForm, DeliveryNotesForm, ChangeOrderDateForm, ChangeProductDateForm, \
-    ChangeDeliveryDateForm
+    ChangeDeliveryDateForm, UpdateOrderFormTest
 from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics, Account, \
     NotesProduct, NotesDelivery, Notification, FilesProduct
 from core.utils import get_course
@@ -161,12 +162,12 @@ def _get_form(request, formcls, prefix):
 @permission_required('core.change_order')
 def update(request, order_id):
     data = get_object_or_404(Order, pk=order_id)
-    form = UpdateOrderForm(instance=data)
+    form = UpdateOrderFormTest(instance=data)
     form2 = ProductForm()
     helper = ProductFormSetHelper()
 
     if request.method == 'POST':
-        form = UpdateOrderForm(request.POST, instance=data)
+        form = UpdateOrderFormTest(request.POST, instance=data)
         form2 = ProductForm(request.POST)
         files = ProductForm(request.FILES)
         print(form2.errors)
@@ -175,22 +176,6 @@ def update(request, order_id):
             print('форма1 валидна')
             form.save()
 
-        if form2.is_valid():
-            print('форма2 валидна')
-            form2.instance.owner = request.user
-
-            form2.save()
-            product = Product.objects.get(id=form2.instance.id)
-            if request.FILES.getlist('image'):
-                for f in request.FILES.getlist('image'):
-                    img = ImagesProduct(product=product, image=f)
-                    img.save()
-            if request.FILES.getlist('file'):
-                for f in request.FILES.getlist('file'):
-                    file = FilesProduct(product=product, file=f)
-                    file.save()
-            data.product.add(product)
-            data.save()
         return redirect('core:upd', order_id=order_id)
 
     context = {
@@ -200,11 +185,64 @@ def update(request, order_id):
         'product_form': form2,
         'helper': helper,
         'products': []
-
     }
     for prod in data.product.all():
         context['products'].append({'product': prod, 'images': prod.images.all()})
-    return render(request, 'core/update_order.html', context)
+    return render(request, 'core/order_upd.html', context)
+
+
+def add_product(request):
+    print(request.POST)
+    print(request.FILES)
+    order_id = request.POST.get("id")
+    product_marker = request.POST.get("product_marker")
+    name = request.POST.get("name")
+    url = request.POST.get("url")
+    number_order = request.POST.get("number_order")
+    price = request.POST.get("price")
+    price_company = request.POST.get("price_company")
+    fraht = request.POST.get("fraht")
+    fraht_company = request.POST.get("fraht_company")
+    quantity = request.POST.get("quantity")
+    arrive = True if request.POST.get("arrive") == 'true' else False
+    paid = True if request.POST.get("paid") == 'true' else False
+
+    product = Product(product_marker=product_marker, name=name, url=url, number_order=number_order, price=decimal.Decimal(price),
+                      price_company=decimal.Decimal(price_company), fraht=decimal.Decimal(fraht), fraht_company=decimal.Decimal(fraht_company), quantity=quantity,
+                      arrive=arrive, paid=paid, owner=request.user
+                      )
+    product.save()
+    print(product.full_price)
+    print(product.full_price_company)
+    order = Order.objects.get(pk=order_id)
+    order.product.add(product)
+    order.save()
+
+    if request.FILES.getlist('image'):
+        for f in request.FILES.getlist('image'):
+            img = ImagesProduct(product=product, image=f)
+            img.save()
+    if request.FILES.getlist('file'):
+        for f in request.FILES.getlist('file'):
+            file = FilesProduct(product=product, file=f)
+            file.save()
+
+    total_price = sum(i.full_price for i in order.product.all())
+    print(total_price)
+    total_price_company = sum(i.full_price_company for i in order.product.all())
+    print(total_price_company)
+    response = {'product_id': product.pk,
+                'product_marker': product.product_marker,
+                'name': product.name,
+                'total_price': float(total_price),
+                'total_price_company': float(total_price_company),
+                'product_image': [i.image.url for i in product.images.all() if product.images.all()],
+                'image': [(prod.image.url, get_thumbnail(prod.image, '100x56', crop='center', quality=99).url) for prod in product.images.all()],
+                }
+
+    print(response)
+
+    return HttpResponse(json.dumps(response), content_type='application/json')
 
 
 class UpdateProduct(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
@@ -563,8 +601,7 @@ class DeliveryStatus(LoginRequiredMixin, FormMixin, FilterView):
         context['image_form'] = LogisticImageForm
         context['notes_form'] = DeliveryNotesForm
         context['title'] = 'Статус грузов'
-        context['groups'] = [self.request.user.groups.filter(name='logist').exists(),
-                             self.request.user.groups.filter(name='china').exists()]
+        context['logist'] = self.request.user.groups.filter(name='logist').exists()
         context['china'] = self.request.user.groups.filter(name='china').exists()
         return context
 

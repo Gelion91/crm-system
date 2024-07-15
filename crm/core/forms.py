@@ -54,6 +54,42 @@ class UpdateOrderForm(ModelForm):
         exclude = ('product', 'owner', 'margin')
 
 
+class UpdateOrderFormTest(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(UpdateOrderFormTest, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'whiteForms'
+        self.helper.form_method = 'post'
+        self.helper.form_action = 'submit_survey'
+        self.fields["account"].queryset = Account.objects.filter(user=self.instance.owner)
+        self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn-secondary shdw_btn'))
+        self.fields["total_price"].disabled = True
+        self.fields["total_price_rub"].disabled = True
+        self.fields["total_price_company"].disabled = True
+        self.fields["total_price_rub_company"].disabled = True
+        self.helper.layout = Layout(
+            Div(Div('client', css_class='col-6'),
+                Div('marker', css_class='col-6'), css_class='row'),
+            Div(Div('account', css_class='col-6'),
+                Div('status', css_class='col-6'), css_class='row'),
+            Div(Div('exchange_for_client', css_class='col-6'),
+                Div('exchange_for_company', css_class='col-6'), css_class='row'),
+            Div(Div('total_price', css_class='col-6'),
+                Div('total_price_company', css_class='col-6'), css_class='row'),
+            Div(Div('total_price_rub', css_class='col-6'),
+                Div('total_price_rub_company', css_class='col-6'), css_class='row'),
+            Div(Div('profit', css_class='col-12'), css_class='row'),
+            Div(Div('paid_method', css_class='col-6'),
+                Div('takemoney', css_class='col-6'), css_class='row')
+        )
+
+    class Meta:
+        model = Order
+        fields = '__all__'
+        exclude = ('product', 'owner', 'margin')
+
+
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
 
@@ -125,13 +161,13 @@ class ProductFormSetHelper(FormHelper):
         self.layout = Layout(
             Div(Div('product_marker', css_class='col-6'),
                 Div('name', css_class='col-6'), css_class='row'),
-            Div(Div('url', css_class='col-12'), css_class='row'),
-            Div(Div('number_order', css_class='col-12'), css_class='row'),
+            Div(Div('url', css_class='col-6'),
+                Div('number_order', css_class='col-6'), css_class='row'),
             Div(Div('price', css_class='col-6'),
                 Div('price_company', css_class='col-6'), css_class='row'),
+            Div(Div('fraht', css_class='col-6'),
+                Div('fraht_company', css_class='col-6'), css_class='row'),
             Div(Div('quantity', css_class='col-12'), css_class='row'),
-            Div(Div('fraht', css_class='col-12'), css_class='row'),
-            Div(Div('fraht_company', css_class='col-12'), css_class='row'),
             Div(Div('image', css_class='col-12'),
                 Div('file', css_class='col-12'), css_class='row'),
             Div(Div('arrive', css_class='col-6'),
