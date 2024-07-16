@@ -1115,9 +1115,9 @@ align-self: center;
 .content_product{
       background-color: #fff;
   /* окно будет находится по центру по горизонтали и с отступом сверху в 100 px */
-      margin: 60px auto;
-      padding: 30px;
-      font-size: 20px;
+      margin: 10px auto;
+      padding: 10px;
+      font-size: calc(10px + 4 * (100vw / 1280));
       /* разнесем текст и кнопоку по краям окна */
       display: flex;
       justify-content: space-between;
@@ -1134,7 +1134,7 @@ align-self: center;
   /* окно будет находится по центру по горизонтали и с отступом сверху в 100 px */
       margin: 0px auto;
       padding: 10px;
-      font-size: 12px;
+      font-size: calc(10px + (8 + 8 * 0.7) * ((100vw - 320px) / 1280));
       /* разнесем текст и кнопоку по краям окна */
       display: flex;
       justify-content: space-between;
