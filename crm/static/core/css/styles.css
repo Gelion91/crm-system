@@ -1109,19 +1109,42 @@ align-self: center;
   background-color: rgba(0,0,0,0.4); /* цвет фона - прозрачный черный */
 }
 
-.content_product {
-  background-color: #fff;
+
+
+@media (min-width: 768px) {
+.content_product{
+      background-color: #fff;
   /* окно будет находится по центру по горизонтали и с отступом сверху в 100 px */
-  margin: 60px auto;
-  padding: 30px;
-  font-size: 20px;
-  /* разнесем текст и кнопоку по краям окна */
-  display: flex;
-  justify-content: space-between;
-  border-radius: 1%;
-  width: 80%;
-  line-height: 1;
- }
+      margin: 60px auto;
+      padding: 30px;
+      font-size: 20px;
+      /* разнесем текст и кнопоку по краям окна */
+      display: flex;
+      justify-content: space-between;
+      width: 80%;
+      line-height: 1;
+      pointer-events: auto;
+      outline: 0;
+      flex-direction: column;
+      }
+}
+@media (max-width: 768px) {
+.content_product{
+      background-color: #fff;
+  /* окно будет находится по центру по горизонтали и с отступом сверху в 100 px */
+      margin: 0px auto;
+      padding: 10px;
+      font-size: 12px;
+      /* разнесем текст и кнопоку по краям окна */
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      line-height: 1;
+      pointer-events: auto;
+      outline: 0;
+      flex-direction: column;
+      }
+}
 
 .shdw {
     box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
@@ -1161,3 +1184,4 @@ color: black;
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
     z-index: 1;
     }
+

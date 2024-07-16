@@ -20,7 +20,6 @@ def change_logistic(sender, instance, created, **kwargs):
     if not created:
         if instance.sendings.all():
             sending = instance.sendings.first()
-            print(sending)
             sending.weight = sum(i.weight for i in sending.logistics.all())
             sending.volume = sum(i.volume for i in sending.logistics.all())
             sending.places = sum(i.places for i in sending.logistics.all())
