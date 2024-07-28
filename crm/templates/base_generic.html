@@ -155,9 +155,9 @@
 </div>
 </div>
 <script>
-
+    var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
     var socket = new WebSocket(
-            'wss://'
+            ws_scheme + '://'
             + window.location.host
             + '/ws');
     socket.onmessage = function(event){
