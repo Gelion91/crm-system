@@ -116,7 +116,10 @@ class DeliveryFilter(django_filters.FilterSet):
         if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists() or self.request.user.groups.filter(name='china').exists():
             return queryset
         else:
-            return queryset.filter(product__owner=self.request.user.pk).distinct()
+            queryset1 = queryset.filter(owner=self.request.user)
+            queryset2 = queryset.filter(product__owner=self.request.user.pk)
+            queryset = (queryset1 | queryset2)
+            return queryset.distinct()
 
     def filter_by_order(self, queryset, name, value):
         return queryset.order_by(value)

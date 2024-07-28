@@ -21,12 +21,12 @@ ALLOWED_HOSTS = ['89.111.170.207', 'cargorc.ru', 'www.cargorc.ru', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'daphne',
     'django.contrib.staticfiles',
     'core.apps.CoreConfig',
     'clients.apps.ClientsConfig',
@@ -41,8 +41,7 @@ INSTALLED_APPS = [
     'django_filters',
     'django_extensions',
     'sorl.thumbnail',
-
-    # 'channels
+    'channels'
 ]
 
 MIDDLEWARE = [
@@ -71,21 +70,22 @@ TEMPLATES = [
                 'core.context_processors.menu_manager',
                 'core.context_processors.get_complete_orders',
                 'core.context_processors.get_clients_info',
-                'core.context_processors.course_today'
+                'core.context_processors.course_today',
+                'core.context_processors.notification_count'
             ],
         },
     },
 ]
 
 ASGI_APPLICATION = 'crm.asgi.application'
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": [("127.0.0.1", 6379)],
-#         },
-#     },
-# }
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("localhost", 6379)],
+        },
+    },
+}
 WSGI_APPLICATION = 'crm.wsgi.application'
 
 # Database

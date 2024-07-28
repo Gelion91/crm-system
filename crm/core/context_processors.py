@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.models import LogEntry
-from core.models import Order, Clients, Course
+from core.models import Order, Clients, Course, Notification
 
 '''{'title': 'Панель управления', 'url_name': 'dashboard:home',
              'submenu': [{'title': 'Общее', 'url_name': 'dashboard:home'},
@@ -35,7 +35,8 @@ def menu_manager(request):
                  'submenu': [
                      {'title': 'Оформить отправку', 'url_name': 'sendings:sending_create', 'path': '/sending_create'},
                  ]},
-                {'title': 'Управление аккаунтами', 'url_name': 'core:add_account'}
+                {'title': 'Управление аккаунтами', 'url_name': 'core:add_account'},
+                {'title': 'Финансы', 'url_name': 'core:finance_list'}
                 ]
         return {'menu': menu}
 
@@ -122,3 +123,11 @@ def course_today(request):
     else:
         return {'dollar_course': 'Еще нету данных',
                 'date_review_course': 'Еще нету данных'}
+
+
+def notification_count(request):
+    if request.user.is_authenticated:
+        notification = Notification.objects.filter(readed=False, subject_owner=request.user).count()
+        return {'notifications': notification}
+    else:
+        return {'notifications': Notification.objects.none()}

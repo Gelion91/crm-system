@@ -30,6 +30,7 @@ class Product(models.Model):
                                              default=0)
     date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     date_update = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
+    last_updater = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='updater', verbose_name='Последний изменивший')
 
     class Meta:
         verbose_name = 'Товар'
@@ -305,6 +306,8 @@ class Logistics(models.Model):
                                         default=0)
     full_price = models.DecimalField(decimal_places=2, max_digits=100,
                                      verbose_name='Общая стоимость(Доставка/упаковка/страховка) $', default=0)
+    company_delivery_price = models.DecimalField(decimal_places=2, max_digits=100,
+                                     verbose_name='себестоимость(Доставка/упаковка/страховка) $', default=0)
     exchange_rate = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Курс $ на момент оплаты',
                                         default=0)
     paid_cash = models.CharField(max_length=100, choices=CASH_CHOICES, default='ruble', null=False,
@@ -317,6 +320,8 @@ class Logistics(models.Model):
     first_step = models.BooleanField(verbose_name='Отправлен', default=False)
     second_step = models.BooleanField(verbose_name='В Москве', default=False)
     third_step = models.BooleanField(verbose_name='Получен клиентом', default=False)
+    last_updater = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='updater_logistic',
+                                     verbose_name='Последний изменивший')
 
     class Meta:
         verbose_name = 'Доставка'
@@ -403,6 +408,8 @@ class Notification(models.Model):
     action = models.TextField(verbose_name='Действие', blank=True)
     subject = models.CharField(max_length=100, verbose_name='Объект')
     date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата')
+    subject_owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='subject_owner', verbose_name='Создатель объекта')
+    readed = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Уведомление'

@@ -40,7 +40,7 @@
 
           {% if order.status == 'Оформление' %}
             <a href="{% url 'core:upd' order.pk %}">
-                <div class="row list-height shdw_list" style="font-weight: 700; border-color:#ead1dc; margin-top:1%; margin-bottom:1%; background-color:#fff;">
+                <div class="row list-height" style="font-weight: 700; border-color:#ead1dc; margin-top:1%; margin-bottom:1%; background-color:#fff;">
                     <div class="col center"><p class="p-size">{{order.client}}</p></div>
                     <div class="col center"><p class="p-size">{{order.marker}}</p></div>
                     <div class="col center"><p class="p-size">{{order.status}}</p></div>
@@ -52,7 +52,7 @@
 
           {% elif order.status == 'Завершен' %}
             <a href="{% url 'core:upd' order.pk %}">
-                <div class="row list-height shdw_list" style="font-weight: 700; border-color:#cff2bf; margin-top:1%; margin-bottom:1%; background-color:#fff;">
+                <div class="row list-height" style="font-weight: 700; border-color:#cff2bf; margin-top:1%; margin-bottom:1%; background-color:#fff;">
                     <div class="col center"><p class="p-size">{{order.client}}</p></div>
                     <div class="col center"><p class="p-size">{{order.marker}}</p></div>
                     <div class="col center"><p class="p-size">{{order.status}}</p></div>
@@ -62,7 +62,7 @@
             </a>
           {% else %}
             <a href="{% url 'core:upd' order.pk %}">
-                <div class="row list-height shdw_list" style="font-weight: 700; border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
+                <div class="row list-height" style="font-weight: 700; border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
                     <div class="col center"><p class="p-size">{{order.client}}</p></div>
                     <div class="col center"><p class="p-size">{{order.marker}}</p></div>
                     <div class="col center"><p class="p-size">{{order.status}}</p></div>

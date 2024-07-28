@@ -1185,3 +1185,31 @@ color: black;
     z-index: 1;
     }
 
+.fin_bord {
+    border: 1px solid;
+    border-color: silver;
+    }
+
+.notific {
+ text-align:center;
+ border: 3px solid;
+ border-color: lightblue;
+ border-radius: 5%;
+ margin-bottom: 10px;
+ margin-left: 5px;
+ }
+
+ .block_animation {
+      animation-name: styles;
+    }
+
+    @keyframes styles {
+      0% {
+        opacity: 1;
+        left: 0;
+      }
+      100% {
+        opacity: 0;
+        left: 100;
+      }
+    }

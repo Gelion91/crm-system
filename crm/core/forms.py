@@ -125,7 +125,7 @@ class ProductForm(ModelForm):
     class Meta:
         model = Product
         fields = '__all__'
-        exclude = ('full_price', 'full_price_company', 'DELETE', 'logistics', 'margin_product', 'owner')
+        exclude = ('full_price', 'full_price_company', 'DELETE', 'logistics', 'margin_product', 'owner', 'last_updater')
 
     def clean_image(self):
         data = self.cleaned_data['image']
@@ -261,12 +261,12 @@ class DeliveryAddForm(ModelForm):
                                                                                                    arrive=True).filter(
                 logistics__product__isnull=True)
         self.fields['product'].widget = CheckboxSelectMultiple(choices=self.fields["product"].queryset)
-        # self.fields['product'].widget = FilteredSelectMultiple("Товары", is_stacked=False)
         self.fields['delivery'].widget = RadioSelect(choices=DELIVERY_CHOICES)
         if self.current_user.is_superuser or self.current_user.groups.filter(name='logist'):
             self.fields['product'].queryset = queryset
         else:
             self.fields['product'].queryset = queryset.filter(owner=self.current_user)
+            self.fields['company_delivery_price'].widget = forms.HiddenInput()
         self.fields['product'].label = ''
         self.fields['product'].required = False
         self.fields["product"].widget.attrs.update({"class": "form-check-inline"})
@@ -295,6 +295,7 @@ class DeliveryAddForm(ModelForm):
                 Div('full_price', css_class='col-6'), css_class='row'),
             Div(Div(FieldWithButtons('exchange_rate', StrictButton("заполнить", name='add_course', css_class='btn-secondary')), css_class='col-6'),
                 Div('paid_cash', css_class='col-6'), css_class='row'),
+            'company_delivery_price'
         )
         if not self.current_user.is_superuser:
             if self.initial:
@@ -307,7 +308,7 @@ class DeliveryAddForm(ModelForm):
     class Meta:
         model = Logistics
         fields = '__all__'
-        exclude = ('height', 'width', 'lenght', 'first_step', 'second_step', 'third_step', 'owner')
+        exclude = ('height', 'width', 'lenght', 'first_step', 'second_step', 'third_step', 'owner', 'last_updater')
 
 
 def render_js(cls):

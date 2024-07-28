@@ -1,0 +1,115 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+    <div class="row" style="align-items: flex-start;">
+
+        <div class="col-lg-12 secondcolor pad_list" style="background-color:#f5f5f5;">
+        {% if order_price_client %}
+            <div class="row">
+                <h1 align="center" style="background-color:lightgreen">Доходы</h1>
+                <div class="col-4 fin_bord">
+                    <div class="row"><h2 align="center">Заказы</h2></div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">Юани</p></div>
+                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">{{ order_price_client }}</p></div>
+                        <div class="col"><p class="p-size" align="center">{{ order_price_client_rub }}</p></div>
+                    </div>
+                </div>
+                <div class="col-4 fin_bord">
+                    <div class="row"><h2 align="center">Доставки</h2></div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">Доллары</p></div>
+                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">{{ delivery_full_price_client }}</p></div>
+                        <div class="col"><p class="p-size" align="center">{{ delivery_full_price_rub }}</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <h1 align="center" style="background-color:pink">Расходы</h1>
+                <div class="col-4 fin_bord">
+                    <div class="row"><h2 align="center">Заказы</h2></div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">Юани</p></div>
+                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">{{ order_price_company }}</p></div>
+                        <div class="col"><p class="p-size" align="center">{{ order_price_company_rub }}</p></div>
+                    </div>
+                </div>
+                <div class="col-4 fin_bord">
+                    <div class="row"><h2 align="center">Доставки</h2></div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">Доллары</p></div>
+                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">{{ delivery_company_price }}</p></div>
+                        <div class="col"><p class="p-size" align="center">{{ delivery_company_price_rub }}</p></div>
+                    </div>
+                </div>
+                <div class="col-4 fin_bord">
+                    <div class="row"><h2 align="center">Доп расходы</h2></div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">Доллары</p></div>
+                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">Пока что хз</p></div>
+                        <div class="col"><p class="p-size" align="center">Пока что хз х2</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <h1 align="center" style="background-color:yellow">Итого</h1>
+                <div class="col-4 fin_bord">
+                    <div class="row"><h2 align="center">Заказы</h2></div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">Юани</p></div>
+                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">{{ total_order }}</p></div>
+                        <div class="col"><p class="p-size" align="center">{{ total_order_rub }}</p></div>
+                    </div>
+                </div>
+                <div class="col-4 fin_bord">
+                    <div class="row"><h2 align="center">Доставки</h2></div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">Доллары</p></div>
+                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">{{ total_delivery }}</p></div>
+                        <div class="col"><p class="p-size" align="center">{{ total_delivery_rub }}</p></div>
+                    </div>
+                </div>
+                <div class="col-4 fin_bord">
+                    <div class="row"><h2 align="center">Доп расходы</h2></div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">Доллары</p></div>
+                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                    </div>
+                    <div class="row">
+                        <div class="col"><p class="p-size" align="center">Пока что хз</p></div>
+                        <div class="col"><p class="p-size" align="center">Пока что хз х2</p></div>
+                    </div>
+                </div>
+            </div>
+
+        {% else %}
+    <h3>Нет данных.</h3>
+    </div>
+    </div>
+    {% endif %}
+{% endblock %}

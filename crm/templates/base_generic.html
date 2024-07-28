@@ -55,6 +55,26 @@
                 {% endfor %}
 
             </div>
+            <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Уведомления</h5>
+                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                    <div id="notification_info">
+                    </div>
+                </div>
+            </div>
+            <div id="notification" class="dropdown order-2 order-md-last" style="padding-right:5px; margin-right:10px;">
+                    <button type="button" id="get_notification" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample" style="margin: 0; padding: 0; border: 0; outline: none; background-color: transparent; color:white;">
+                        <img width="40px;" src="{% static 'core/image/notification.svg' %}">
+                    </button>
+                    {% if notifications %}
+                        <p id="notific" class="p-size" style="color:white; float: right;">{{notifications}}</p>
+                    {% else %}
+                        <p id="notific" class="p-size" style="color:white; float: right;"></p>
+                    {% endif %}
+            </div>
             <div id="get_course" class="dropdown order-2 order-md-last" style="padding-right:5px;">
                     <h4 style="color:white;">курс $: {{dollar_course}}</h4>
                     <p class="p-size" style="line-height: 0; color:white; margin:0px;">{{date_review_course}}</p>
@@ -94,9 +114,10 @@
               {% endif %}
               {% endfor %}
               {% endif %}
-          {% endfor %}
+        {% endfor %}
 
           </ul>
+          <div id="message"></div>
       </div>
       {% endblock %}
       <div class="col-xs-12 col-sm-10" style="background:radial-gradient(#f5f5f5, transparent);">
@@ -134,6 +155,35 @@
 </div>
 </div>
 <script>
+
+    var socket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws');
+    socket.onmessage = function(event){
+        var data = JSON.parse(event.data)
+        console.log(data);
+        console.log(data['last_updater']);
+        console.log(data['subject']);
+        console.log(data['action']);
+<!--        $('#message').empty();-->
+        $('#message').append('<div class="notific" id="_' + data['subject'].split(" ")[1] + '">' +
+                             '<p class="p-size">' + data['last_updater'] + '</p>' +
+                             '<p class="p-size">' + data['action'] + '</p>' +
+                             '<p class="p-size">' + data['subject'] + '</p>' +
+                             '</div>')
+        var id_child = "_" + data['subject'].split(" ")[1];
+        console.log(id_child);
+        $("#" + id_child).show(500, function(){
+          setTimeout(function(){
+            $("#" + id_child).remove();
+          }, 5000);
+        });
+        $('#notific').text(data['notification_count']);
+        var snd = new Audio("{% static 'core/zvuk.mp3' %}");
+        snd.play();
+    }
+
     $(document).on('click', "#reniew", function () {
                         var token = '{{ csrf_token }}';
                         $.ajax({
@@ -149,6 +199,53 @@
 
                             $("#get_course").empty();
                             $("#get_course").append(new_data);
+                            },
+                            error: function() {
+                                console.log('it broke');
+                            },
+                        });
+                    });
+
+    $(document).on('click', "#get_notification", function () {
+                        var token = '{{ csrf_token }}';
+                        $.ajax({
+                            type: "POST",
+                            url: "{% url 'core:get_notification' %}",
+                            headers: {'X-CSRFToken': token},
+                            success: function(response) {
+                            $("#notification_info").empty();
+                            response.notification.forEach(function (notification, index) {
+                            new_data =('<div id="notification_' + notification.id + '" name="readed" class="notific">' +
+                                       '<h4>' + notification.owner + '</h4>' +
+                                       '<p class="p-size">' + notification.action + '</p>' +
+                                       '<p class="p-size">' + notification.subject + '</p>' +
+                                       '<p class="p-size">' + notification.date + '</p>' +
+                                       '</div>')
+                            $("#notification_info").append(new_data);
+                            });
+                            },
+                            error: function() {
+                                console.log('it broke');
+                            },
+                        });
+                    });
+
+    $(document).on('click', "div[name='readed']", function () {
+                        var token = '{{ csrf_token }}';
+                        let dur = 0.5;
+                          $(this).css('animation-duration', dur + 's');
+                          $(this).toggleClass('block_animation');
+                          setTimeout(() => $(this).remove(), dur * 1000);
+                        $.ajax({
+                                type: "POST",
+                                url: "{% url 'core:read_notification' %}",
+                                data: {'id': $(this)[0].id},
+                                headers: {'X-CSRFToken': token},
+                                success: function(response) {
+                                $('#notific').text(response.notification);
+                                if (response.notification == 0) {
+                                $('#notific').empty();
+                                }
                             },
                             error: function() {
                                 console.log('it broke');

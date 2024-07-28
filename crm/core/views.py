@@ -14,7 +14,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils import dateformat
 from django.views import View
 from django.views.generic import CreateView, DeleteView, UpdateView, ListView
-from django.views.generic.base import ContextMixin
+from django.views.generic.base import ContextMixin, TemplateView
 from django.views.generic.edit import FormMixin
 from django_filters.views import FilterView
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
@@ -40,6 +40,29 @@ def getcourse(request):
         'date': dateformat.format(datetime.datetime.now(tz=tz), settings.DATE_FORMAT).lstrip('0'),
     }
 
+    return HttpResponse(json.dumps(response), content_type='application/json')
+
+
+def get_notification(request):
+    tz = timezone('Europe/Moscow')
+    response = { 'notification': [{
+        'id': notification.pk,
+        'owner': notification.owner.username,
+        'action': notification.action,
+        'subject': notification.subject,
+        'date': dateformat.format(notification.date_create, settings.DATE_FORMAT).lstrip('0'),
+    } for notification in Notification.objects.filter(subject_owner=request.user, readed=False)]
+    }
+    return HttpResponse(json.dumps(response), content_type='application/json')
+
+
+def read_notification(request):
+    notification_id = request.POST.get("id").split('_')[-1]
+    notification = Notification.objects.get(pk=notification_id)
+    notification.readed = True
+    notification.save()
+    print(notification.readed)
+    response = {'notification': Notification.objects.filter(readed=False, subject_owner=request.user).count()}
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 
@@ -283,6 +306,7 @@ class UpdateProduct(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         form.instance.id = self.object.pk
         form.instance.owner = self.object.owner
         form.instance.date_create = self.object.date_create
+        form.instance.last_updater = self.request.user
         self.object = form.save()
         return super().form_valid(form)
 
@@ -367,6 +391,7 @@ class AddDelivery(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
+        form.instance.last_updater = self.request.user
         return super().form_valid(form)
 
 
@@ -406,6 +431,10 @@ class UpdateDelivery(LoginRequiredMixin, UpdateView):
         context['title'] = 'Доставка'
         context['data'] = [{'id': i.id, 'full_price': i.full_price} for i in context['form'].fields['product'].queryset]
         return context
+
+    def form_valid(self, form):
+        form.instance.last_updater = self.request.user
+        return super().form_valid(form)
 
 
 class ProductStatus(LoginRequiredMixin, FormMixin, FilterView):
@@ -460,6 +489,7 @@ def change_status_paid(request):
         product.paid = True
     else:
         product.paid = False
+    product.last_updater = request.user
     product.save()
 
     response = {
@@ -477,6 +507,7 @@ def change_status_arrive(request):
         product.arrive = True
     else:
         product.arrive = False
+    product.last_updater = request.user
     product.save()
 
     response = {
@@ -689,6 +720,7 @@ def change_logistic_status(request):
         logistic.second_step = result
     else:
         logistic.third_step = result
+    logistic.last_updater = request.user
     logistic.save()
 
     response = {
@@ -871,4 +903,26 @@ class ViewNotifications(FilterView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Журнал событий'
+        return context
+
+
+class FinanceList(TemplateView):
+    template_name = 'core/finance_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Финансы общее'
+        context['order_price_client'] = sum(order.total_price for order in Order.objects.all())
+        context['order_price_client_rub'] = sum(order.total_price_rub for order in Order.objects.all())
+        context['order_price_company'] = sum(order.total_price_company for order in Order.objects.all())
+        context['order_price_company_rub'] = sum(order.total_price_rub_company for order in Order.objects.all())
+        context['order_price_profit'] = sum(order.profit for order in Order.objects.all())
+        context['delivery_full_price_client'] = sum(logistic.full_price for logistic in Logistics.objects.all())
+        context['delivery_full_price_rub'] = round(sum(logistic.full_price * logistic.exchange_rate for logistic in Logistics.objects.all()), 2)
+        context['delivery_company_price'] = sum(logistic.company_delivery_price for logistic in Logistics.objects.all())
+        context['delivery_company_price_rub'] = round(sum(logistic.company_delivery_price * logistic.exchange_rate for logistic in Logistics.objects.all()), 2)
+        context['total_order'] = context['order_price_client'] - context['order_price_company']
+        context['total_order_rub'] = context['order_price_client_rub'] - context['order_price_company_rub']
+        context['total_delivery'] = context['delivery_full_price_client'] - context['delivery_company_price']
+        context['total_delivery_rub'] = context['delivery_full_price_rub'] - context['delivery_company_price_rub']
         return context

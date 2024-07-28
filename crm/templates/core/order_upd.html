@@ -11,6 +11,7 @@
         {% csrf_token %}
         <div class="form-error">{{ form.non_field_errors }}</div>
         {% crispy order_form %}
+        <button type="button" class="btn btn-danger shdw_btn"><a href="{% url 'core:delete' data.pk %}" style="color:white; underline:none;">Удалить</a></button>
     </form>
         </div>
     {% if data.product.all %}
@@ -111,7 +112,6 @@
         </div>
     </div>
 </div>
-    </div>
     </div>
 <script defer>
     const exchange_for_client = document.getElementById('id_exchange_for_client')

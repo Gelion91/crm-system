@@ -36,7 +36,3 @@ $(document).ready(function(){
 
 });
 
-
-
-console.log(exchange_for_company)
-console.log(product)
