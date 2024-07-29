@@ -69,7 +69,7 @@ def create_product(sender, instance, **kwargs):
         if old_product.arrive != instance.arrive:
             act = f'Статус изменен на {"Прибыл" if instance.arrive else "Еще не пришел"}'
 
-    notification = Notification(owner=instance.last_updater,
+    notification = Notification(owner=instance.last_updater if instance.last_updater else instance.owner,
                                 subject=f'продукт {instance.product_marker}({instance.name})',
                                 action=act, subject_owner=instance.owner)
     notification.save()

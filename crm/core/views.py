@@ -47,7 +47,7 @@ def get_notification(request):
     tz = timezone('Europe/Moscow')
     response = { 'notification': [{
         'id': notification.pk,
-        'owner': notification.owner.username,
+        'owner': notification.owner.username if notification.owner else notification.subject_owner.username,
         'action': notification.action,
         'subject': notification.subject,
         'date': dateformat.format(notification.date_create, settings.DATE_FORMAT).lstrip('0'),

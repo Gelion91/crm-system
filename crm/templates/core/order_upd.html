@@ -94,25 +94,25 @@
     {% endif %}
     </div>
         <div id="modal_add_product">
-    <div class="modal-dialog modal-xl">
-        <div class="content_product">
-          <div class="modal-body">
-              <form id="product-form" name="{{data.pk}}" method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
+            <div class="modal-dialog modal-xl">
+                <div class="content_product">
+                  <div class="modal-body">
+                      <form id="product-form" name="{{data.pk}}" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
 
-                    <div class="form-error">{{ form.non_field_errors }}</div>
-                    {% crispy product_form helper %}
-              </form>
-          </div>
+                            <div class="form-error">{{ form.non_field_errors }}</div>
+                            {% crispy product_form helper %}
+                      </form>
+                  </div>
 
-          <div class="modal-footer">
-              <input name='close_modal' type="button" value="закрыть">
-          </div>
+                  <div class="modal-footer">
+                      <input name='close_modal' type="button" value="закрыть">
+                  </div>
 
-        </div>
-    </div>
+                </div>
+            </div>
+            </div>
 </div>
-    </div>
 <script defer>
     const exchange_for_client = document.getElementById('id_exchange_for_client')
     const exchange_for_company = document.getElementById('id_exchange_for_company')

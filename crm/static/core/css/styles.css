@@ -1148,17 +1148,14 @@ align-self: center;
 
 .shdw {
     box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
-    z-index: 1;
     }
 
 .shdw_btn {
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
-    z-index: 1;
     }
 
 .shdw_btn:hover{
   box-shadow: 0px 10px 15px 5px rgba(0, 0, 0, 0.5);
-  z-index: 1;
   transform: translateY(5px);
 }
 
@@ -1168,13 +1165,11 @@ color: black;
 
 .shdw_acc {
     box-shadow: inset 0px 3px 5px 5px rgba(0, 0, 0, 0.5);
-    z-index: 1;
     }
 
 @media (min-width: 768px) {
     .shdw_form {
     box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.5);
-    z-index: 1;
     border-radius: 2%;
     padding: 1%;
     }
@@ -1182,7 +1177,6 @@ color: black;
 
 .shdw_list {
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
-    z-index: 1;
     }
 
 .fin_bord {
