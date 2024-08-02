@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  crm:
+    image: gelion91_docker:latest
+    container_name: gelion91_crm
+    volumes:
+      - static_volume:/gelion91/static
+      - media_volume:/gelion91/media
+    env_file:
+      - .env
+    command: >
+      bash -c "./manage.py collectstatic --noinput && ./manage.py migrate && gunicorn -b 0.0.0.0:8001"
+
+volumes:
+  static_volume:
+  media_volume:

@@ -26,7 +26,7 @@ from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
     LogisticImageForm, AddAccountForm, ProductNotesForm, DeliveryNotesForm, ChangeOrderDateForm, ChangeProductDateForm, \
     ChangeDeliveryDateForm, UpdateOrderFormTest
 from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics, Account, \
-    NotesProduct, NotesDelivery, Notification, FilesProduct
+    NotesProduct, NotesDelivery, Notification, FilesProduct, ReadNotification
 from core.utils import get_course
 from crm import settings
 from crm.settings import LOGIN_URL
@@ -59,10 +59,12 @@ def get_notification(request):
 def read_notification(request):
     notification_id = request.POST.get("id").split('_')[-1]
     notification = Notification.objects.get(pk=notification_id)
-    notification.readed = True
-    notification.save()
-    print(notification.readed)
-    response = {'notification': Notification.objects.filter(readed=False, subject_owner=request.user).count()}
+    read = ReadNotification(notification=notification)
+    read.save()
+    read.readers.add(request.user)
+    read.save()
+    response = {'notification': Notification.objects.filter(readed=False, subject_owner=request.user, notifications__in=request.user).count()}
+
     return HttpResponse(json.dumps(response), content_type='application/json')
 
 

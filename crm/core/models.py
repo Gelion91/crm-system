@@ -12,7 +12,7 @@ class Product(models.Model):
     product_marker = models.CharField(max_length=100, verbose_name='маркировка товара', null=True)
     name = models.CharField(max_length=100, verbose_name='Наименование')
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Создал')
-    number_order = models.CharField(max_length=100, verbose_name='Номер заказа', blank=True)
+    number_order = models.CharField(max_length=400, verbose_name='Номер заказа', blank=True)
     url = models.CharField(max_length=500, verbose_name='Ссылка на продавца', blank=True)
     arrive = models.BooleanField(verbose_name='Прибыл на склад')
     paid = models.BooleanField(verbose_name='Оплачен')
@@ -31,6 +31,7 @@ class Product(models.Model):
     date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     date_update = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
     last_updater = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='updater', verbose_name='Последний изменивший')
+    comment = models.TextField(max_length=600, null=True, verbose_name='Примечание по товару', blank=True)
 
     class Meta:
         verbose_name = 'Товар'
@@ -215,6 +216,7 @@ class Order(models.Model):
                                    verbose_name='Способ оплаты')
     takemoney = models.CharField(max_length=100, choices=WHO_TAKE_MONEY, verbose_name='Кто принял оплату', blank=True)
     result = models.BooleanField(verbose_name='Выполнен', default=False)
+    comment = models.TextField(max_length=600, null=True, verbose_name='Примечание по заказу', blank=True)
 
     class Meta:
         verbose_name = 'Заказ'
@@ -432,3 +434,8 @@ class Notification(models.Model):
 class Course(models.Model):
     course = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Курс $', default=0)
     date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата')
+
+
+class ReadNotification(models.Model):
+    readers = models.ManyToManyField(User, verbose_name='Сотрудники', related_name="readers")
+    notification = models.ForeignKey(Notification, on_delete=models.SET_NULL, null=True, verbose_name='Уведомления', related_name="notifications")

@@ -68,6 +68,7 @@ class UpdateOrderFormTest(ModelForm):
         self.fields["total_price_rub"].disabled = True
         self.fields["total_price_company"].disabled = True
         self.fields["total_price_rub_company"].disabled = True
+        self.fields['comment'].widget.attrs['rows'] = 3
         self.helper.layout = Layout(
             Div(Div('client', css_class='col-6'),
                 Div('marker', css_class='col-6'), css_class='row'),
@@ -81,7 +82,8 @@ class UpdateOrderFormTest(ModelForm):
                 Div('total_price_rub_company', css_class='col-6'), css_class='row'),
             Div(Div('profit', css_class='col-12'), css_class='row'),
             Div(Div('paid_method', css_class='col-6'),
-                Div('takemoney', css_class='col-6'), css_class='row')
+                Div('takemoney', css_class='col-6'), css_class='row'),
+            'comment'
         )
 
     class Meta:
@@ -121,6 +123,7 @@ class ProductForm(ModelForm):
         self.helper.form_action = 'submit_survey'
         self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn-secondary'))
         self.fields['paid'].initial = True
+        self.fields['comment'].widget.attrs['rows'] = 3
 
     class Meta:
         model = Product
@@ -172,6 +175,7 @@ class ProductFormSetHelper(FormHelper):
                 Div('file', css_class='col-12'), css_class='row'),
             Div(Div('arrive', css_class='col-6'),
                 Div('paid', css_class='col-6'), css_class='row'),
+            'comment',
             Div('DELETE', css_class='input-small'),
             HTML("""<hr>""")
         )
