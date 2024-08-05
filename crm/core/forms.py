@@ -1,3 +1,6 @@
+import datetime
+from datetime import date
+
 from crispy_forms.bootstrap import InlineRadios, StrictButton, FieldWithButtons
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Field, Div, HTML, Button
@@ -11,7 +14,7 @@ from django.forms import ModelForm, CheckboxSelectMultiple, SelectMultiple, Text
 from django.utils.html import format_html
 
 from core.models import Order, Clients, Product, ImagesProduct, Logistics, PackedImagesProduct, Account, NotesProduct, \
-    NotesDelivery
+    NotesDelivery, Spendings
 from django import forms
 
 
@@ -111,7 +114,8 @@ class MultipleFileField(forms.ImageField):
 
 
 class ProductForm(ModelForm):
-    image = forms.ImageField(widget=MultipleFileInput, validators=[validate_image_file_extension], required=False, label='Добавить изображения')
+    image = forms.ImageField(widget=MultipleFileInput, validators=[validate_image_file_extension], required=False,
+                             label='Добавить изображения')
     file = forms.FileField(required=False, label='Добавить файл')
     DELETE = forms.BooleanField(initial=True, widget=HiddenInput)
 
@@ -297,17 +301,19 @@ class DeliveryAddForm(ModelForm):
                 Div('order_price', css_class='col-6'), css_class='row'),
             Div(Div('insurance', css_class='col-6'),
                 Div('full_price', css_class='col-6'), css_class='row'),
-            Div(Div(FieldWithButtons('exchange_rate', StrictButton("заполнить", name='add_course', css_class='btn-secondary')), css_class='col-6'),
+            Div(Div(FieldWithButtons('exchange_rate',
+                                     StrictButton("заполнить", name='add_course', css_class='btn-secondary')),
+                    css_class='col-6'),
                 Div('paid_cash', css_class='col-6'), css_class='row'),
             'company_delivery_price'
         )
-        if not self.current_user.is_superuser:
-            if self.initial:
-                if Logistics.objects.get(pk=self.initial['id']).sendings.all():
-                    for field in self.fields:
-                        if field == 'exchange_rate' or field == 'paid_cash':
-                            continue
-                        self.fields[f'{field}'].disabled = True
+        # if not self.current_user.is_superuser:
+        #     if self.initial:
+        #         if Logistics.objects.get(pk=self.initial['id']).sendings.all():
+        #             for field in self.fields:
+        #                 if field == 'exchange_rate' or field == 'paid_cash':
+        #                     continue
+        #                 self.fields[f'{field}'].disabled = True
 
     class Meta:
         model = Logistics
@@ -404,3 +410,25 @@ class ChangeProductDateForm(forms.Form):
 class ChangeDeliveryDateForm(forms.Form):
     delivery = forms.ModelChoiceField(queryset=Logistics.objects.all())
     date = forms.DateTimeField(widget=DatInput)
+
+
+class DateFilterForm(forms.Form):
+    date_start = forms.DateTimeField(widget=DatInput, label='С какого?')
+    date_finish = forms.DateField(widget=DatInput, label='По какое?')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'whiteForms'
+        self.helper.form_method = 'get'
+        self.helper.form_action = 'submit_survey'
+        self.helper.add_input(Submit('submit', 'Поиск', css_class="btn btn-secondary"))
+        self.helper.layout = Layout(
+            Div(Div('date_start', css_class='col-6'), Div('date_finish', css_class='col-6'), css_class='row'))
+
+
+class SpendingForm(ModelForm):
+    class Meta:
+        model = Spendings
+        fields = '__all__'

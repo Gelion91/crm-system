@@ -26,7 +26,7 @@ from core.filters import OrderFilter, ProductFilter, DeliveryFilter, DeliveryLis
 from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
     ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm, PackedImageForm, \
     LogisticImageForm, AddAccountForm, ProductNotesForm, DeliveryNotesForm, ChangeOrderDateForm, ChangeProductDateForm, \
-    ChangeDeliveryDateForm, UpdateOrderFormTest
+    ChangeDeliveryDateForm, UpdateOrderFormTest, DateFilterForm
 from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics, Account, \
     NotesProduct, NotesDelivery, Notification, FilesProduct, ReadNotification
 from core.utils import get_course
@@ -917,20 +917,34 @@ class ViewNotifications(FilterView):
 class FinanceList(TemplateView):
     template_name = 'core/finance_list.html'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        start = request.GET.get("date_start")
+        finish = request.GET.get("date_finish")
+
+        if start is not None and finish is not None:
+            orders = Order.objects.filter(date_create__range=[start, finish])
+            logistics = Logistics.objects.filter(date_create__range=[start, finish])
+            context['text_message'] = f'Поиск данных с {start} по {finish}'
+        else:
+            orders = Order.objects.all()
+            logistics = Logistics.objects.all()
+
         context['title'] = 'Финансы общее'
-        context['order_price_client'] = sum(order.total_price for order in Order.objects.all())
-        context['order_price_client_rub'] = sum(order.total_price_rub for order in Order.objects.all())
-        context['order_price_company'] = sum(order.total_price_company for order in Order.objects.all())
-        context['order_price_company_rub'] = sum(order.total_price_rub_company for order in Order.objects.all())
-        context['order_price_profit'] = sum(order.profit for order in Order.objects.all())
-        context['delivery_full_price_client'] = sum(logistic.full_price for logistic in Logistics.objects.all())
-        context['delivery_full_price_rub'] = round(sum(logistic.full_price * logistic.exchange_rate for logistic in Logistics.objects.all()), 2)
-        context['delivery_company_price'] = sum(logistic.company_delivery_price for logistic in Logistics.objects.all())
-        context['delivery_company_price_rub'] = round(sum(logistic.company_delivery_price * logistic.exchange_rate for logistic in Logistics.objects.all()), 2)
+        context['order_price_client'] = sum(order.total_price for order in orders)
+        context['order_price_client_rub'] = sum(order.total_price_rub for order in orders)
+        context['order_price_company'] = sum(order.total_price_company for order in orders)
+        context['order_price_company_rub'] = sum(order.total_price_rub_company for order in orders)
+        context['order_price_profit'] = sum(order.profit for order in orders)
+
+        context['delivery_full_price_client'] = sum(logistic.full_price for logistic in logistics)
+        context['delivery_full_price_rub'] = round(sum(logistic.full_price * logistic.exchange_rate for logistic in logistics), 2)
+        context['delivery_company_price'] = sum(logistic.company_delivery_price for logistic in logistics)
+        context['delivery_company_price_rub'] = round(sum(logistic.company_delivery_price * logistic.exchange_rate for logistic in logistics), 2)
+
         context['total_order'] = context['order_price_client'] - context['order_price_company']
         context['total_order_rub'] = context['order_price_client_rub'] - context['order_price_company_rub']
         context['total_delivery'] = context['delivery_full_price_client'] - context['delivery_company_price']
         context['total_delivery_rub'] = context['delivery_full_price_rub'] - context['delivery_company_price_rub']
-        return context
+        context['filter_form'] = DateFilterForm()
+        return self.render_to_response(context)

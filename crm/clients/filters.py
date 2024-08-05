@@ -12,7 +12,11 @@ class DatInput(forms.DateInput):
 
 class ClientFilter(django_filters.FilterSet):
     date_create = DateFromToRangeFilter(widget=DateRangeWidget(attrs={'class': "form-control", 'type': 'date'}))
+    filter_name = django_filters.CharFilter(label='Поиск по имени', method='filter_by_name')
+
+    def filter_by_name(self, queryset, name, value):
+        return queryset.filter(name__icontains=value)
 
     class Meta:
         model = Clients
-        fields = ['name', 'owner', 'result', 'date_create']
+        fields = ['owner', 'date_create']

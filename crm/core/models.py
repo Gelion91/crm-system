@@ -439,3 +439,26 @@ class Course(models.Model):
 class ReadNotification(models.Model):
     readers = models.ManyToManyField(User, verbose_name='Сотрудники', related_name="readers")
     notification = models.ForeignKey(Notification, on_delete=models.SET_NULL, null=True, verbose_name='Уведомления', related_name="notifications")
+
+
+class Spendings(models.Model):
+    title = models.CharField(max_length=100, verbose_name='Наименование')
+    price = models.DecimalField(decimal_places=2, max_digits=100, verbose_name='Стоимость', default=0)
+    date_create = models.DateTimeField(auto_now_add=True, verbose_name='Дата')
+
+    class Meta:
+        verbose_name = 'Затрата'
+        verbose_name_plural = 'Затраты'
+        ordering = ['-date_create']
+
+    def __str__(self):
+        """
+        String for representing the Model object.
+        """
+        if self.title:
+            return self.title
+        else:
+            return 'без имени'
+
+    def get_absolute_url(self):
+        return reverse('sendings', kwargs={'sending_id': self.pk})

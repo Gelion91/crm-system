@@ -19,6 +19,7 @@ class OrderFilter(django_filters.FilterSet):
 
     ordering = django_filters.ChoiceFilter(label='Сортировать', choices=CHOICES, method='filter_by_order')
 
+
     def filter_by_order(self, queryset, name, value):
         expression = '-date_create' if value == 'ascending' else 'date_create'
         return queryset.order_by(expression)
