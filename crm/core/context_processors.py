@@ -38,7 +38,9 @@ def menu_manager(request):
                      {'title': 'Оформить отправку', 'url_name': 'sendings:sending_create', 'path': '/sending_create'},
                  ]},
                 {'title': 'Управление аккаунтами', 'url_name': 'core:add_account'},
-                {'title': 'Финансы', 'url_name': 'core:finance_list'}
+                {'title': 'Финансы', 'url_name': 'core:finance_list', 'submenu': [
+                     {'title': 'Добавить трату', 'url_name': 'core:add_spending', 'path': 'finance/add_spending'},
+                 ]},
                 ]
         return {'menu': menu}
 

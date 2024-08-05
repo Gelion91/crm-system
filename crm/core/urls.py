@@ -42,6 +42,7 @@ urlpatterns = [
     path('change_date', views.change_datetime, name='change_date'),
     path('notifications', views.ViewNotifications.as_view(), name='notifications'),
     path('finance', views.FinanceList.as_view(), name='finance_list'),
+    path('finance/add_spending/', views.AddSpending.as_view(), name='add_spending'),
     path('ajax_get_course', views.getcourse, name='get_course'),
     path('ajax_add_product', views.add_product, name='add_product'),
     path('ajax_get_notification', views.get_notification, name='get_notification'),

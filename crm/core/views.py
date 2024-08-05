@@ -26,9 +26,9 @@ from core.filters import OrderFilter, ProductFilter, DeliveryFilter, DeliveryLis
 from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
     ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm, PackedImageForm, \
     LogisticImageForm, AddAccountForm, ProductNotesForm, DeliveryNotesForm, ChangeOrderDateForm, ChangeProductDateForm, \
-    ChangeDeliveryDateForm, UpdateOrderFormTest, DateFilterForm
+    ChangeDeliveryDateForm, UpdateOrderFormTest, DateFilterForm, SpendingForm
 from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics, Account, \
-    NotesProduct, NotesDelivery, Notification, FilesProduct, ReadNotification
+    NotesProduct, NotesDelivery, Notification, FilesProduct, ReadNotification, Spendings
 from core.utils import get_course
 from crm import settings
 from crm.settings import LOGIN_URL
@@ -47,13 +47,14 @@ def getcourse(request):
 
 def get_notification(request):
     tz = timezone('Europe/Moscow')
-    response = { 'notification': [{
+    response = {'notification': [{
         'id': notification.pk,
         'owner': notification.owner.username if notification.owner else notification.subject_owner.username,
         'action': notification.action,
         'subject': notification.subject,
         'date': dateformat.format(notification.date_create, settings.DATE_FORMAT).lstrip('0'),
-    } for notification in Notification.objects.filter(readed=False, subject_owner=request.user).filter(~Q(notifications__readers__in=[request.user.pk]))]
+    } for notification in Notification.objects.filter(readed=False, subject_owner=request.user).filter(
+        ~Q(notifications__readers__in=[request.user.pk]))]
     }
     return HttpResponse(json.dumps(response), content_type='application/json')
 
@@ -66,7 +67,8 @@ def read_notification(request):
     read.readers.add(request.user)
     read.save()
 
-    response = {'notification': Notification.objects.filter(readed=False, subject_owner=request.user).filter(~Q(notifications__readers__in=[request.user.pk])).count()}
+    response = {'notification': Notification.objects.filter(readed=False, subject_owner=request.user).filter(
+        ~Q(notifications__readers__in=[request.user.pk])).count()}
     print(response)
 
     return HttpResponse(json.dumps(response), content_type='application/json')
@@ -237,8 +239,10 @@ def add_product(request):
     arrive = True if request.POST.get("arrive") == 'true' else False
     paid = True if request.POST.get("paid") == 'true' else False
 
-    product = Product(product_marker=product_marker, name=name, url=url, number_order=number_order, price=decimal.Decimal(price),
-                      price_company=decimal.Decimal(price_company), fraht=decimal.Decimal(fraht), fraht_company=decimal.Decimal(fraht_company), quantity=quantity,
+    product = Product(product_marker=product_marker, name=name, url=url, number_order=number_order,
+                      price=decimal.Decimal(price),
+                      price_company=decimal.Decimal(price_company), fraht=decimal.Decimal(fraht),
+                      fraht_company=decimal.Decimal(fraht_company), quantity=quantity,
                       arrive=arrive, paid=paid, owner=request.user, comment=comment
                       )
     product.save()
@@ -267,7 +271,8 @@ def add_product(request):
                 'total_price': float(total_price),
                 'total_price_company': float(total_price_company),
                 'product_image': [i.image.url for i in product.images.all() if product.images.all()],
-                'image': [(prod.image.url, get_thumbnail(prod.image, '100x56', crop='center', quality=99).url) for prod in product.images.all()],
+                'image': [(prod.image.url, get_thumbnail(prod.image, '100x56', crop='center', quality=99).url) for prod
+                          in product.images.all()],
                 'product_url': reverse('core:upd_product', args=(product.pk,))
                 }
 
@@ -905,6 +910,7 @@ class ViewNotifications(FilterView):
     model = Notification
     paginate_by = 32
     template_name = 'core/notifications_list.html'
+
     # filterset_class = ProductFilter
     # form_class = PackedImageForm
 
@@ -925,10 +931,12 @@ class FinanceList(TemplateView):
         if start is not None and finish is not None:
             orders = Order.objects.filter(date_create__range=[start, finish])
             logistics = Logistics.objects.filter(date_create__range=[start, finish])
+            spendings = Spendings.objects.filter(date_create__range=[start, finish])
             context['text_message'] = f'Поиск данных с {start} по {finish}'
         else:
             orders = Order.objects.all()
             logistics = Logistics.objects.all()
+            spendings = Spendings.objects.all()
 
         context['title'] = 'Финансы общее'
         context['order_price_client'] = sum(order.total_price for order in orders)
@@ -938,9 +946,13 @@ class FinanceList(TemplateView):
         context['order_price_profit'] = sum(order.profit for order in orders)
 
         context['delivery_full_price_client'] = sum(logistic.full_price for logistic in logistics)
-        context['delivery_full_price_rub'] = round(sum(logistic.full_price * logistic.exchange_rate for logistic in logistics), 2)
+        context['delivery_full_price_rub'] = round(
+            sum(logistic.full_price * logistic.exchange_rate for logistic in logistics), 2)
         context['delivery_company_price'] = sum(logistic.company_delivery_price for logistic in logistics)
-        context['delivery_company_price_rub'] = round(sum(logistic.company_delivery_price * logistic.exchange_rate for logistic in logistics), 2)
+        context['delivery_company_price_rub'] = round(
+            sum(logistic.company_delivery_price * logistic.exchange_rate for logistic in logistics), 2)
+
+        context['spendings'] = sum(spending.price for spending in spendings)
 
         context['total_order'] = context['order_price_client'] - context['order_price_company']
         context['total_order_rub'] = context['order_price_client_rub'] - context['order_price_company_rub']
@@ -948,3 +960,19 @@ class FinanceList(TemplateView):
         context['total_delivery_rub'] = context['delivery_full_price_rub'] - context['delivery_company_price_rub']
         context['filter_form'] = DateFilterForm()
         return self.render_to_response(context)
+
+
+class AddSpending(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = Spendings
+    permission_required = 'core.add_spendings'
+    form_class = SpendingForm
+    template_name = 'core/add_spending.html'
+
+    # On successful form submission
+    def get_success_url(self):
+        return reverse('core:finance_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Добавить расходы'
+        return context
