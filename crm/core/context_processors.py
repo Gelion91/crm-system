@@ -1,5 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.models import LogEntry
+from django.db.models import Q
+
 from core.models import Order, Clients, Course, Notification
 
 '''{'title': 'Панель управления', 'url_name': 'dashboard:home',
@@ -127,7 +129,8 @@ def course_today(request):
 
 def notification_count(request):
     if request.user.is_authenticated:
-        notification = Notification.objects.filter(readed=False, subject_owner=request.user).count()
+        notification = Notification.objects.filter(readed=False, subject_owner=request.user).filter(
+                                                ~Q(notifications__readers__in=[request.user.pk])).count()
         return {'notifications': notification}
     else:
         return {'notifications': Notification.objects.none()}

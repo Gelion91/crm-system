@@ -52,7 +52,7 @@ class Product(models.Model):
         super(Product, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('client', kwargs={'product_id': self.pk})
+        return reverse('product', kwargs={'product_id': self.pk})
 
 
 class ImagesProduct(models.Model):

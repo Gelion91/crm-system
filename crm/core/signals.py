@@ -6,6 +6,7 @@ import django.dispatch
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Q
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete
 from django.dispatch import receiver
 from django.forms import model_to_dict
@@ -34,7 +35,8 @@ def create_logistic(sender, instance, **kwargs):
         'subject': f'Груз {instance.marker}',
         'action': act,
         'owner': instance.owner.username,
-        'notification_count': Notification.objects.filter(readed=False, subject_owner=instance.owner).count()
+        'notification_count': Notification.objects.filter(readed=False, subject_owner=instance.owner).filter(
+            ~Q(notifications__readers__in=[instance.owner])).count()
     }
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
@@ -79,7 +81,8 @@ def create_product(sender, instance, **kwargs):
         'subject': f'товар {instance.product_marker}',
         'action': act,
         'owner': instance.owner.username,
-        'notification_count': Notification.objects.filter(readed=False, subject_owner=instance.owner).count()
+        'notification_count': Notification.objects.filter(readed=False, subject_owner=instance.owner).filter(
+            ~Q(notifications__readers__in=[instance.owner])).count()
     }
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
@@ -108,7 +111,8 @@ def create_product(sender, instance, created, **kwargs):
             'last_updater': instance.owner.username,
             'subject': instance.marker,
             'action': act,
-            'notification_count': Notification.objects.filter(readed=False, subject_owner=instance.owner).count()
+            'notification_count': Notification.objects.filter(readed=False, subject_owner=instance.owner).filter(
+                ~Q(notifications__readers__in=[instance.owner])).count()
         }
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
@@ -120,7 +124,8 @@ def create_product(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=Order)
 def create_product(sender, instance, **kwargs):
     act = 'удалил'
-    notification = Notification(owner=instance.owner, subject=f'заказ {instance.marker}', action=act, subject_owner=instance.owner)
+    notification = Notification(owner=instance.owner, subject=f'заказ {instance.marker}', action=act,
+                                subject_owner=instance.owner)
     notification.save()
 
 

@@ -96,7 +96,7 @@
         <div id="modal_add_product">
             <div class="modal-dialog modal-xl">
                 <div class="content_product">
-                  <div class="modal-body">
+                  <div class="modal-body" style="overflow: scroll;overflow-x: hidden;height: 80vh;max-height: 100vh;">
                       <form id="product-form" name="{{data.pk}}" method="post" enctype="multipart/form-data">
                             {% csrf_token %}
 
@@ -163,6 +163,7 @@
         formData.append('id', $(this).attr('name'));
         formData.append('product_marker', data.find(x => x.name === 'product_marker').value);
         formData.append('name', data.find(x => x.name === 'name').value);
+        formData.append('comment', data.find(x => x.name === 'comment').value);
         formData.append('url', data.find(x => x.name === 'url').value);
         formData.append('number_order', data.find(x => x.name === 'number_order').value);
         formData.append('price', data.find(x => x.name === 'price').value);
@@ -195,7 +196,7 @@
                         '<hr>' +
                         '<div class="row">' +
                         '<div class="col">' +
-                        '<a href="" class="btn_edit">Редактировать</a>' +
+                        '<a href="' + response.product_url + '" class="btn_edit">Редактировать</a>' +
                         '</div>' +
                         '<div class="col">' +
                         '<form method="POST" action="" class="form">' +

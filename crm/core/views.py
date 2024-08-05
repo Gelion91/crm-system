@@ -2,6 +2,8 @@ import asyncio
 import datetime
 import decimal
 import json
+
+from django.db.models import Q
 from pytz import timezone
 
 from django.contrib import messages
@@ -51,7 +53,7 @@ def get_notification(request):
         'action': notification.action,
         'subject': notification.subject,
         'date': dateformat.format(notification.date_create, settings.DATE_FORMAT).lstrip('0'),
-    } for notification in Notification.objects.filter(subject_owner=request.user, readed=False)]
+    } for notification in Notification.objects.filter(readed=False, subject_owner=request.user).filter(~Q(notifications__readers__in=[request.user.pk]))]
     }
     return HttpResponse(json.dumps(response), content_type='application/json')
 
@@ -63,7 +65,9 @@ def read_notification(request):
     read.save()
     read.readers.add(request.user)
     read.save()
-    response = {'notification': Notification.objects.filter(readed=False, subject_owner=request.user, notifications__in=request.user).count()}
+
+    response = {'notification': Notification.objects.filter(readed=False, subject_owner=request.user).filter(~Q(notifications__readers__in=[request.user.pk])).count()}
+    print(response)
 
     return HttpResponse(json.dumps(response), content_type='application/json')
 
@@ -229,12 +233,13 @@ def add_product(request):
     fraht = request.POST.get("fraht")
     fraht_company = request.POST.get("fraht_company")
     quantity = request.POST.get("quantity")
+    comment = request.POST.get("comment")
     arrive = True if request.POST.get("arrive") == 'true' else False
     paid = True if request.POST.get("paid") == 'true' else False
 
     product = Product(product_marker=product_marker, name=name, url=url, number_order=number_order, price=decimal.Decimal(price),
                       price_company=decimal.Decimal(price_company), fraht=decimal.Decimal(fraht), fraht_company=decimal.Decimal(fraht_company), quantity=quantity,
-                      arrive=arrive, paid=paid, owner=request.user
+                      arrive=arrive, paid=paid, owner=request.user, comment=comment
                       )
     product.save()
     print(product.full_price)
@@ -263,6 +268,7 @@ def add_product(request):
                 'total_price_company': float(total_price_company),
                 'product_image': [i.image.url for i in product.images.all() if product.images.all()],
                 'image': [(prod.image.url, get_thumbnail(prod.image, '100x56', crop='center', quality=99).url) for prod in product.images.all()],
+                'product_url': reverse('core:upd_product', args=(product.pk,))
                 }
 
     print(response)
