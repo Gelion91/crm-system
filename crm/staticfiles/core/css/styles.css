@@ -797,6 +797,15 @@ tr {
     border-radius: 3px; /* Скругляем уголки */
    }
 
+.btn_url {
+    text-align: center;
+    background: #f80; /* Серый цвет фона */
+    color: #fff; /* Белый цвет текста */
+    padding: 0.5rem 0.5rem; /* Поля вокруг текста */
+    text-decoration: none; /* Убираем подчёркивание */
+    border-radius: 3px; /* Скругляем уголки */
+   }
+
 .btn_delete {
     display: inline-block; /* Строчно-блочный элемент */
     background: #CD5C5C; /* Серый цвет фона */
@@ -1014,26 +1023,18 @@ align-self: center;
 
 
 #show_info {
-    width: 298px; height: 218px;
+    width: 50%;
     padding: 18px 9px;
-    border-radius: 4px;
     background: #fafafa;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    position: absolute;
     margin: auto;
     display: none;
     opacity: 0;
     z-index: 38;
     text-align: center;
-}
-
-#show_info #myModal__close {
-    width: 21px; height: 21px;
-    position: absolute;
-    font-size: 29px;
-    top: 1px; right: 11px;
-    cursor: pointer;
-    display: block;
+    border: 1px solid;
+    border-color: silver;
+    border-radius: .375rem;
 }
 
 #myOverlay {
@@ -1045,3 +1046,164 @@ align-self: center;
     cursor: pointer;
     display: none;
 }
+
+.img {
+    width: 50%;
+}
+
+
+@media (max-width: 768px) {
+  .fl_image {
+    flex-direction: column;
+    }
+}
+
+.ajax_image {
+    margin: 2px;
+}
+
+#modal_add_carrier {
+  display: none; /* скрыт по умолчанию */
+  /* темный фон при открытии модалки должен быть на всю страницу */
+  position: fixed;
+  z-index: 1; /* поверх всех элементов */
+  left: 0;
+  top: 0;
+  width: 100vw; /* полная ширина */
+  height: 100vh; /* полная высота */
+  background-color: rgba(0,0,0,0.4); /* цвет фона - прозрачный черный */
+}
+
+/* само модальное окно с контентом */
+.modal-content {
+  background-color: #fff;
+  /* окно будет находится по центру по горизонтали и с отступом сверху в 100 px */
+  margin: 100px auto;
+  padding: 20px;
+  font-size: 20px;
+  /* разнесем текст и кнопоку по краям окна */
+  display: flex;
+  justify-content: space-between;
+ }
+
+ @media (min-width: 768px) {
+  .btn_place {
+    justify-content: flex-end;
+    }
+}
+
+.dcol {
+    align-self: center;
+    padding-top: 1%;
+}
+
+#modal_add_product {
+  display: none; /* скрыт по умолчанию */
+  /* темный фон при открытии модалки должен быть на всю страницу */
+  position: fixed;
+  z-index: 1; /* поверх всех элементов */
+  left: 0;
+  top: 0;
+  width: 100vw; /* полная ширина */
+  height: 100vh; /* полная высота */
+  background-color: rgba(0,0,0,0.4); /* цвет фона - прозрачный черный */
+}
+
+
+
+@media (min-width: 768px) {
+.content_product{
+      background-color: #fff;
+  /* окно будет находится по центру по горизонтали и с отступом сверху в 100 px */
+      margin: 10px auto;
+      padding: 10px;
+      font-size: calc(10px + 4 * (100vw / 1280));
+      /* разнесем текст и кнопоку по краям окна */
+      display: flex;
+      justify-content: space-between;
+      width: 80%;
+      line-height: 1;
+      pointer-events: auto;
+      outline: 0;
+      flex-direction: column;
+      }
+}
+@media (max-width: 768px) {
+.content_product{
+      background-color: #fff;
+  /* окно будет находится по центру по горизонтали и с отступом сверху в 100 px */
+      margin: 0px auto;
+      padding: 10px;
+      font-size: calc(10px + (8 + 8 * 0.7) * ((100vw - 320px) / 1280));
+      /* разнесем текст и кнопоку по краям окна */
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      line-height: 1;
+      pointer-events: auto;
+      outline: 0;
+      flex-direction: column;
+      }
+}
+
+.shdw {
+    box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.5);
+    }
+
+.shdw_btn {
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+    }
+
+.shdw_btn:hover{
+  box-shadow: 0px 10px 15px 5px rgba(0, 0, 0, 0.5);
+  transform: translateY(5px);
+}
+
+.accordion-button:not(.collapsed) {
+color: black;
+}
+
+.shdw_acc {
+    box-shadow: inset 0px 3px 5px 5px rgba(0, 0, 0, 0.5);
+    }
+
+@media (min-width: 768px) {
+    .shdw_form {
+    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.5);
+    border-radius: 2%;
+    padding: 1%;
+    }
+    }
+
+.shdw_list {
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.5);
+    }
+
+.fin_bord {
+    border: 1px solid;
+    border-color: silver;
+    }
+
+.notific {
+ text-align:center;
+ border: 3px solid;
+ border-color: lightblue;
+ border-radius: 5%;
+ margin-bottom: 10px;
+ margin-left: 5px;
+ }
+
+ .block_animation {
+      animation-name: styles;
+    }
+
+    @keyframes styles {
+      0% {
+        opacity: 1;
+        left: 0;
+      }
+      100% {
+        opacity: 0;
+        left: 100;
+      }
+    }
