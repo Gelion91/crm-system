@@ -1,3 +1,5 @@
+import os
+
 import requests
 from bs4 import BeautifulSoup
 from django.utils import dateformat
@@ -5,6 +7,7 @@ from django.core.files.base import ContentFile, File
 from openpyxl import load_workbook
 from core.models import Course, Logistics, Invoices
 from crm import settings
+from crm.settings import MEDIA_ROOT, BASE_DIR
 
 
 def get_course():
@@ -35,14 +38,15 @@ def get_invoice(logistic):
     ws['I7'] = logistic.insurance
     ws['K7'] = logistic.package_price
     ws['M7'] = logistic.full_price
-    new_wb.save(filename=f'{logistic.marker}.xlsx')
-    with open(f'{logistic.marker}.xlsx', 'rb') as f:
-        try:
-            invoice = Invoices.objects.get(logistic=logistic)
-        except:
+    new_wb.save(filename=f'other_files/{logistic.marker}.xlsx')
+    with open(f'other_files/{logistic.marker}.xlsx', 'rb') as f:
+        if Invoices.objects.filter(logistic=logistic).first():
+            invoice = Invoices.objects.filter(logistic=logistic).first()
+            os.remove(path=str(BASE_DIR) + invoice.file.url)
+        else:
             invoice = Invoices()
-            invoice.logistic = logistic
-            invoice.file = File(f)
-            invoice.save()
+        invoice.logistic = logistic
+        invoice.file = File(f, name=f'{logistic.marker}.xlsx')
+        invoice.save()
         return invoice.file
 

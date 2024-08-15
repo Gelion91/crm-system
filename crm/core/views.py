@@ -1009,12 +1009,9 @@ def create_invoice(request):
     delivery_id = request.POST.get("id").split('_')[-1]
     logistic = Logistics.objects.get(pk=delivery_id)
     file = get_invoice(logistic)
-    print(file)
     response = {
         'file_name': file.url.split('/')[-1],
         'file_url': file.url,
         'delivery_id': delivery_id,
     }
-    print(response)
-
     return HttpResponse(json.dumps(response), content_type='application/json')
