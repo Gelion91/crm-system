@@ -42,7 +42,7 @@ def get_invoice(logistic):
     with open(f'other_files/{logistic.marker}.xlsx', 'rb') as f:
         if Invoices.objects.filter(logistic=logistic).first():
             invoice = Invoices.objects.filter(logistic=logistic).first()
-            os.remove(path=str(BASE_DIR) + invoice.file.url)
+            # os.remove(path=str(BASE_DIR) + invoice.file.url)
         else:
             invoice = Invoices()
         invoice.logistic = logistic
