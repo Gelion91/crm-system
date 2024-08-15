@@ -1,0 +1,15 @@
+{% extends "base_generic.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+{% if form %}
+    <div class="col secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
+    <h2>Создать накладную</h2>
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-error">{{ form.non_field_errors }}</div>
+        {{ form|crispy }}
+    <button type="submit" class="btn btn-outline-secondary" name="btnform1">Сохранить!</button>
+    </form>
+    </div>
+{% endif %}
+{% endblock %}

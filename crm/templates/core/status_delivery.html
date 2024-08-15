@@ -99,11 +99,16 @@
                               <label for="places" class="form-label">Количество мест:</label>
                               <input type="number" class="numberinput form-control" id="places" name="places" value='{{ obj.places|unlocalize }}'><br><br>
                           </div>
-                          <div class="row btn_place">
-                              <div class="col-3">
-                                <button class="btn btn-secondary" type="submit" >Подтвердить изменения</button>
-                              </div>
                           </div>
+                          <div class="row">
+                              <div class="col">
+                                <button class="btn btn-secondary" type="submit">Подтвердить изменения</button>
+                              </div>
+                              <div class="col col-md-2 ms-auto">
+                                <button id="bi_{{obj.pk}}" class="btn btn-secondary" name="invoice" type="button">Получить накладную</button>
+                                    <div id="invoice_{{obj.pk}}" style="padding-top:10px;">
+                                    </div>
+                              </div>
                           </div>
                       </form>
                   <div id="message_{{obj.pk}}" style="display: none;"><p class="p-size">Успешно сохранено!</p></div>
@@ -327,6 +332,30 @@
 
 
 <script>
+$(document).on('click', "button[name='invoice']", function (e) {
+    e.preventDefault();
+    var data = {
+            id: $(this).attr('id'),
+        };
+    var token = '{{ csrf_token }}';
+    $.ajax({
+        type: "POST",
+        url: "{% url 'core:create_invoice' %}",
+        headers: {'X-CSRFToken': token},
+        data: data,
+        success: function(response) {
+        invoice_div = 'invoice_' + response.delivery_id
+        $("#" + invoice_div).empty();
+        var card = '<a href=' + response.file_url + '><img width="30px;" src="/static/core/image/xls.png">' + response.file_name + '</a>'
+        $("#" + invoice_div).append(card)
+        message = 'message_' + response.delivery_id
+        },
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+
 
 $(document).on('submit', "form[name='change_delivery_form']", function (e) {
     e.preventDefault();
@@ -617,6 +646,7 @@ $(document).on('click', "input[name='del_comment']", function (e) {
 $("input").focus(function(){
   $(this).select();
 });
+
  </script>
 
 {% endblock %}

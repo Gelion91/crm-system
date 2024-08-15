@@ -12,8 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Необходимо заменить на статичный ключ
-SECRET_KEY = get_random_secret_key()
-
+SECRET_KEY = "Ваш секретный ключ"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -154,6 +153,7 @@ LOGIN_URL = 'login:login'
 LOGOUT_URL = 'logout'
 
 DATE_FORMAT = 'd E Y г. H:i'
+DATE_FORMAT_INVOICE = "Y-m-d"
 
 THUMBNAIL_DEBUG = True
 

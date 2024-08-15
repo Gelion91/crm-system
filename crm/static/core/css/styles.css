@@ -1207,3 +1207,9 @@ color: black;
         left: 100;
       }
     }
+
+.flex-wrap {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 20px;
+ }

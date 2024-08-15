@@ -40,6 +40,7 @@ def menu_manager(request):
                 {'title': 'Управление аккаунтами', 'url_name': 'core:add_account'},
                 {'title': 'Финансы', 'url_name': 'core:finance_list', 'submenu': [
                      {'title': 'Добавить трату', 'url_name': 'core:add_spending', 'path': 'finance/add_spending'},
+                     {'title': 'Список затрат', 'url_name': 'core:list_spendings', 'path': 'finance/spendings/'},
                  ]},
                 ]
         return {'menu': menu}

@@ -15,7 +15,33 @@
     </form>
     </div>
 {% endif %}
+<input id="{{object.pk}}" type="hidden" name="id">
 <script defer>
+
+$(document).on('click', "input[name='invoice']", function (e) {
+    e.preventDefault();
+    var data = {
+            id: $("input[name='id']").attr('id'),
+        };
+    var token = '{{ csrf_token }}';
+    $.ajax({
+        type: "POST",
+        url: "{% url 'core:create_invoice' %}",
+        headers: {'X-CSRFToken': token},
+        data: data,
+        success: function(response) {
+        invoice_div = 'invoice'
+        $("#" + invoice_div).empty();
+        var card = '<a href=' + response.file_url + '><img width="30px;" src="/static/core/image/xls.png">' + response.file_name + '</a>'
+        $("#" + invoice_div).append(card)
+        message = 'message_' + response.delivery_id
+        },
+        error: function() {
+            console.log('it broke');
+        },
+    });
+});
+
 window.onload = function () {
     const Delivery_form = document.getElementById('delivery-form')
     const volume = document.getElementById('id_volume')

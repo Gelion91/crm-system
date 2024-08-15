@@ -176,6 +176,9 @@ class ProductFormSetHelper(FormHelper):
                 Div('fraht_company', css_class='col-6'), css_class='row'),
             Div(Div('quantity', css_class='col-12'), css_class='row'),
             Div(Div('image', css_class='col-12'),
+                HTML("""
+                    <div id='preview'></div>
+                """),
                 Div('file', css_class='col-12'), css_class='row'),
             Div(Div('arrive', css_class='col-6'),
                 Div('paid', css_class='col-6'), css_class='row'),
@@ -284,11 +287,11 @@ class DeliveryAddForm(ModelForm):
         self.helper.form_class = 'whiteForms'
         self.helper.form_method = 'post'
         self.helper.form_action = 'submit_survey'
-        self.helper.add_input(Submit("submit", 'Сохранить', css_class='btn-secondary'))
         self.helper.layout = Layout(
             'marker',
             InlineRadios('product', css_class='col-12 product_select', ),
-            Div(Div('package', 'delivery', css_class='col-12'), css_class='row'),
+            Div(Div('package', css_class='col-12'), css_class='row'),
+            Div(Div('delivery', css_class='col-9'), css_class='row'),
             Div(Div('extra_package', css_class='col-12'), css_class='row'),
             Div(Div('weight', css_class='col-6'),
                 Div('volume', css_class='col-6'), css_class='row'),
@@ -305,7 +308,12 @@ class DeliveryAddForm(ModelForm):
                                      StrictButton("заполнить", name='add_course', css_class='btn-secondary')),
                     css_class='col-6'),
                 Div('paid_cash', css_class='col-6'), css_class='row'),
-            'company_delivery_price'
+            'company_delivery_price',
+            Div(Submit("submit", 'Сохранить', css_class='btn-secondary'),
+                HTML("""
+                    <div id='invoice'></div>
+                """),
+                Button("invoice", value="Получить накладную", css_class='btn btn-secondary'), css_class='flex-wrap'),
         )
         # if not self.current_user.is_superuser:
         #     if self.initial:
@@ -429,6 +437,19 @@ class DateFilterForm(forms.Form):
 
 
 class SpendingForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'whiteForms'
+        self.helper.form_method = 'get'
+        self.helper.form_action = 'submit_survey'
+        self.helper.add_input(Submit('submit', 'Сохранить', css_class="btn btn-secondary"))
+
     class Meta:
         model = Spendings
         fields = '__all__'
+
+
+class InvoiceForm(forms.Form):
+    logistics = forms.ModelChoiceField(queryset=Logistics.objects.all())

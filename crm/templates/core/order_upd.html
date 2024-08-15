@@ -124,6 +124,76 @@
     //const id_margin = document.getElementById('id_margin')
     const price = total_price.value
 
+/*
+--------------------------------------
+Захват изображения из буфера обмена
+--------------------------------------
+*/
+
+    const form = document.getElementById("new_document_attachment");
+    const fileInput = document.getElementById("id_image");
+
+    fileInput.addEventListener('change', () => {
+      ShowInputs()
+    });
+
+    window.addEventListener('paste', e => {
+      fileInput.files = e.clipboardData.files;
+      ShowInputs()
+    });
+
+
+/*
+--------------------------------------
+Функция превью изображения
+--------------------------------------
+*/
+
+    function ShowInputs() {
+        var files = fileInput.files;
+        var preview = document.getElementById('preview');
+
+        // Clear any existing content
+        preview.innerHTML = '';
+
+        // Loop through all selected files
+        for (var i = 0; i < files.length; i++) {
+          var file = files[i];
+
+          // Only process image files
+          if (!file.type.match('image.*')) {
+            continue;
+          }
+
+          var imgContainer = document.createElement('div');
+          imgContainer.style.marginBottom = '20px'; // Spacing between each image container
+          imgContainer.style.marginTop = '20px';
+          var img = document.createElement('img');
+          img.src = URL.createObjectURL(file);
+          img.style.height = '64px';
+          img.style.display = 'block'; // Ensure the image is displayed in a block to put it on a new line
+          img.style.marginBottom = '10px';
+
+          var fileInfo = document.createElement('p');
+          fileInfo.textContent = `Имя файла: ${file.name}`;
+          fileInfo.style.fontSize = '14px';
+          fileInfo.style.marginTop = '0';
+
+          // Append the image and file info to the container
+          imgContainer.appendChild(img);
+          imgContainer.appendChild(fileInfo);
+
+          // Append the container to the preview div
+          preview.appendChild(imgContainer);
+        }
+    }
+
+/*
+--------------------------------------
+Обработчики численных инпутов
+--------------------------------------
+*/
+
     exchange_for_company.addEventListener('input', ()=>{
                     total_price_rub.value =  parseFloat(exchange_for_client.value*total_price.value).toFixed(2)
                     total_price_rub_company.value = parseFloat(exchange_for_company.value*total_price_company.value).toFixed(2)

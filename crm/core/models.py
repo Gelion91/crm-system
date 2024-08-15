@@ -355,6 +355,22 @@ class ImagesLogistics(models.Model):
         return reverse('core', kwargs={'logistic_image_id': self.pk})
 
 
+class Invoices(models.Model):
+    logistic = models.OneToOneField(Logistics, default=None, on_delete=models.CASCADE, related_name='invoices')
+    file = models.FileField(upload_to='files/invoices')
+
+    def filename(self):
+        return os.path.basename(self.file.name)
+
+    class Meta:
+        verbose_name = 'Файл'
+        verbose_name_plural = 'Файлы'
+        ordering = ['-id']
+
+    def get_absolute_url(self):
+        return reverse('core', kwargs={'file_id': self.pk})
+
+
 class NotesProduct(models.Model):
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Менеджер')
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, verbose_name='Товар',
@@ -462,3 +478,5 @@ class Spendings(models.Model):
 
     def get_absolute_url(self):
         return reverse('sendings', kwargs={'sending_id': self.pk})
+
+

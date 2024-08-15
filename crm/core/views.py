@@ -26,10 +26,10 @@ from core.filters import OrderFilter, ProductFilter, DeliveryFilter, DeliveryLis
 from core.forms import AddOrderForm, ProductForm, ProductFormSet, \
     ProductFormSetHelper, UpdateOrderForm, DeliveryAddForm, PackedImageForm, \
     LogisticImageForm, AddAccountForm, ProductNotesForm, DeliveryNotesForm, ChangeOrderDateForm, ChangeProductDateForm, \
-    ChangeDeliveryDateForm, UpdateOrderFormTest, DateFilterForm, SpendingForm
+    ChangeDeliveryDateForm, UpdateOrderFormTest, DateFilterForm, SpendingForm, InvoiceForm
 from core.models import Order, Product, Logistics, ImagesProduct, PackedImagesProduct, ImagesLogistics, Account, \
     NotesProduct, NotesDelivery, Notification, FilesProduct, ReadNotification, Spendings
-from core.utils import get_course
+from core.utils import get_course, get_invoice
 from crm import settings
 from crm.settings import LOGIN_URL
 
@@ -976,3 +976,45 @@ class AddSpending(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Добавить расходы'
         return context
+
+
+class SpendingList(LoginRequiredMixin, PermissionRequiredMixin, FilterView):
+    model = Spendings
+    permission_required = 'core.add_spendings'
+    template_name = 'core/list_spendings.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Расходы'
+        return context
+
+
+class SpendingUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Spendings
+    form_class = SpendingForm
+    pk_url_kwarg = 'spending_id'
+    template_name = 'core/update_spending.html'
+    permission_required = 'core.change_spendings'
+
+    def get_success_url(self):
+        return reverse('core:list_spendings')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Изменить затрату'
+        return context
+
+
+def create_invoice(request):
+    delivery_id = request.POST.get("id").split('_')[-1]
+    logistic = Logistics.objects.get(pk=delivery_id)
+    file = get_invoice(logistic)
+    print(file)
+    response = {
+        'file_name': file.url.split('/')[-1],
+        'file_url': file.url,
+        'delivery_id': delivery_id,
+    }
+    print(response)
+
+    return HttpResponse(json.dumps(response), content_type='application/json')
