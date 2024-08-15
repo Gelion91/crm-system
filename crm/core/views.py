@@ -781,6 +781,7 @@ def change_delivery(request):
     volume = request.POST.get("volume")
     density = request.POST.get("density")
     places = request.POST.get("places")
+    print(request.POST)
     logistic = Logistics.objects.get(pk=delivery_id)
     logistic.marker, logistic.weight, logistic.volume, logistic.density, logistic.places = marker, weight, volume, density, places
     logistic.save()

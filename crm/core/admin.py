@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 
-from .models import Clients, Order, Product, Logistics, Account
+from .models import Clients, Order, Product, Logistics, Account, Invoices
 
 
 # Register your models here.
@@ -27,3 +27,4 @@ admin.site.register(Order, OrderAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Logistics)
 admin.site.register(Account)
+admin.site.register(Invoices)
