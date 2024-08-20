@@ -10,10 +10,10 @@
             {% crispy filter_form %}
             </form>
         {{ text_message }}
-        {% if order_price_client %}
             <div class="row">
-                <h1 align="center" style="background-color:lightgreen">Доходы</h1>
-                <div class="col-4 fin_bord">
+                <h1 align="center" style="background-color:#a8ffd5;">Доходы</h1>
+                <div class="col-4">
+                    <div class="fin_bord shdw_list">
                     <div class="row"><h2 align="center">Заказы</h2></div>
                     <div class="row">
                         <div class="col"><p class="p-size" align="center">Юани</p></div>
@@ -24,92 +24,103 @@
                         <div class="col"><p class="p-size" align="center">{{ order_price_client_rub }}</p></div>
                     </div>
                 </div>
-                <div class="col-4 fin_bord">
-                    <div class="row"><h2 align="center">Доставки</h2></div>
-                    <div class="row">
-                        <div class="col"><p class="p-size" align="center">Доллары</p></div>
-                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
-                    </div>
-                    <div class="row">
-                        <div class="col"><p class="p-size" align="center">{{ delivery_full_price_client }}</p></div>
-                        <div class="col"><p class="p-size" align="center">{{ delivery_full_price_rub }}</p></div>
+                </div>
+                <div class="col-4">
+                    <div class="fin_bord shdw_list">
+                        <div class="row"><h2 align="center">Доставки</h2></div>
+                        <div class="row">
+                            <div class="col"><p class="p-size" align="center">Доллары</p></div>
+                            <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><p class="p-size" align="center">{{ delivery_full_price_client }}</p></div>
+                            <div class="col"><p class="p-size" align="center">{{ delivery_full_price_rub }}</p></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="row">
-                <h1 align="center" style="background-color:pink">Расходы</h1>
-                <div class="col-4 fin_bord">
-                    <div class="row"><h2 align="center">Заказы</h2></div>
-                    <div class="row">
-                        <div class="col"><p class="p-size" align="center">Юани</p></div>
-                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
-                    </div>
-                    <div class="row">
-                        <div class="col"><p class="p-size" align="center">{{ order_price_company }}</p></div>
-                        <div class="col"><p class="p-size" align="center">{{ order_price_company_rub }}</p></div>
-                    </div>
-                </div>
-                <div class="col-4 fin_bord">
-                    <div class="row"><h2 align="center">Доставки</h2></div>
-                    <div class="row">
-                        <div class="col"><p class="p-size" align="center">Доллары</p></div>
-                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
-                    </div>
-                    <div class="row">
-                        <div class="col"><p class="p-size" align="center">{{ delivery_company_price }}</p></div>
-                        <div class="col"><p class="p-size" align="center">{{ delivery_company_price_rub }}</p></div>
+                <h1 align="center" style="background-color:#ffa8a8;">Расходы</h1>
+                <div class="col-4">
+                    <div class="fin_bord shdw_list">
+                        <div class="row"><h2 align="center">Заказы</h2></div>
+                        <div class="row">
+                            <div class="col"><p class="p-size" align="center">Юани</p></div>
+                            <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><p class="p-size" align="center">{{ order_price_company }}</p></div>
+                            <div class="col"><p class="p-size" align="center">{{ order_price_company_rub }}</p></div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-4 fin_bord">
-                    <div class="row"><h2 align="center">Доп расходы</h2></div>
-                    <div class="row">
-                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                <div class="col-4">
+                    <div class="fin_bord shdw_list">
+                        <div class="row"><h2 align="center">Доставки</h2></div>
+                        <div class="row">
+                            <div class="col"><p class="p-size" align="center">Доллары</p></div>
+                            <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><p class="p-size" align="center">{{ delivery_company_price }}</p></div>
+                            <div class="col"><p class="p-size" align="center">{{ delivery_company_price_rub }}</p></div>
+                        </div>
                     </div>
-                    <div class="row">
-                        <div class="col"><p class="p-size" align="center">{{ spendings }}</p></div>
+                </div>
+                <div class="col-4">
+                    <div class="fin_bord shdw_list">
+                        <div class="row"><h2 align="center">Доп расходы</h2></div>
+                        <div class="row">
+                            <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><p class="p-size" align="center">{{ spendings }}</p></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="row">
-                <h1 align="center" style="background-color:yellow">Итого</h1>
-                <div class="col-4 fin_bord">
-                    <div class="row"><h2 align="center">Заказы</h2></div>
-                    <div class="row">
-                        <div class="col"><p class="p-size" align="center">Юани</p></div>
-                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
-                    </div>
-                    <div class="row">
-                        <div class="col"><p class="p-size" align="center">{{ total_order }}</p></div>
-                        <div class="col"><p class="p-size" align="center">{{ total_order_rub }}</p></div>
-                    </div>
-                </div>
-                <div class="col-4 fin_bord">
-                    <div class="row"><h2 align="center">Доставки</h2></div>
-                    <div class="row">
-                        <div class="col"><p class="p-size" align="center">Доллары</p></div>
-                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
-                    </div>
-                    <div class="row">
-                        <div class="col"><p class="p-size" align="center">{{ total_delivery }}</p></div>
-                        <div class="col"><p class="p-size" align="center">{{ total_delivery_rub }}</p></div>
+                <h1 align="center" style="background-color:#feffa8;">Итого</h1>
+                <div class="col-4">
+                    <div class="fin_bord shdw_list">
+                        <div class="row"><h2 align="center">Заказы</h2></div>
+                        <div class="row">
+                            <div class="col"><p class="p-size" align="center">Юани</p></div>
+                            <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><p class="p-size" align="center">{{ total_order }}</p></div>
+                            <div class="col"><p class="p-size" align="center">{{ total_order_rub }}</p></div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-4 fin_bord">
-                    <div class="row"><h2 align="center">Доп расходы</h2></div>
-                    <div class="row">
-                        <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                <div class="col-4">
+                    <div class="fin_bord shdw_list" style="background-color:white;">
+                        <div class="row"><h2 align="center">Доставки</h2></div>
+                        <div class="row">
+                            <div class="col"><p class="p-size" align="center">Доллары</p></div>
+                            <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><p class="p-size" align="center">{{ total_delivery }}</p></div>
+                            <div class="col"><p class="p-size" align="center">{{ total_delivery_rub }}</p></div>
+                        </div>
                     </div>
-                    <div class="row">
-                        <div class="col"><p class="p-size" align="center">{{ spendings }}</p></div>
+                </div>
+                <div class="col-4">
+                    <div class="fin_bord shdw_list">
+                        <div class="row"><h2 align="center">Доп расходы</h2></div>
+                        <div class="row">
+                            <div class="col"><p class="p-size" align="center">Рубли</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col"><p class="p-size" align="center">{{ spendings }}</p></div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-        {% else %}
-    <h3>Нет данных.</h3>
     </div>
     </div>
-    {% endif %}
 {% endblock %}

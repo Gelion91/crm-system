@@ -191,14 +191,15 @@ def _get_form(request, formcls, prefix):
 
 @login_required(login_url=LOGIN_URL)
 @permission_required('core.change_order')
-def update(request, order_id):
+def update(request, order_id, *args, **kwargs):
+    my_kwargs = {'current_user': request.user}
     data = get_object_or_404(Order, pk=order_id)
-    form = UpdateOrderFormTest(instance=data)
+    form = UpdateOrderFormTest(instance=data, **my_kwargs)
     form2 = ProductForm()
     helper = ProductFormSetHelper()
 
     if request.method == 'POST':
-        form = UpdateOrderFormTest(request.POST, instance=data)
+        form = UpdateOrderFormTest(request.POST, instance=data, **my_kwargs)
         form2 = ProductForm(request.POST)
         files = ProductForm(request.FILES)
         print(form2.errors)
@@ -588,7 +589,7 @@ def save_notes_product(request):
         'product': product_id,
         'comment_id': comment.pk,
         'user': request.user.username,
-        'date': dateformat.format(comment.date_create, settings.DATE_FORMAT).lstrip('0'),
+        'date': dateformat.format(datetime.datetime.now(tz=timezone('Europe/Moscow')), settings.DATE_FORMAT).lstrip('0'),
     }
     print(response)
 
@@ -755,7 +756,7 @@ def save_notes_delivery(request):
         'delivery': delivery_id,
         'comment_id': comment.pk,
         'user': request.user.username,
-        'date': dateformat.format(comment.date_create, settings.DATE_FORMAT).lstrip('0'),
+        'date': dateformat.format(datetime.datetime.now(tz=timezone('Europe/Moscow')), settings.DATE_FORMAT).lstrip('0'),
     }
     print(response)
 
@@ -928,6 +929,13 @@ class FinanceList(TemplateView):
         context = self.get_context_data(**kwargs)
         start = request.GET.get("date_start")
         finish = request.GET.get("date_finish")
+        payment_method = request.GET.get("payment_method", 'Все оплаты')
+        manager = request.GET.get("user")
+
+        if not start:
+            start = '2024-05-01'
+        if not finish:
+            finish = datetime.date.today()
 
         if start is not None and finish is not None:
             orders = Order.objects.filter(date_create__range=[start, finish])
@@ -938,6 +946,13 @@ class FinanceList(TemplateView):
             orders = Order.objects.all()
             logistics = Logistics.objects.all()
             spendings = Spendings.objects.all()
+
+        if payment_method != 'Все оплаты':
+            orders = orders.filter(paid_method=payment_method)
+
+        if manager:
+            orders = orders.filter(owner=manager)
+            logistics = logistics.filter(owner=manager)
 
         context['title'] = 'Финансы общее'
         context['order_price_client'] = sum(order.total_price for order in orders)
@@ -959,7 +974,7 @@ class FinanceList(TemplateView):
         context['total_order_rub'] = context['order_price_client_rub'] - context['order_price_company_rub']
         context['total_delivery'] = context['delivery_full_price_client'] - context['delivery_company_price']
         context['total_delivery_rub'] = context['delivery_full_price_rub'] - context['delivery_company_price_rub']
-        context['filter_form'] = DateFilterForm()
+        context['filter_form'] = DateFilterForm(request.GET)
         return self.render_to_response(context)
 
 

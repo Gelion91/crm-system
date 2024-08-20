@@ -1182,6 +1182,8 @@ color: black;
 .fin_bord {
     border: 1px solid;
     border-color: silver;
+    margin-bottom: 2%;
+    background-color:white;
     }
 
 .notific {

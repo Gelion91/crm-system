@@ -186,6 +186,7 @@ class Order(models.Model):
         (TIMOFEEV, "Тимофеев"),
         (CASH, "Наличные"),
         (IP, "Расчетный счет(ИП)"),
+        ('Игорь', 'Игорь')
     ]
 
     client = models.ForeignKey(Clients, on_delete=models.SET_NULL, null=True, verbose_name='Клиент')

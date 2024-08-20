@@ -6,11 +6,12 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Field, Div, HTML, Button
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_image_file_extension
 from django.forms import ModelForm, CheckboxSelectMultiple, SelectMultiple, TextInput, MultipleHiddenInput, \
     PasswordInput, modelformset_factory, BaseFormSet, HiddenInput, inlineformset_factory, ClearableFileInput, \
-    ChoiceField, RadioSelect
+    ChoiceField, RadioSelect, Select
 from django.utils.html import format_html
 
 from core.models import Order, Clients, Product, ImagesProduct, Logistics, PackedImagesProduct, Account, NotesProduct, \
@@ -58,7 +59,25 @@ class UpdateOrderForm(ModelForm):
 
 
 class UpdateOrderFormTest(ModelForm):
+    ALFA_BANK = "Альфа-банк"
+    SBER = "Сбер"
+    TINKOFF = "Тинькофф"
+    TIMOFEEV = "Тимофеев"
+    CASH = "Наличные"
+    IP = "Расчетный счет"
+
+    PAID_METHOD = [
+        (ALFA_BANK, "Альфа-банк Игорь"),
+        (SBER, "Сбер Мария"),
+        (TINKOFF, "Тинькофф Игорь"),
+        (TIMOFEEV, "Тимофеев"),
+        (CASH, "Наличные"),
+        (IP, "Расчетный счет(ИП)"),
+        ('Игорь', 'Игорь')
+    ]
+
     def __init__(self, *args, **kwargs):
+        self.current_user = kwargs.pop('current_user', None)
         super(UpdateOrderFormTest, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'id-exampleForm'
@@ -72,6 +91,10 @@ class UpdateOrderFormTest(ModelForm):
         self.fields["total_price_company"].disabled = True
         self.fields["total_price_rub_company"].disabled = True
         self.fields['comment'].widget.attrs['rows'] = 3
+        self.fields['paid_method'].widget = Select(choices=self.PAID_METHOD[:-1])
+        if self.current_user.is_superuser:
+            self.fields['paid_method'].widget = Select(choices=self.PAID_METHOD)
+
         self.helper.layout = Layout(
             Div(Div('client', css_class='col-6'),
                 Div('marker', css_class='col-6'), css_class='row'),
@@ -421,8 +444,27 @@ class ChangeDeliveryDateForm(forms.Form):
 
 
 class DateFilterForm(forms.Form):
-    date_start = forms.DateTimeField(widget=DatInput, label='С какого?')
-    date_finish = forms.DateField(widget=DatInput, label='По какое?')
+    ALFA_BANK = "Альфа-банк"
+    SBER = "Сбер"
+    TINKOFF = "Тинькофф"
+    TIMOFEEV = "Тимофеев"
+    CASH = "Наличные"
+    IP = "Расчетный счет"
+
+    PAID_METHOD = [
+        ('Все оплаты', 'Все оплаты'),
+        (ALFA_BANK, "Альфа-банк Игорь"),
+        (SBER, "Сбер Мария"),
+        (TINKOFF, "Тинькофф Игорь"),
+        (TIMOFEEV, "Тимофеев"),
+        (CASH, "Наличные"),
+        (IP, "Расчетный счет(ИП)"),
+        ('Игорь', 'Игорь')
+    ]
+    date_start = forms.DateTimeField(widget=DatInput, label='С какого?', required=False)
+    date_finish = forms.DateField(widget=DatInput, label='По какое?', required=False)
+    payment_method = forms.ChoiceField(choices=PAID_METHOD, label='Способ оплаты', required=False)
+    user = forms.ModelChoiceField(queryset=User.objects.all(), label='Менеджер', required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -433,7 +475,8 @@ class DateFilterForm(forms.Form):
         self.helper.form_action = 'submit_survey'
         self.helper.add_input(Submit('submit', 'Поиск', css_class="btn btn-secondary"))
         self.helper.layout = Layout(
-            Div(Div('date_start', css_class='col-6'), Div('date_finish', css_class='col-6'), css_class='row'))
+            Div(Div('date_start', css_class='col-6'), Div('date_finish', css_class='col-6'), css_class='row'),
+            Div(Div('payment_method', css_class='col-6'), Div('user', css_class='col-6'), css_class='row'))
 
 
 class SpendingForm(ModelForm):
