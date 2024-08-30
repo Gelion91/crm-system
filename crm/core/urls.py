@@ -51,4 +51,5 @@ urlpatterns = [
     path('ajax_get_notification', views.get_notification, name='get_notification'),
     path('ajax_read_notification', views.read_notification, name='read_notification'),
     path('ajax_create_invoice', views.create_invoice, name='create_invoice'),
+    path('ajax_read_all_notification', views.read_all_notification, name='read_all_notification')
 ]

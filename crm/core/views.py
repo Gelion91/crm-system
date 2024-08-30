@@ -65,7 +65,22 @@ def read_notification(request):
     read = ReadNotification(notification=notification)
     read.save()
     read.readers.add(request.user)
-    read.save()
+
+    response = {'notification': Notification.objects.filter(readed=False, subject_owner=request.user).filter(
+        ~Q(notifications__readers__in=[request.user.pk])).count()}
+    print(response)
+
+    return HttpResponse(json.dumps(response), content_type='application/json')
+
+
+def read_all_notification(request):
+    notifications = Notification.objects.filter(readed=False, subject_owner=request.user).filter(
+        ~Q(notifications__readers__in=[request.user.pk]))
+    for notification in notifications:
+        read = ReadNotification(notification=notification)
+        read.save()
+        read.readers.add(request.user)
+        print(read)
 
     response = {'notification': Notification.objects.filter(readed=False, subject_owner=request.user).filter(
         ~Q(notifications__readers__in=[request.user.pk])).count()}

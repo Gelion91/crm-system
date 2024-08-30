@@ -58,6 +58,7 @@
             <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
                 <div class="offcanvas-header">
                     <h5 class="offcanvas-title" id="offcanvasExampleLabel">Уведомления</h5>
+                    <button name="all_read" class="btn btn-success" type="button">Отметить все прочитанными</button>
                     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                     </div>
                     <div class="offcanvas-body">
@@ -246,6 +247,24 @@
                                 if (response.notification == 0) {
                                 $('#notific').empty();
                                 }
+                            },
+                            error: function() {
+                                console.log('it broke');
+                            },
+                        });
+                    });
+
+    $(document).on('click', "Button[name='all_read']", function () {
+                        var token = '{{ csrf_token }}';
+                        $.ajax({
+                                type: "POST",
+                                url: "{% url 'core:read_all_notification' %}",
+                                data: {'id': $(this)[0].id},
+                                headers: {'X-CSRFToken': token},
+                                success: function(response) {
+                                $("#notification_info").empty();
+                                $("#notific").empty();
+
                             },
                             error: function() {
                                 console.log('it broke');
