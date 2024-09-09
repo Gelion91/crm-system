@@ -305,8 +305,9 @@ class UpdateProduct(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     permission_required = 'core.change_product'
 
     def get_success_url(self):
-        return reverse('core:upd', kwargs={'order_id': Order.objects.get(product=self.object).pk})
-
+        return self.request.META.get('HTTP_REFERER')
+    
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Продавец'
@@ -459,6 +460,8 @@ class UpdateDelivery(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Доставка'
         context['data'] = [{'id': i.id, 'full_price': i.full_price} for i in context['form'].fields['product'].queryset]
+        context['orders'] = {product.order.first(): [product for product in product.order.first().product.filter(logistics=self.object)] for product in self.object.product.all()}
+        print(context['orders'])
         return context
 
     def form_valid(self, form):
@@ -548,8 +551,21 @@ def change_status_arrive(request):
 def get_price(request):
     product_id = request.POST.get("id")
     product = Product.objects.get(pk=product_id)
+    order = Order.objects.get(product=product)
     response = {
-        'price': product.full_price
+        'product_marker': product.product_marker,
+        'name': product.name,
+        'number_order': product.number_order,
+        'price': product.price,
+        'price_company': product.price_company,
+        'margin_product': product.margin_product,
+        'fraht': product.fraht,
+        'fraht_company': product.fraht_company,
+        'full_price_company': product.full_price_company,
+        'full_price': product.full_price,
+        'order': order.marker,
+        'order_rate': order.exchange_for_client,
+        'order_rate_company': order.exchange_for_company
     }
 
     return JsonResponse(response)

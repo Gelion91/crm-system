@@ -4,16 +4,83 @@
 {% block content %}
 
 {% if form %}
-    <div class="col secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
+<div class="row">
+    <div class="col-xs-12 col-sm-9 secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
         <div id="show_info">
         </div>
-<div id="myOverlay"></div>
-    <form id="delivery-form" action="" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="form-error">{{ form.non_field_errors }}</div>
-        {% crispy form %}
-    </form>
+        <div id="myOverlay"></div>
+        <form id="delivery-form" action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-error">{{ form.non_field_errors }}</div>
+            {% crispy form %}
+        </form>
     </div>
+    <div class="col-xs-12 col-sm-3 gut">
+        {% if orders %}
+        {% for order, product in orders.items %}
+        <div style="background-color:#d1dee3;">
+            <div class="row" style="padding-left:5%; align:center;">
+                <div class="col"><p class="p-size">{{order}}</p></div>
+                <div class="col"><p class="p-size">{{order.exchange_for_client}}</p></div>
+                <div class="col"><p class="p-size">{{order.exchange_for_company}}</p></div>
+            </div>
+        </div>
+            <div class="accordion accordion-flush" id="accordionFlushExample">
+            {% for prod in product %}
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc{{prod.pk}}" aria-expanded="false" aria-controls="flush-collapseOne" style="background-color:#f7fdff;">
+                        {{prod.product_marker}} | {{prod.name}}
+                        </button>
+                </h2>
+                <div id="acc{{prod.pk}}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                      <div class="accordion-body">
+                          <div class="row">
+                              <div class="col"><p>Маркировка:</p></div>
+                              <div class="col"><p>{{prod.product_marker}}</p></div>
+                              <hr>
+                          </div>
+                          <div class="row">
+                              <div class="col"><p>Наименование:</p></div>
+                              <div class="col"><p>{{prod.name}}</p></div>
+                              <hr>
+                          </div>
+                          <div class="row">
+                              <div class="col"><p>Номер заказа:</p></div>
+                              <div class="col"><p>{{prod.number_order}}</p></div>
+                              <hr>
+                          </div>
+                          <div class="row">
+                              <div class="col"><p>Цена для клиента ¥:</p></div>
+                              <div class="col"><p>{{prod.price}}</p></div>
+                              <hr>
+                          </div>
+                          <div class="row">
+                              <div class="col"><p>Цена для компании ¥:</p></div>
+                              <div class="col"><p>{{prod.price_company}}</p></div>
+                              <hr>
+                          </div>
+                          <div class="row">
+                              <div class="col"><p>Доставка по Китаю для клиента ¥</p></div>
+                              <div class="col"><p>{{prod.fraht}}</p></div>
+                              <hr>
+                          </div>
+                          <div class="row">
+                              <div class="col"><p>Доставка по Китаю для компании ¥</p></div>
+                              <div class="col"><p>{{prod.fraht_company}}</p></div>
+                              <hr>
+                          </div>
+                    </div>
+              </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    </div>
+    {% endif %}
+    </div>
+
+</div>
 {% endif %}
 <input id="{{object.pk}}" type="hidden" name="id">
 <script defer>
@@ -209,10 +276,11 @@ $('[name="product"]').on( "mouseout", function() {
 
         success: function(response) {
                if (checked_paid) {
-                      order_price.value = parseFloat(parseFloat(order_price.value) + parseFloat(response.price)).toFixed(2)
+                      order_price.value = parseFloat(parseFloat(order_price.value) + parseFloat(response.full_price)).toFixed(2)
                     } else {
-                      order_price.value = parseFloat(parseFloat(order_price.value) - parseFloat(response.price)).toFixed(2)
+                      order_price.value = parseFloat(parseFloat(order_price.value) - parseFloat(response.full_price)).toFixed(2)
                     }
+
         },
 
         error: function() {

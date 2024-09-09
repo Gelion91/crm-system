@@ -29,7 +29,14 @@ def get_invoice(logistic):
     wb = load_workbook(filename='other_files/Накладная_форма.xlsx')
     new_wb = wb
     ws = new_wb.active
-    ws['A7'] = dateformat.format(logistic.date_create, settings.DATE_FORMAT_INVOICE).lstrip('0')
+    try:
+        date_invoice = logistic.marker.split('-')
+        date_invoice = date_invoice[-1] if len(date_invoice[-1]) >= 4 else date_invoice[-2]
+        date_invoice = f"{date_invoice[2::]}-{date_invoice[:2]}-2024"
+    except:
+        date_invoice = 'Нет даты'
+
+    ws['A7'] = date_invoice
     ws['B7'] = logistic.marker
     ws['D7'] = logistic.places
     ws['E7'] = logistic.weight
