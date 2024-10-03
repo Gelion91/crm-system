@@ -4,8 +4,10 @@
 {% block content %}
 <div class="col secondcolor" style="padding-left: 1%; padding-right: 1%; background-color:#f5f5f5;">
   <div class="row">
-      <div class="col"><p style="font-size: calc(16px + 8 * (100vw / 1280)); font-weight: 700;">{{ object.name }} {% if object.surname %}{{ object.surname }}{% endif %}</p></div>
-      <div class="col"><p style="font-size: calc(16px + 8 * (100vw / 1280)); font-weight: 700;">Остаток на счете: {{ object.deposit }}</p></div>
+      <hr>
+      <div class="col-6"><p style="font-size: calc(16px + 8 * (100vw / 1280)); font-weight: 700;">{{ object.name }} {% if object.surname %}{{ object.surname }}{% endif %}</p></div>
+      <div class="col-5"><p style="font-size: calc(16px + 8 * (100vw / 1280)); font-weight: 700;">Остаток на счете: {{ object.deposit }}</p></div>
+      <div class="col"><button id="order_list" class="btn btn-secondary" type="button">Заказы</button></div>
   </div>
   <div class="col"><p><strong>Телефон: </strong>{% if object.phone %}{{ object.phone }}{% else %}Не указан{% endif %}</p></div>
         <div class="col messanger"><p>{{object.messanger}}</p></div>
@@ -45,5 +47,96 @@
         <button class="btn btn-secondary" type="submit">Сохранить</button>
     </form>
     </div>
+
+<div id="modal_order_list" style="display:none;">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modalBodyWrapper">
+          {% for order in orders %}
+          <div class="flex-wrap" style="background:#dfdfdf;padding:0;">
+          <h2 align="center" style="padding-left:5px;">Заказ: {{order.order}}</h2>
+          <h2 align="center" style="padding-right:5px;">Дата: {{order.order.date_create}}</h2>
+          </div>
+              {% for product in order.products %}
+              <p>Продукт: {{product}}</p>
+                <div class="flex-wrap-s">
+                {% for img in product.images.all %}
+              <img src="{{ img.url }}" class="image-detail">
+                    {% load thumbnail %}
+                        {% thumbnail img.image "128x64" as im %}
+                    <!-- Modal -->
+                        <div style="border: 2px solid #d0d0d0;">
+                            <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img_{{img.pk}}">
+                                  <img src="{{ im.url }}" class="image-detail">
+                            </a>
+                        </div>
+                        {% endthumbnail %}
+                                        <div class="modal fade" id="img_{{img.pk}}" aria-labelledby="img_{{img.pk}}" aria-hidden="true">
+                                          <div class="modal-dialog modal-xl">
+                                            <div class="modal-content">
+                                              <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="exampleModalLabel">{{product}}</h1>
+                                              </div>
+                                              <div class="modal-body">
+                                                <img src="{{ img.image.url }}">
+                                              </div>
+                                              <div class="modal-footer">
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                {% endfor %}
+                {% for img in product.packed_images.all %}
+                <img src="{{ img.url }}" class="image-detail">
+                    {% load thumbnail %}
+                        {% thumbnail img.image "128x64" as im %}
+                    <!-- Modal -->
+                        <div style="border: 2px solid #d0d0d0;">
+                            <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#packed_img_{{img.pk}}">
+                                  <img src="{{ im.url }}" class="image-detail">
+                            </a>
+                        </div>
+                        {% endthumbnail %}
+                                        <div class="modal fade" id="packed_img_{{img.pk}}" aria-labelledby="img_{{img.pk}}" aria-hidden="true">
+                                          <div class="modal-dialog modal-xl">
+                                            <div class="modal-content">
+                                              <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="exampleModalLabel">{{product}}</h1>
+                                              </div>
+                                              <div class="modal-body">
+                                                <img src="{{ img.image.url }}">
+                                              </div>
+                                              <div class="modal-footer">
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                {% endfor %}
+                </div>
+              {% endfor %}
+          <hr>
+          {% endfor %}
+      </div>
+      <div class="modal-footer">
+          <button name='close_modal' class="floating-button" type="button">закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script defer>
+    $("#order_list").on( "click", function(e) {
+        console.log('Нажали');
+            $("#modal_order_list")
+                .css("display", "block")
+                .animate({ opacity: 1 }, 198);
+    });
+
+    $('button[name="close_modal"]').on( "click", function(e) {
+            $("#modal_order_list")
+                .css("display", "none")
+                .animate({ opacity: 1 }, 198);
+    });
+</script>
 
 {% endblock %}

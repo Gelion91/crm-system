@@ -60,10 +60,10 @@ class ProductFilter(django_filters.FilterSet):
         return queryset.order_by(value)
 
     def filter_by_marker(self, queryset, name, value):
-        # if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
-        #     queryset = Product.objects.all()
-        # else:
-        #     queryset = Product.objects.filter(owner=self.request.user)
+        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
+            queryset = Product.objects.all()
+        else:
+            queryset = Product.objects.filter(owner=self.request.user)
         return queryset.filter(product_marker__icontains=value)
 
     def filter_by_status(self, queryset, name, value):
@@ -132,10 +132,10 @@ class DeliveryFilter(django_filters.FilterSet):
         return queryset
 
     def filter_by_marker(self, queryset, name, value):
-        # if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
-        #     queryset = Logistics.objects.all()
-        # else:
-        #     queryset = Logistics.objects.filter(owner=self.request.user)
+        if self.request.user.is_superuser or self.request.user.groups.filter(name='logist').exists():
+            queryset = Logistics.objects.all()
+        else:
+            queryset = Logistics.objects.filter(owner=self.request.user)
         return queryset.filter(marker__icontains=value)
 
     def filter_by_type(self, queryset, name, value):

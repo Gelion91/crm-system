@@ -44,7 +44,7 @@
         </div>
 
             <div class="col accordion accordion-flush" id="accordionFlushExample">
-          {% for obj in object_list %}
+            {% for obj in object_list %}
             <div class="row list-height" style="font-weight: 700; border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;">
                 <div id="marker_{{obj.pk}}" class="col-2 center"><a href="{% url 'core:update_delivery' obj.pk %}"><p class="p-size">{{obj.marker}}</p></a></div>
 

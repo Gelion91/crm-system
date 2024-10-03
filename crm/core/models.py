@@ -189,7 +189,7 @@ class Order(models.Model):
         ('Игорь', 'Игорь')
     ]
 
-    client = models.ForeignKey(Clients, on_delete=models.SET_NULL, null=True, verbose_name='Клиент')
+    client = models.ForeignKey(Clients, on_delete=models.SET_NULL, null=True, verbose_name='Клиент', related_name='client_orders')
     marker = models.CharField(max_length=100, verbose_name='Маркировка заказа')
     product = models.ManyToManyField(Product, verbose_name='Товары', related_name='order')
     slug = AutoSlugField(populate_from='marker', db_index=True)

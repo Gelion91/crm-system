@@ -6,50 +6,172 @@
     <div class="row" style="align-items: flex-start;">
 
         <div class="col-lg-12 secondcolor pad_list" style="background-color:#f5f5f5;">
-            <br>
-                <div class="row">
-                    <div class="col-3">
-                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Фильтры</button>
+                <br>
+                    <div class="row">
+                        <div class="col-3">
+                            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">Фильтры</button>
+                        </div>
+                        <div class="col-9">
+                            <h2 style="text-align:end;">{{title}}</h2>
+                        </div>
                     </div>
-                    <div class="col-9">
-                        <h2 style="text-align:end;">{{title}}</h2>
+                    <div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
+
+                        <div class="offcanvas-header">
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+                        </div>
+
+                        <div class="offcanvas-body">
+                            <form action="" method="get">
+                                {{ filter.form|crispy }}
+                             <button class="btn btn-outline-secondary" type="submit">Поиск</button>
+                             </form>
+                        </div>
+
+                    </div>
+                <hr>
+            {% if object_list %}
+            <div class="row" style="margin-top:1%; margin-bottom:1%;">
+                <div class="col-3 center"><p class="p-size">Маркировка</p></div>
+                <div class="col-2 center"><p class="p-size">Упаковка</p></div>
+                <div class="col-3 center"><p class="p-size">Дата оформления</p></div>
+                <div class="col-2 center"><p class="p-size">Оформил</p></div>
+                <div class="col-2 center"></div>
+            </div>
+
+
+            <div class="col accordion accordion-flush" id="accordionFlushExample">
+                {% for obj in object_list %}
+                    <div class="row list-height" {% if obj.exchange_rate %}style="font-weight: 700; border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;"{% else %}style="font-weight: 700; border-color:#ff7d7d; margin-top:1%; margin-bottom:1%; background-color:#fff; box-shadow: 0px 0px 10px 0px #ff7d7d;"{% endif %}>
+                        <div id="marker_{{obj.pk}}" class="col-3 center"><a href="{% url 'core:update_delivery' obj.pk %}"><p class="p-size">{{obj.marker}}</p></a></div>
+                        <div class="col-2 center"><p class="p-size">{{obj.package}}</p></div>
+                        <div class="col-3 center"><p class="p-size">{{obj.date_create}}</p></div>
+                        <div class="col-2 center"><p class="p-size">{{obj.owner}}</p></div>
+                        <div class="col-2 center">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                <button id="{{obj.pk}}" class="accordion-button collapsed" style="background-color:white;" type="button" data-bs-toggle="collapse" data-bs-target="#acc_{{obj.marker}}" aria-expanded="false" aria-controls="flush-collapseOne"></button>
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                <div id="acc_{{obj.marker}}" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                  <div class="accordion-body">
+
+                  {% for product in obj.product.all %}
+                      {% with outer_counter=forloop.counter %}
+                          {% if outer_counter >= 2 %}
+                          <hr class="hr-horizontal-gradient">
+                          {% endif %}
+                      <div class="row">
+                          <p class="p-size" style="font-weight: bold;">{{product.name}} | {{product.product_marker}} {% if product.url %}<a href="{{product.url}}" class="btn_url" target="_blank">Ссылка на товар</a>{% endif %}</p>
+
+                    <!-- Фотографии с 1688 -->
+
+                      <div class="col">
+                          <p class="p-size">Фото продавца</p>
+                            {% if product.images.all %}
+                                {% for img in product.images.all %}
+                                <img src="{{ img.url }}" class="image-detail">
+                                {% load thumbnail %}
+                                {% thumbnail img.image "64x64" as im %}
+                                    <!-- Modal -->
+                                    <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img{{forloop.counter}}_{{outer_counter}}_{{obj.pk}}">
+                                        <img src="{{ im.url }}" class="image-detail">
+                                    </a>
+                                    <div class="modal fade" id="img{{forloop.counter}}_{{outer_counter}}_{{obj.pk}}" tabindex="-1" aria-labelledby="img{{forloop.counter}}" aria-hidden="true">
+                                        <div class="modal-dialog modal-xl">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5">{{img.product}}</h1>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <img src="{{ img.image.url }}">
+                                                </div>
+                                                    <div class="modal-footer">
+                                                    </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endthumbnail %}
+                                {% endfor %}
+                            {% endif %}
+                          </div>
+
+                    <!-- Фотографии со склада в Китае -->
+
+                      <div class="col">
+                      {% if product.packed_images.all %}
+                        <p class="p-size">фото на складе</p>
+                        {% for img in product.packed_images.all %}
+                      <img src="{{ img.url }}" class="image-detail">
+                        {% load thumbnail %}
+                            {% thumbnail img.image "64x64" as im %}
+                        <!-- Modal -->
+                                <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img{{forloop.counter}}_{{outer_counter}}_{{obj.pk}}_packed">
+                                      <img src="{{ im.url }}" class="image-detail">
+                                </a>
+                                            <div class="modal fade" id="img{{forloop.counter}}_{{outer_counter}}_{{obj.pk}}_packed" tabindex="-1" aria-labelledby="img{{forloop.counter}}" aria-hidden="true">
+                                              <div class="modal-dialog modal-xl">
+                                                <div class="modal-content">
+                                                  <div class="modal-header">
+                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">{{img.product}}</h1>
+                                                  </div>
+                                                  <div class="modal-body">
+                                                    <img src="{{ img.image.url }}">
+                                                  </div>
+                                                  <div class="modal-footer">
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
+                            {% endthumbnail %}
+                        {% endfor %}
+                      {% endif %}
+                      </div>
+                      </div>
+                          {% if obj.logistic_images.all %}
+                            <hr>
+                            <p class="p-size">фото упакованного груза</p>
+                            <div id="ajax_photo_{{obj.pk}}" style="display:flex;flex-wrap: wrap;">
+                              {% for img in obj.logistic_images.all %}
+                              <div id="div_image_{{img.pk}}" name="div_image">
+                                {% load thumbnail %}
+                                    {% thumbnail img.image "64x64" as im %}
+                                <!-- Modal -->
+                                        <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img_{{obj.pk}}_{{img.pk}}">
+                                              <img src="{{ im.url }}" class="image-detail ajax_image">
+                                        </a>
+                                                    <div class="modal fade" id="img_{{obj.pk}}_{{img.pk}}" tabindex="-1" aria-labelledby="img" aria-hidden="true">
+                                                      <div class="modal-dialog modal-xl">
+                                                        <div class="modal-content">
+                                                          <div class="modal-header">
+                                                            <h1 class="modal-title fs-5" id="exampleModalLabel">{{img.product}}</h1>
+                                                          </div>
+                                                          <div class="modal-body">
+                                                            <img src="{{ img.image.url }}">
+                                                          </div>
+                                                          <div class="modal-footer">
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    </div>
+
+                                    {% endthumbnail %}
+                                  </div>
+                              {% endfor %}
+                              </div>
+                          {% endif %}
+                      {% endwith %}
+                      {% endfor %}
+                      <br>
                     </div>
                 </div>
-                <div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
-
-                    <div class="offcanvas-header">
-                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
-                    </div>
-
-                    <div class="offcanvas-body">
-                        <form action="" method="get">
-                            {{ filter.form|crispy }}
-                         <button class="btn btn-outline-secondary" type="submit">Поиск</button>
-                         </form>
-                    </div>
-
-                </div>
-            <hr>
-        {% if object_list %}
-        <div class="row" style="margin-top:1%; margin-bottom:1%;">
-            <div class="col center"><p class="p-size">Маркировка</p></div>
-            <div class="col center"><p class="p-size">Упаковка</p></div>
-            <div class="col center"><p class="p-size">Дата оформления</p></div>
-            <div class="col center"><p class="p-size">Оформил</p></div>
+                {% endfor %}
+            {% else %}
+        <h3>Нет доставок.</h3>
         </div>
-          {% for obj in object_list %}
-            <a href="{% url 'core:update_delivery' obj.pk %}">
-                <div class="row list-height" {% if obj.exchange_rate %}style="font-weight: 700; border-color:#bbddfd; margin-top:1%; margin-bottom:1%; background-color:#fff;"{% else %}style="font-weight: 700; border-color:#ff7d7d; margin-top:1%; margin-bottom:1%; background-color:#fff; box-shadow: 0px 0px 10px 0px #ff7d7d;"{% endif %}>
-                    <div class="col center"><p class="p-size">{{obj.marker}}</p></div>
-                    <div class="col center"><p class="p-size">{{obj.package}}</p></div>
-                    <div class="col center"><p class="p-size">{{obj.date_create}}</p></div>
-                    <div class="col center"><p class="p-size">{{obj.owner}}</p></div>
-                </div>
-            </a>
-            {% endfor %}
-        {% else %}
-    <h3>Нет доставок.</h3>
-    </div>
-    </div>
+        </div>
     {% endif %}
+    </div>
 {% endblock %}

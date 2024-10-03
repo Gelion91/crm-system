@@ -93,7 +93,11 @@ class ClientDetail(LoginRequiredMixin, FormMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ClientDetail, self).get_context_data(**kwargs)
+        orders_list = self.object.client_orders.all()
+        orders = [{'order': order, 'products': order.product.all()} for order in orders_list]
+
         context['comments'] = Comments.objects.filter(client=self.object).order_by('date_create')
+        context['orders'] = orders
         context['form'] = CommentForm()
         return context
 

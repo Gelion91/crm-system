@@ -22,7 +22,6 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ['client', 'marker', 'status']
 
 
-admin.site.register(Clients, ClientsAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Logistics)
