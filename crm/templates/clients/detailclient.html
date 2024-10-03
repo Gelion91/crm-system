@@ -66,11 +66,11 @@
                         {% thumbnail img.image "128x64" as im %}
                     <!-- Modal -->
                         <div style="border: 2px solid #d0d0d0;">
+                            {% if img.image %}
                             <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#img_{{img.pk}}">
                                   <img src="{{ im.url }}" class="image-detail">
                             </a>
                         </div>
-                        {% endthumbnail %}
                                         <div class="modal fade" id="img_{{img.pk}}" aria-labelledby="img_{{img.pk}}" aria-hidden="true">
                                           <div class="modal-dialog modal-xl">
                                             <div class="modal-content">
@@ -85,6 +85,8 @@
                                             </div>
                                           </div>
                                         </div>
+                            {% endif %}
+                    {% endthumbnail %}
                 {% endfor %}
                 {% for img in product.packed_images.all %}
                 <img src="{{ img.url }}" class="image-detail">
@@ -92,11 +94,11 @@
                         {% thumbnail img.image "128x64" as im %}
                     <!-- Modal -->
                         <div style="border: 2px solid #d0d0d0;">
+                            {% if img.image %}
                             <a href="{{ img.image.url }}" data-bs-toggle="modal" data-bs-target="#packed_img_{{img.pk}}">
                                   <img src="{{ im.url }}" class="image-detail">
                             </a>
                         </div>
-                        {% endthumbnail %}
                                         <div class="modal fade" id="packed_img_{{img.pk}}" aria-labelledby="img_{{img.pk}}" aria-hidden="true">
                                           <div class="modal-dialog modal-xl">
                                             <div class="modal-content">
@@ -111,6 +113,8 @@
                                             </div>
                                           </div>
                                         </div>
+                            {% endif %}
+                    {% endthumbnail %}
                 {% endfor %}
                 </div>
               {% endfor %}
